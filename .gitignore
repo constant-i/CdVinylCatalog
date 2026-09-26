@@ -1,0 +1,26 @@
+# Android
+*.iml
+.gradle
+/local.properties
+local.properties
+.idea/
+.DS_Store
+
+# Build (все модули)
+build/
+*/build/
+
+# Captures
+/captures
+.externalNativeBuild
+.cxx
+
+# Логи
+*.log
+
+# APK/AAB
+*.apk
+*.aab
+
+# Kotlin
+.kotlin/

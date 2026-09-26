@@ -1,0 +1,66 @@
+package com.kai.cdvinylcatalog.core.network
+
+import com.kai.cdvinylcatalog.core.model.DiscogsError
+import com.kai.cdvinylcatalog.core.model.ScanResult
+import com.kai.cdvinylcatalog.core.network.dto.toDomain
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import retrofit2.HttpException
+import java.io.IOException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * Репозиторий для работы с Discogs API.
+ * Инкапсулирует вызовы API, обработку ошибок и маппинг.
+ */
+@Singleton
+class DiscogsRepository @Inject constructor(
+    private val api: DiscogsApi
+) {
+
+    /**
+     * Ищет релиз по штрихкоду.
+     *
+     * @param barcode штрихкод с диска
+     * @return ScanResult.Found или ScanResult.Error
+     */
+    suspend fun searchByBarcode(barcode: String): ScanResult {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = api.searchByBarcode(
+                    barcode = barcode,
+                    token = NetworkConstants.DISCOGS_TOKEN
+                )
+
+                val firstResult = response.results.firstOrNull()
+                    ?: return@withContext ScanResult.NotFound(barcode)
+
+                ScanResult.Found(release = firstResult.toDomain())
+
+            } catch (e: UnknownHostException) {
+                ScanResult.Error(DiscogsError.NoInternet)
+            } catch (e: SocketTimeoutException) {
+                ScanResult.Error(DiscogsError.Timeout)
+            } catch (e: HttpException) {
+                ScanResult.Error(mapHttpException(e))
+            } catch (e: IOException) {
+                ScanResult.Error(DiscogsError.Unknown(e.message))
+            } catch (e: Exception) {
+                ScanResult.Error(DiscogsError.Unknown(e.message))
+            }
+        }
+    }
+
+    private fun mapHttpException(e: HttpException): DiscogsError {
+        return when (e.code()) {
+            401, 403 -> DiscogsError.Unauthorized
+            404 -> DiscogsError.NotFound
+            429 -> DiscogsError.RateLimited
+            in 500..599 -> DiscogsError.ServerError(e.code())
+            else -> DiscogsError.Unknown(e.message())
+        }
+    }
+}
