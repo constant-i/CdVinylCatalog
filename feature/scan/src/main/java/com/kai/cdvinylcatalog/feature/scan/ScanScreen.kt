@@ -72,7 +72,7 @@ private fun ScannerPlaceholder(onBarcodeScanned: (String) -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         // Временная кнопка для теста — потом заменим на CameraX
-        Button(onClick = { onBarcodeScanned("602547378781") }) {
+        Button(onClick = { onBarcodeScanned("720642442524") }) {
             Text("Симулировать сканирование")
         }
     }
