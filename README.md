@@ -49,15 +49,30 @@
 
 ```mermaid
 graph TD
-    A[:feature:scan] --> B[:core:network]
-    A --> C[:core:database]
-    A --> D[:core:model]
-    E[:feature:collection] --> B
-    E --> C
-    E --> D
-    B --> F[Discogs API]
-    C --> G[Room]
+    Scan[:feature:scan]
+    Coll[:feature:collection]
+    
+    Network[:core:network]
+    Database[:core:database]
+    Model[:core:model]
+    Ui[:core:ui]
+    
+    Api[Discogs API]
+    Room[Room]
+    
+    Scan --> Network
+    Scan --> Database
+    Scan --> Model
+    Scan --> Ui
+    
+    Coll --> Database
+    Coll --> Model
+    Coll --> Ui
+    
+    Network --> Api
+    Database --> Room
 ```
+
 Фичи зависят от core-модулей, но **не знают друг о друге**.
 
 ### MVI в :feature:scan
