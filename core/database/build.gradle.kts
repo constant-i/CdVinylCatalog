@@ -26,6 +26,6 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.bundles.room)
-    ksp(libs.room.compiler)
+    ksp(libs.androidx.room.compiler)
     testImplementation(libs.junit)
 }

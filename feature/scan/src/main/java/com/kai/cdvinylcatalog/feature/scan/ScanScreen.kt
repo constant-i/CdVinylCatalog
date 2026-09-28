@@ -52,28 +52,20 @@ fun ScanScreen(
                     onScanAgain = { onIntent(ScanContract.Intent.OnScanAgainClicked) }
                 )
             }
-            else -> {
-                ScannerPlaceholder(
-                    onBarcodeScanned = { barcode ->
-                        onIntent(ScanContract.Intent.OnBarcodeScanned(barcode))
+            else ->  {
+                CameraPermissionHandler(
+                    onPermissionGranted = {
+                        CameraPreview(
+                            onBarcodeDetected = { barcode ->
+                                onIntent(ScanContract.Intent.OnBarcodeScanned(barcode))
+                            }
+                        )
+                    },
+                    onPermissionDenied = {
+                        Text("Нет доступа к камере. Разрешите в настройках.")
                     }
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun ScannerPlaceholder(onBarcodeScanned: (String) -> Unit) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = "Наведите камеру на штрихкод",
-            style = MaterialTheme.typography.titleMedium
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        // Временная кнопка для теста — потом заменим на CameraX
-        Button(onClick = { onBarcodeScanned("720642442524") }) {
-            Text("Симулировать сканирование")
         }
     }
 }
