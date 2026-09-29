@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,7 +50,8 @@ fun ScanScreen(
                 ReleaseContent(
                     state = state,
                     onAddToCollection = { onIntent(ScanContract.Intent.OnAddToCollectionClicked) },
-                    onScanAgain = { onIntent(ScanContract.Intent.OnScanAgainClicked) }
+                    onScanAgain = { onIntent(ScanContract.Intent.OnScanAgainClicked) },
+                    onNotesChanged = { notes -> onIntent(ScanContract.Intent.OnNotesChanged(notes)) }
                 )
             }
             else ->  {
@@ -74,7 +76,8 @@ fun ScanScreen(
 private fun ReleaseContent(
     state: ScanContract.State,
     onAddToCollection: () -> Unit,
-    onScanAgain: () -> Unit
+    onScanAgain: () -> Unit,
+    onNotesChanged: (String) -> Unit
 ) {
     val release = state.foundRelease ?: return
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -95,14 +98,34 @@ private fun ReleaseContent(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        if (state.isAlreadyInCollection) {
-            Text(
-                text = "Этот диск уже в коллекции!",
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyLarge
-            )
-            Spacer(modifier = Modifier.height(16.dp))
+        when {
+            state.justAdded -> {
+                Text(
+                    text = "Добавлено: ${release.title}",
+                    color = MaterialTheme.colorScheme.primary,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            state.isAlreadyInCollection -> {
+                Text(
+                    text = "Этот диск уже в коллекции!",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
         }
+
+        OutlinedTextField(
+            value = state.userNotes,
+            onValueChange = onNotesChanged,
+            label = { Text("Заметка (необязательно)") },
+            placeholder = { Text("Например: подарок, подписана") },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 3
+        )
+        Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = onAddToCollection) {
             Text("Добавить в коллекцию")

@@ -7,9 +7,6 @@ sealed class ScanResult {
     /** Релиз найден и его нет в коллекции */
     data class Found(val release: Release) : ScanResult()
 
-    /** Релиз найден, но он уже есть в коллекции */
-    data class AlreadyInCollection(val release: Release) : ScanResult()
-
     /** Релиз не найден в базе Discogs */
     data class NotFound(val barcode: String) : ScanResult()
 

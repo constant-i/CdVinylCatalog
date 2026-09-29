@@ -17,7 +17,9 @@ object ScanContract {
         val scannedBarcode: String? = null,
         val foundRelease: Release? = null,
         val isAlreadyInCollection: Boolean = false,
-        val error: DiscogsError? = null
+        val justAdded: Boolean = false,
+        val error: DiscogsError? = null,
+        val userNotes: String = ""
     ) {
         /** Есть ли что показать пользователю */
         val hasResult: Boolean
@@ -32,6 +34,7 @@ object ScanContract {
         data object OnScanAgainClicked : Intent()
         data object OnAddToCollectionClicked : Intent()
         data object OnErrorDismissed : Intent()
+        data class OnNotesChanged(val notes: String) : Intent()
     }
 
     /**
