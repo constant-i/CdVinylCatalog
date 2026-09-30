@@ -1,0 +1,32 @@
+package com.kai.cdvinylcatalog.feature.collection.detail
+
+import com.kai.cdvinylcatalog.core.model.CollectionItem
+import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.core.model.Track
+
+object CollectionItemDetailContract {
+
+    data class State(
+        val collectionItem: CollectionItem? = null,
+        val detailedRelease: Release? = null,
+        val isLoadingDetails: Boolean = false,
+        val isDeleting: Boolean = false,
+        val error: String? = null
+    ) {
+        val tracklist: List<Track>
+            get() = detailedRelease?.tracklist ?: emptyList()
+    }
+
+    sealed class Intent {
+        data object OnBackClicked : Intent()
+        data object OnLoadDetails : Intent()
+        data object OnDeleteClicked : Intent()
+        data object OnEditNotesClicked : Intent()
+        data class OnNotesChanged(val notes: String) : Intent()
+    }
+
+    sealed class Effect {
+        data object NavigateBack : Effect()
+        data class ShowToast(val message: String) : Effect()
+    }
+}

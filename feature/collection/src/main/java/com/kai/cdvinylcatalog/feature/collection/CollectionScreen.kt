@@ -32,6 +32,7 @@ import com.kai.cdvinylcatalog.core.model.CollectionItem
 fun CollectionScreen(
     state: CollectionContract.State,
     onIntent: (CollectionContract.Intent) -> Unit,
+    onItemClicked: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Scaffold(
@@ -71,7 +72,7 @@ fun CollectionScreen(
                         items(state.items, key = { it.id }) { item ->
                             CollectionItemCard(
                                 item = item,
-                                onClick = { onIntent(CollectionContract.Intent.OnItemClicked(item)) },
+                                onClick = { onItemClicked(item.id) },
                                 onDelete = { onIntent(CollectionContract.Intent.OnDeleteItem(item)) }
                             )
                         }

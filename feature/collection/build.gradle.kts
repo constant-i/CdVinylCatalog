@@ -36,6 +36,7 @@ dependencies {
     // Наши core-модули
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
+    implementation(project(":core:network"))
     implementation(project(":core:database"))
 
     // Compose
@@ -60,6 +61,9 @@ dependencies {
 
     // Core
     implementation(libs.androidx.core.ktx)
+
+    // Coil
+    implementation(libs.coil.compose)
 
     // Testing
     testImplementation(libs.bundles.testing)
