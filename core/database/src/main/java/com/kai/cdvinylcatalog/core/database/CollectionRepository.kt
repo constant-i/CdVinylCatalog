@@ -75,6 +75,13 @@ class CollectionRepository @Inject constructor(
     suspend fun removeFromCollection(id: Long) {
         dao.deleteById(id)
     }
+
+    /**
+     * Получает запись из коллекции по её локальному (не release) id.
+     */
+    suspend fun getItemById(id: Long): CollectionItem? {
+        return dao.getById(id)?.toDomain()
+    }
 }
 
 /**
