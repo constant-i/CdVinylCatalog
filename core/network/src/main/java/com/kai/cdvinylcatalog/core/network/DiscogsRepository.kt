@@ -1,6 +1,7 @@
 package com.kai.cdvinylcatalog.core.network
 
 import com.kai.cdvinylcatalog.core.model.DiscogsError
+import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.ScanResult
 import com.kai.cdvinylcatalog.core.network.dto.toDomain
 import kotlinx.coroutines.Dispatchers
@@ -63,4 +64,29 @@ class DiscogsRepository @Inject constructor(
             else -> DiscogsError.Unknown(e.message())
         }
     }
+
+    /**
+     * Поиск информации о конкретном релизе по ID релиза в базе Discogs (releaseId).
+     *
+     * @param releaseId ID релиза в базе Discogs
+     * @return ScanResult.Found или ScanResult.Error
+     */
+    suspend fun getReleaseDetails(releaseId: Long): Result<Release> =
+        withContext(Dispatchers.IO) {
+            try {
+                val dto = api.getReleaseDetails(
+                    releaseId = releaseId,
+                    token = NetworkConstants.DISCOGS_TOKEN
+                )
+                Result.success(dto.toDomain())
+            } catch (e: UnknownHostException) {
+                Result.failure(Exception("Нет подключения к интернету"))
+            } catch (e: SocketTimeoutException) {
+                Result.failure(Exception("Сервер не отвечает"))
+            } catch (e: HttpException) {
+                Result.failure(Exception("Ошибка сервера: ${e.code()}"))
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
 }

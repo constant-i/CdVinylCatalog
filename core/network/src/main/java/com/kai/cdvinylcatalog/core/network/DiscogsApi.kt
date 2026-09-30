@@ -1,7 +1,9 @@
 package com.kai.cdvinylcatalog.core.network
 
+import com.kai.cdvinylcatalog.core.network.dto.ReleaseDetailsDto
 import com.kai.cdvinylcatalog.core.network.dto.SearchResponseDto
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 /**
@@ -22,4 +24,16 @@ interface DiscogsApi {
         @Query("type") type: String = "release",
         @Query("token") token: String
     ): SearchResponseDto
+
+    /**
+     * Поиск информации о конкретном релизе по ID релиза в базе Discogs (releaseId).
+     *
+     * @param releaseId ID релиза в базе Discogs
+     * @param token токен Discogs (передаётся как query-параметр)
+     */
+    @GET("releases/{releaseId}")
+    suspend fun getReleaseDetails(
+        @Path("releaseId") releaseId: Long,
+        @Query("token") token: String
+    ): ReleaseDetailsDto
 }

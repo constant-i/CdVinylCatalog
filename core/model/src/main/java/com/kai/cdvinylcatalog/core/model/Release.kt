@@ -11,6 +11,7 @@ data class Release(
     val year: Int?,
     val barcode: String?,
     val coverImageUrl: String?,
+    val imageUrls: List<String> = emptyList(),
     val label: String?,
     val rawFormat: String?,        // "CD, Album" от API
     val country: String?,          // "US", "EU", "JP"

@@ -2,6 +2,7 @@ package com.kai.cdvinylcatalog.core.network.dto
 
 import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.core.model.Track
 
 /**
  * Маппер DTO → Domain модель.
@@ -15,6 +16,7 @@ fun SearchResultDto.toDomain(): Release {
         year = year?.toIntOrNull(),
         barcode = barcode?.firstOrNull(),
         coverImageUrl = coverImage,
+        imageUrls = listOfNotNull(coverImage),
         label = label?.firstOrNull(),
         rawFormat = rawFormat?.joinToString(", "),
         country = country,
@@ -51,4 +53,43 @@ fun String?.toFormat(): Format {
         contains("Cassette", ignoreCase = true) -> Format.CASSETTE
         else -> Format.UNKNOWN
     }
+}
+
+fun ReleaseDetailsDto.toDomain(): Release {
+    val allImages = images?.map { it.uri } ?: emptyList()
+    return Release(
+        id = id,
+        title = parseTitle(title).second,
+        artist = artists?.joinToString(", ") { it.name } ?: parseTitle(title).first,
+        year = year,
+        barcode = null,
+        coverImageUrl = images?.firstOrNull { it.type == "primary" }?.uri
+            ?: allImages.firstOrNull(),
+        imageUrls = allImages,
+        label = labels?.joinToString(", ") { it.name },
+        rawFormat = formats?.joinToString(", ") { format ->
+            buildString {
+                append(format.name)
+                format.descriptions?.let {
+                    if (it.isNotEmpty()) {
+                        append(", ")
+                        append(it.joinToString(", "))
+                    }
+                }
+            }
+        },
+        country = country,
+        releaseDate = released,
+        catalogNumber = labels?.firstOrNull()?.catno,
+        notes = notes,
+        tracklist = tracklist?.map { it.toDomain() } ?: emptyList()
+    )
+}
+
+private fun TrackDto.toDomain(): Track {
+    return Track(
+        position = position,
+        title = title,
+        duration = duration
+    )
 }
