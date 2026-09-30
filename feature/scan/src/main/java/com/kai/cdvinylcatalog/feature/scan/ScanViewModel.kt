@@ -73,9 +73,6 @@ class ScanViewModel @Inject constructor(
                             isAlreadyInCollection = isInCollection
                         )
                     }
-                    if (isInCollection) {
-                        _effect.send(ScanContract.Effect.ShowToast("Этот диск уже в коллекции"))
-                    }
                 }
                 is ScanResult.NotFound -> {
                     _state.update {
@@ -106,7 +103,6 @@ class ScanViewModel @Inject constructor(
             try {
                 addToCollection(release, format, notes)
                 _state.update { it.copy(justAdded = true) }
-                _effect.send(ScanContract.Effect.ShowToast("Добавлено: ${release.title}"))
             } catch (e: Exception) {
                 _effect.send(ScanContract.Effect.ShowToast("Ошибка: ${e.message}"))
             }

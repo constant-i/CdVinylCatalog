@@ -7,6 +7,7 @@ lifecycle = "2.7.0"
 activityCompose = "1.8.2"
 composeBom = "2024.02.00"
 navigation = "2.7.7"
+coil = "2.6.0"
 
 # Coroutines
 coroutines = "1.7.3"
@@ -93,6 +94,9 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "a
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+
+# Coil
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

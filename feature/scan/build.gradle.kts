@@ -68,6 +68,9 @@ dependencies {
     // ML Kit — сканирование штрихкодов
     implementation(libs.mlkit.barcode)
 
+    // Coil
+    implementation(libs.coil.compose)
+
     // Testing
     testImplementation(libs.bundles.testing)
 }

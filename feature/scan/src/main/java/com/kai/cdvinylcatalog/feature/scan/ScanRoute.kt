@@ -15,13 +15,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
  */
 @Composable
 fun ScanRoute(
+    onNavigateToCollection: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ScanViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    // Обработка одноразовых событий
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
@@ -29,7 +29,7 @@ fun ScanRoute(
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
                 ScanContract.Effect.NavigateToCollection -> {
-                    // TODO: навигация — добавим позже
+                    onNavigateToCollection()
                 }
             }
         }
@@ -38,6 +38,7 @@ fun ScanRoute(
     ScanScreen(
         state = state,
         onIntent = viewModel::onIntent,
-        modifier = modifier
+        modifier = modifier,
+        onNavigateToCollection = onNavigateToCollection
     )
 }
