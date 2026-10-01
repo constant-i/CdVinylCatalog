@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.ScanResult
+import com.kai.cdvinylcatalog.core.model.parseFormat
 import com.kai.cdvinylcatalog.feature.scan.domain.AddToCollectionUseCase
 import com.kai.cdvinylcatalog.feature.scan.domain.CheckCollectionUseCase
 import com.kai.cdvinylcatalog.feature.scan.domain.SearchReleaseUseCase
@@ -106,17 +107,6 @@ class ScanViewModel @Inject constructor(
             } catch (e: Exception) {
                 _effect.send(ScanContract.Effect.ShowToast("Ошибка: ${e.message}"))
             }
-        }
-    }
-
-    private fun parseFormat(rawFormat: String?): Format {
-        if (rawFormat == null) return Format.UNKNOWN
-        return when {
-            rawFormat.contains("CD", ignoreCase = true) -> Format.CD
-            rawFormat.contains("DVD", ignoreCase = true) -> Format.DVD
-            rawFormat.contains("Vinyl", ignoreCase = true) -> Format.VINYL
-            rawFormat.contains("Cassette", ignoreCase = true) -> Format.CASSETTE
-            else -> Format.UNKNOWN
         }
     }
 
