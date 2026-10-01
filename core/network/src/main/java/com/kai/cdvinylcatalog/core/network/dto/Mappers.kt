@@ -40,21 +40,6 @@ private fun parseTitle(rawTitle: String): Pair<String, String> {
     }
 }
 
-/**
- * Маппер строки формата в enum Format.
- * Discogs возвращает "CD", "Vinyl", "DVD" и т.д.
- */
-fun String?.toFormat(): Format {
-    if (this == null) return Format.UNKNOWN
-    return when {
-        contains("CD", ignoreCase = true) -> Format.CD
-        contains("DVD", ignoreCase = true) -> Format.DVD
-        contains("Vinyl", ignoreCase = true) -> Format.VINYL
-        contains("Cassette", ignoreCase = true) -> Format.CASSETTE
-        else -> Format.UNKNOWN
-    }
-}
-
 fun ReleaseDetailsDto.toDomain(): Release {
     val allImages = images?.map { it.uri } ?: emptyList()
     return Release(

@@ -89,4 +89,30 @@ class DiscogsRepository @Inject constructor(
                 Result.failure(e)
             }
         }
+
+    /**
+     * Ищет релизы по текстовому запросу в базе Discogs.
+     *
+     * @param query поисковая строка (обрезается от пробелов)
+     * @return [Result.success] со списком релизов или [Result.failure] с причиной ошибки
+     */
+    suspend fun searchByText(query: String): Result<List<Release>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.searchByText(
+                    query = query.trim(),
+                    token = NetworkConstants.DISCOGS_TOKEN
+                )
+                val releases = response.results.map { it.toDomain() }
+                Result.success(releases)
+            } catch (e: UnknownHostException) {
+                Result.failure(Exception("Нет подключения к интернету"))
+            } catch (e: SocketTimeoutException) {
+                Result.failure(Exception("Сервер не отвечает"))
+            } catch (e: HttpException) {
+                Result.failure(Exception("Ошибка сервера: ${e.code()}"))
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
 }

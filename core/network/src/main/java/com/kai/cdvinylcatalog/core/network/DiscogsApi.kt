@@ -36,4 +36,18 @@ interface DiscogsApi {
         @Path("releaseId") releaseId: Long,
         @Query("token") token: String
     ): ReleaseDetailsDto
+
+    /**
+     * Поиск релизов по текстовому запросу.
+     *
+     * @param query поисковая строка (название релиза, артист и т.п.)
+     * @param type тип искомой сущности, по умолчанию "release"
+     * @param token токен авторизации Discogs
+     */
+    @GET("database/search")
+    suspend fun searchByText(
+        @Query("q") query: String,
+        @Query("type") type: String = "release",
+        @Query("token") token: String
+    ): SearchResponseDto
 }
