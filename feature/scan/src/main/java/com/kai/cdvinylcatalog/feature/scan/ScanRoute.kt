@@ -16,6 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun ScanRoute(
     onNavigateToCollection: () -> Unit,
+    onNavigateToSearch: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ScanViewModel = hiltViewModel()
 ) {
@@ -38,7 +39,8 @@ fun ScanRoute(
     ScanScreen(
         state = state,
         onIntent = viewModel::onIntent,
-        modifier = modifier,
-        onNavigateToCollection = onNavigateToCollection
+        onNavigateToCollection = onNavigateToCollection,
+        onNavigateToSearch = onNavigateToSearch,
+        modifier = modifier
     )
 }

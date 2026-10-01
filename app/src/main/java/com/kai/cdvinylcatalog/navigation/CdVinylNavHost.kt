@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.kai.cdvinylcatalog.feature.collection.CollectionRoute
 import com.kai.cdvinylcatalog.feature.collection.detail.CollectionItemDetailRoute
 import com.kai.cdvinylcatalog.feature.scan.ScanRoute
+import com.kai.cdvinylcatalog.feature.scan.search.SearchRoute
 
 /**
  * Маршруты навигации приложения.
@@ -18,6 +19,7 @@ object Routes {
     const val SCAN = "scan"
     const val COLLECTION = "collection"
     const val COLLECTION_ITEM = "collection_item/{itemId}"
+    const val SEARCH = "search"
 
     fun collectionItem(itemId: Long) = "collection_item/$itemId"
 }
@@ -37,9 +39,8 @@ fun CdVinylNavHost(
     ) {
         composable(Routes.SCAN) {
             ScanRoute(
-                onNavigateToCollection = {
-                    navController.navigate(Routes.COLLECTION)
-                }
+                onNavigateToCollection = { navController.navigate(Routes.COLLECTION) },
+                onNavigateToSearch = { navController.navigate(Routes.SEARCH) }
             )
         }
         composable(Routes.COLLECTION) {
@@ -55,6 +56,11 @@ fun CdVinylNavHost(
             arguments = listOf(navArgument("itemId") { type = NavType.LongType })
         ) {
             CollectionItemDetailRoute(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Routes.SEARCH) {
+            SearchRoute(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
