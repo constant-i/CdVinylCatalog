@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="error_no_internet">Нет подключения к интернету</string>
+    <string name="error_timeout">Сервер не отвечает, попробуйте позже</string>
+    <string name="error_unauthorized">Проблема с токеном Discogs</string>
+    <string name="error_rate_limited">Слишком много запросов, подождите минуту</string>
+    <string name="error_not_found">Релиз не найден</string>
+    <string name="error_server">Ошибка сервера: %1$d</string>
+    <string name="error_unknown">Что-то пошло не так: %1$s</string>
+</resources>

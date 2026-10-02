@@ -14,12 +14,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun SearchRoute(
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateBack: () -> Unit,
+    initialResults: List<com.kai.cdvinylcatalog.core.model.Release>? = null,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    LaunchedEffect(initialResults) {
+        if (initialResults != null) {
+            viewModel.setInitialResults(initialResults)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->

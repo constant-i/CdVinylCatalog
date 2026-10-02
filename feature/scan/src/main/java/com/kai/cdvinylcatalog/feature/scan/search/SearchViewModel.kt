@@ -133,4 +133,14 @@ class SearchViewModel @Inject constructor(
             _effect.send(SearchContract.Effect.NavigateBack)
         }
     }
+
+    fun setInitialResults(releases: List<Release>) {
+        _state.update {
+            it.copy(
+                results = releases,
+                hasSearched = true,
+                query = ""
+            )
+        }
+    }
 }

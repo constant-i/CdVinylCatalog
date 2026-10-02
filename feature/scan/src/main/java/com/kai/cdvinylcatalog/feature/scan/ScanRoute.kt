@@ -9,14 +9,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-/**
- * Route — "умная" обёртка над ScanScreen.
- * Связывает ViewModel с UI, обрабатывает Effect.
- */
 @Composable
 fun ScanRoute(
+    onNavigateBack: () -> Unit,
     onNavigateToCollection: () -> Unit,
     onNavigateToSearch: () -> Unit,
+    onNavigateToSearchWithResults: (List<com.kai.cdvinylcatalog.core.model.Release>) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ScanViewModel = hiltViewModel()
 ) {
@@ -29,8 +27,8 @@ fun ScanRoute(
                 is ScanContract.Effect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
-                ScanContract.Effect.NavigateToCollection -> {
-                    onNavigateToCollection()
+                is ScanContract.Effect.NavigateToSearch -> {
+                    onNavigateToSearchWithResults(effect.results)
                 }
             }
         }
@@ -39,6 +37,7 @@ fun ScanRoute(
     ScanScreen(
         state = state,
         onIntent = viewModel::onIntent,
+        onNavigateBack = onNavigateBack,
         onNavigateToCollection = onNavigateToCollection,
         onNavigateToSearch = onNavigateToSearch,
         modifier = modifier

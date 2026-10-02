@@ -1,7 +1,6 @@
 package com.kai.cdvinylcatalog.feature.scan.domain
 
-import com.kai.cdvinylcatalog.core.model.DiscogsError
-import com.kai.cdvinylcatalog.core.model.ScanResult
+import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.network.DiscogsRepository
 import javax.inject.Inject
 
@@ -12,14 +11,9 @@ import javax.inject.Inject
 class SearchReleaseUseCase @Inject constructor(
     private val repository: DiscogsRepository
 ) {
-    suspend operator fun invoke(barcode: String): ScanResult {
-        // Валидация: штрихкод должен быть непустой и достаточно длинный
+    suspend operator fun invoke(barcode: String): Result<List<Release>> {
         if (barcode.isBlank() || barcode.length < 8) {
-            return ScanResult.Error(
-                DiscogsError.Unknown(
-                    "Некорректный штрихкод"
-                )
-            )
+            return Result.failure(Exception("Некорректный штрихкод"))
         }
         return repository.searchByBarcode(barcode.trim())
     }

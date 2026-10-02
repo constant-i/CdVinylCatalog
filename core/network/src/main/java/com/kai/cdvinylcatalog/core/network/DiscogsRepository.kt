@@ -2,12 +2,10 @@ package com.kai.cdvinylcatalog.core.network
 
 import com.kai.cdvinylcatalog.core.model.DiscogsError
 import com.kai.cdvinylcatalog.core.model.Release
-import com.kai.cdvinylcatalog.core.model.ScanResult
 import com.kai.cdvinylcatalog.core.network.dto.toDomain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.HttpException
-import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.inject.Inject
@@ -23,37 +21,29 @@ class DiscogsRepository @Inject constructor(
 ) {
 
     /**
-     * Ищет релиз по штрихкоду.
+     * Ищет релизы по штрихкоду.
      *
      * @param barcode штрихкод с диска
      * @return ScanResult.Found или ScanResult.Error
      */
-    suspend fun searchByBarcode(barcode: String): ScanResult {
-        return withContext(Dispatchers.IO) {
+    suspend fun searchByBarcode(barcode: String): Result<List<Release>> =
+        withContext(Dispatchers.IO) {
             try {
                 val response = api.searchByBarcode(
                     barcode = barcode,
                     token = NetworkConstants.DISCOGS_TOKEN
                 )
-
-                val firstResult = response.results.firstOrNull()
-                    ?: return@withContext ScanResult.NotFound(barcode)
-
-                ScanResult.Found(release = firstResult.toDomain())
-
+                Result.success(response.results.map { it.toDomain() })
             } catch (e: UnknownHostException) {
-                ScanResult.Error(DiscogsError.NoInternet)
+                Result.failure(Exception("Нет подключения к интернету"))
             } catch (e: SocketTimeoutException) {
-                ScanResult.Error(DiscogsError.Timeout)
+                Result.failure(Exception("Сервер не отвечает"))
             } catch (e: HttpException) {
-                ScanResult.Error(mapHttpException(e))
-            } catch (e: IOException) {
-                ScanResult.Error(DiscogsError.Unknown(e.message))
+                Result.failure(Exception("Ошибка сервера: ${e.code()}"))
             } catch (e: Exception) {
-                ScanResult.Error(DiscogsError.Unknown(e.message))
+                Result.failure(e)
             }
         }
-    }
 
     private fun mapHttpException(e: HttpException): DiscogsError {
         return when (e.code()) {
