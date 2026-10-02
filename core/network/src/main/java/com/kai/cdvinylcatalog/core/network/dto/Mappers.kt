@@ -18,7 +18,7 @@ fun SearchResultDto.toDomain(): Release {
         coverImageUrl = coverImage,
         imageUrls = listOfNotNull(coverImage),
         label = label?.firstOrNull(),
-        rawFormat = rawFormat?.joinToString(", "),
+        rawFormat = format?.joinToString(", "),
         country = country,
         releaseDate = null,
         catalogNumber = null,

@@ -70,13 +70,13 @@ class SearchViewModel @Inject constructor(
     private fun onResultClicked(release: Release) {
         viewModelScope.launch {
             val inCollection = checkCollection(release.id)
+            val detectedFormat = parseFormat(release.rawFormat)
 
             if (inCollection) {
                 _state.update { it.copy(askAddAnother = release) }
                 return@launch
             }
 
-            val detectedFormat = parseFormat(release.rawFormat)
             if (detectedFormat != Format.UNKNOWN) {
                 addRelease(release, detectedFormat)
             } else {

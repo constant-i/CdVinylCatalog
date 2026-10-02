@@ -10,7 +10,7 @@ data class SearchResultDto(
     @SerializedName("title") val title: String,
     @SerializedName("year") val year: String?,
     @SerializedName("country") val country: String?,
-    @SerializedName("format") val rawFormat: List<String>?,
+    @SerializedName("format") val format: List<String>?,
     @SerializedName("label") val label: List<String>?,
     @SerializedName("cover_image") val coverImage: String?,
     @SerializedName("barcode") val barcode: List<String>?
