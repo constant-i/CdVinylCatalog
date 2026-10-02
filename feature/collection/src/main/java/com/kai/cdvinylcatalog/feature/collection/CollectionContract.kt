@@ -15,11 +15,14 @@ object CollectionContract {
 
     sealed class Intent {
         data object OnBackClicked : Intent()
-        data class OnItemClicked(val item: CollectionItem) : Intent()
         data class OnDeleteItem(val item: CollectionItem) : Intent()
+        data object OnScanClicked : Intent()
+        data object OnSearchClicked : Intent()
     }
 
     sealed class Effect {
         data object NavigateBack : Effect()
+        data object NavigateToScan : Effect()
+        data object NavigateToSearch : Effect()
     }
 }

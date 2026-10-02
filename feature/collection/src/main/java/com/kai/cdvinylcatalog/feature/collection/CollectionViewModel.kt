@@ -55,8 +55,21 @@ class CollectionViewModel @Inject constructor(
     fun onIntent(intent: CollectionContract.Intent) {
         when (intent) {
             CollectionContract.Intent.OnBackClicked -> onBack()
-            is CollectionContract.Intent.OnItemClicked -> onItemClicked(intent.item)
             is CollectionContract.Intent.OnDeleteItem -> onDeleteItem(intent.item)
+            CollectionContract.Intent.OnScanClicked -> onScanClicked()
+            CollectionContract.Intent.OnSearchClicked -> onSearchClicked()
+        }
+    }
+
+    private fun onScanClicked() {
+        viewModelScope.launch {
+            _effect.send(CollectionContract.Effect.NavigateToScan)
+        }
+    }
+
+    private fun onSearchClicked() {
+        viewModelScope.launch {
+            _effect.send(CollectionContract.Effect.NavigateToSearch)
         }
     }
 
@@ -64,10 +77,6 @@ class CollectionViewModel @Inject constructor(
         viewModelScope.launch {
             _effect.send(CollectionContract.Effect.NavigateBack)
         }
-    }
-
-    private fun onItemClicked(item: com.kai.cdvinylcatalog.core.model.CollectionItem) {
-        // TODO: открыть детали диска
     }
 
     private fun onDeleteItem(item: com.kai.cdvinylcatalog.core.model.CollectionItem) {

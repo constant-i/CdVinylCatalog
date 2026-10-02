@@ -53,7 +53,7 @@ fun HomeScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("CdVinylCatalog") }
+                title = { Text("Vinyl & CD") }
             )
         }
     ) { padding ->

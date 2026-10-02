@@ -92,6 +92,12 @@ fun CdVinylNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onItemClicked = { itemId ->
                     navController.navigate(Routes.collectionItem(itemId))
+                },
+                onNavigateToScan = {
+                    navController.navigate(Routes.SCAN)
+                },
+                onNavigateToSearch = {
+                    navController.navigate(Routes.SEARCH)
                 }
             )
         }

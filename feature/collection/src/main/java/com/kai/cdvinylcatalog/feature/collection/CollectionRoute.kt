@@ -11,6 +11,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun CollectionRoute(
     onNavigateBack: () -> Unit,
     onItemClicked: (Long) -> Unit,
+    onNavigateToScan: () -> Unit,
+    onNavigateToSearch: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionViewModel = hiltViewModel()
 ) {
@@ -20,6 +22,8 @@ fun CollectionRoute(
         viewModel.effect.collect { effect ->
             when (effect) {
                 CollectionContract.Effect.NavigateBack -> onNavigateBack()
+                CollectionContract.Effect.NavigateToScan -> onNavigateToScan()
+                CollectionContract.Effect.NavigateToSearch -> onNavigateToSearch()
             }
         }
     }
