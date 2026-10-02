@@ -6,7 +6,8 @@ object ReleaseSelectionContract {
 
     data class State(
         val results: List<Release> = emptyList(),
-        val source: Source = Source.SEARCH  // откуда пришли
+        val source: Source = Source.SEARCH,  // откуда пришли
+        val inCollectionIds: Set<Long> = emptySet()
     ) {
         val isEmpty: Boolean
             get() = results.isEmpty()

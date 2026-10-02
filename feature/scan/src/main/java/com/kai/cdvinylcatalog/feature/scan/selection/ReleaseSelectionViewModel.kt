@@ -3,6 +3,7 @@ package com.kai.cdvinylcatalog.feature.scan.selection
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.feature.scan.domain.CheckCollectionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ReleaseSelectionViewModel @Inject constructor() : ViewModel() {
+class ReleaseSelectionViewModel @Inject constructor(
+    private val checkCollection: CheckCollectionUseCase
+) : ViewModel() {
 
     private val _state = MutableStateFlow(ReleaseSelectionContract.State())
     val state: StateFlow<ReleaseSelectionContract.State> = _state.asStateFlow()
@@ -24,6 +27,13 @@ class ReleaseSelectionViewModel @Inject constructor() : ViewModel() {
 
     fun setResults(releases: List<Release>, source: ReleaseSelectionContract.Source) {
         _state.update { it.copy(results = releases, source = source) }
+        viewModelScope.launch {
+            val inCollection = releases
+                .filter { checkCollection(it.id) }
+                .map { it.id }
+                .toSet()
+            _state.update { it.copy(inCollectionIds = inCollection) }
+        }
     }
 
     fun onIntent(intent: ReleaseSelectionContract.Intent) {
