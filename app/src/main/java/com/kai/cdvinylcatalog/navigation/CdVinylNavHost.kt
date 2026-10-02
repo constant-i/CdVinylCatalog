@@ -16,7 +16,10 @@ import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.feature.collection.CollectionRoute
 import com.kai.cdvinylcatalog.feature.collection.detail.CollectionItemDetailRoute
 import com.kai.cdvinylcatalog.feature.scan.ScanRoute
+import com.kai.cdvinylcatalog.feature.scan.details.ReleaseDetailsRoute
 import com.kai.cdvinylcatalog.feature.scan.search.SearchRoute
+import com.kai.cdvinylcatalog.feature.scan.selection.ReleaseSelectionContract
+import com.kai.cdvinylcatalog.feature.scan.selection.ReleaseSelectionRoute
 import com.kai.cdvinylcatalog.home.HomeRoute
 
 object Routes {
@@ -25,8 +28,12 @@ object Routes {
     const val COLLECTION = "collection"
     const val COLLECTION_ITEM = "collection_item/{itemId}"
     const val SEARCH = "search"
+    const val RELEASE_DETAILS = "release_details/{releaseId}"
+    const val SELECTION = "selection"
 
     fun collectionItem(itemId: Long) = "collection_item/$itemId"
+    fun releaseDetails(releaseId: Long) = "release_details/$releaseId"
+
 }
 
 @Composable
@@ -36,6 +43,8 @@ fun CdVinylNavHost(
 ) {
     // Shared State для передачи результатов сканирования на экран поиска
     var pendingResults by remember { mutableStateOf<List<Release>?>(null) }
+
+    var pendingSource by remember { mutableStateOf(ReleaseSelectionContract.Source.SEARCH) }
 
     NavHost(
         navController = navController,
@@ -59,7 +68,6 @@ fun CdVinylNavHost(
                 onNavigateToCollection = { navController.navigate(Routes.COLLECTION) }
             )
         }
-
         composable(Routes.SCAN) {
             ScanRoute(
                 onNavigateBack = { navController.popBackStack() },
@@ -72,13 +80,13 @@ fun CdVinylNavHost(
                     pendingResults = null
                     navController.navigate(Routes.SEARCH)
                 },
-                onNavigateToSearchWithResults = { results ->
+                onNavigateToSelection = { results ->
                     pendingResults = results
-                    navController.navigate(Routes.SEARCH)
+                    pendingSource = ReleaseSelectionContract.Source.SCAN
+                    navController.navigate(Routes.SELECTION)
                 }
             )
         }
-
         composable(Routes.COLLECTION) {
             CollectionRoute(
                 onNavigateBack = { navController.popBackStack() },
@@ -87,7 +95,6 @@ fun CdVinylNavHost(
                 }
             )
         }
-
         composable(
             route = Routes.COLLECTION_ITEM,
             arguments = listOf(navArgument("itemId") { type = NavType.LongType })
@@ -96,15 +103,45 @@ fun CdVinylNavHost(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-
         composable(Routes.SEARCH) {
             SearchRoute(
-                onNavigateBack = {
-                    pendingResults = null
-                    navController.popBackStack()
-                },
-                initialResults = pendingResults
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToSelection = { results ->
+                    pendingResults = results
+                    pendingSource = ReleaseSelectionContract.Source.SEARCH
+                    navController.navigate(Routes.SELECTION)
+                }
             )
+        }
+        composable(
+            route = Routes.RELEASE_DETAILS,
+            arguments = listOf(navArgument("releaseId") { type = NavType.LongType })
+        ) {
+            ReleaseDetailsRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCollection = {
+                    pendingResults = null
+                    navController.navigate(Routes.COLLECTION) {
+                        popUpTo(Routes.HOME)
+                    }
+                }
+            )
+        }
+        composable(Routes.SELECTION) {
+            val results = pendingResults
+            if (results != null) {
+                ReleaseSelectionRoute(
+                    results = results,
+                    source = pendingSource,
+                    onNavigateBack = {
+                        pendingResults = null
+                        navController.popBackStack()
+                    },
+                    onNavigateToDetails = { releaseId ->
+                        navController.navigate(Routes.releaseDetails(releaseId))
+                    }
+                )
+            }
         }
     }
 }

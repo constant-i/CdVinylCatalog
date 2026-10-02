@@ -14,7 +14,7 @@ fun ScanRoute(
     onNavigateBack: () -> Unit,
     onNavigateToCollection: () -> Unit,
     onNavigateToSearch: () -> Unit,
-    onNavigateToSearchWithResults: (List<com.kai.cdvinylcatalog.core.model.Release>) -> Unit,
+    onNavigateToSelection: (List<com.kai.cdvinylcatalog.core.model.Release>) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ScanViewModel = hiltViewModel()
 ) {
@@ -27,8 +27,8 @@ fun ScanRoute(
                 is ScanContract.Effect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
                 }
-                is ScanContract.Effect.NavigateToSearch -> {
-                    onNavigateToSearchWithResults(effect.results)
+                is ScanContract.Effect.NavigateToSelection -> {
+                    onNavigateToSelection(effect.results)
                 }
             }
         }

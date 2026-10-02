@@ -54,7 +54,7 @@ class ScanViewModel @Inject constructor(
                     if (releases.isEmpty()) {
                         _effect.send(ScanContract.Effect.ShowToast("Релиз не найден в Discogs"))
                     } else {
-                        _effect.send(ScanContract.Effect.NavigateToSearch(releases))
+                        _effect.send(ScanContract.Effect.NavigateToSelection(releases))
                     }
                 }
                 .onFailure { e ->
