@@ -10,7 +10,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.kai.cdvinylcatalog.navigation.CdVinylNavHost
-import com.kai.cdvinylcatalog.ui.theme.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

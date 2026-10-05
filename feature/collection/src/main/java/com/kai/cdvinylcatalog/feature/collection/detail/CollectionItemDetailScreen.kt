@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.feature.collection.detail
 
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,13 +27,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.kai.cdvinylcatalog.core.model.CollectionItem
+import com.kai.cdvinylcatalog.core.model.Format
+import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.Track
+import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.feature.collection.detail.CollectionItemDetailContract.State
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun CollectionItemDetailScreen(
-    state: CollectionItemDetailContract.State,
+    state: State,
     onIntent: (CollectionItemDetailContract.Intent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -141,5 +148,63 @@ private fun TrackRow(track: Track) {
         track.duration?.let {
             Text(text = it, style = MaterialTheme.typography.bodyMedium)
         }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CollectionItemDetailScreenPreview() {
+    CdVinylCatalogTheme {
+        CollectionItemDetailScreen(
+            state = State(
+                isLoadingDetails = false,
+                detailedRelease = Release(
+                    id = 1,
+                    title = "Nevermind",
+                    artist = "Nirvana",
+                    year = 1991,
+                    barcode = null,
+                    coverImageUrl = null,
+                    label = "DGC",
+                    rawFormat = "CD, Album",
+                    country = "US",
+                    releaseDate = null,
+                    catalogNumber = null,
+                    notes = null,
+                    tracklist = listOf(
+                        Track("1", "Smells Like Teen Spirit", "5:01"),
+                        Track("2", "In Bloom", "4:14")
+                    )
+                ),
+                collectionItem = CollectionItem(
+                    id = 1,
+                    release = Release(
+                        id = 1,
+                        title = "Nevermind",
+                        artist = "Nirvana",
+                        year = 1991,
+                        barcode = null,
+                        coverImageUrl = null,
+                        label = "DGC",
+                        rawFormat = "CD, Album",
+                        country = "US",
+                        releaseDate = null,
+                        catalogNumber = null,
+                        notes = null,
+                        tracklist = listOf(
+                            Track("1", "Smells Like Teen Spirit", "5:01"),
+                            Track("2", "In Bloom", "4:14")
+                        )
+                    ),
+                    format = Format.CD,
+                    quantity = 1,
+                    addedAt = 0,
+                    notes = "Фирменный диск",
+                )
+            ),
+            onIntent = {}
+
+        )
     }
 }

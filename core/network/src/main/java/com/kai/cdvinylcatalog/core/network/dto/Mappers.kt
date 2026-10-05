@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.core.network.dto
 
-import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.Track
 

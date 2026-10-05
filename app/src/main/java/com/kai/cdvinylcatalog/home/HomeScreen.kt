@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.home
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -33,8 +34,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 
 /**
  * Главный экран приложения.
@@ -65,13 +67,6 @@ fun HomeScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Что будем делать?",
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-
             HomeActionCard(
                 icon = Icons.Default.PhotoCamera,
                 title = "Сканировать",
@@ -187,5 +182,19 @@ private fun HomeActionCard(
                 }
             )
         }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun HomeScreenPreview() {
+    CdVinylCatalogTheme {
+        HomeScreen(
+            onNavigateToScan = {},
+            onNavigateToSearch = {},
+            onNavigateToManualAdd = {},
+            onNavigateToCollection = {}
+        )
     }
 }

@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.feature.scan.details
 
+import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -49,14 +50,16 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.Track
+import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ReleaseDetailsScreen(
     state: ReleaseDetailsContract.State,
@@ -466,4 +469,36 @@ private fun FormatPickerDialog(
             TextButton(onClick = onDismiss) { Text("Отмена") }
         }
     )
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ReleaseDetailsScreenPreview() {
+    CdVinylCatalogTheme {
+        ReleaseDetailsScreen(
+            state = ReleaseDetailsContract.State(
+                isLoading = false,
+                release = Release(
+                    id = 1,
+                    title = "Nevermind",
+                    artist = "Nirvana",
+                    year = 1991,
+                    barcode = null,
+                    coverImageUrl = null,
+                    label = "DGC",
+                    rawFormat = "CD, Album",
+                    country = "US",
+                    releaseDate = null,
+                    catalogNumber = null,
+                    notes = null,
+                    tracklist = listOf(
+                        Track("1", "Smells Like Teen Spirit", "5:01"),
+                        Track("2", "In Bloom", "4:14")
+                    )
+                )
+            ),
+            onIntent = {}
+        )
+    }
 }

@@ -82,21 +82,89 @@ class CollectionRepository @Inject constructor(
     suspend fun getItemById(id: Long): CollectionItem? {
         return dao.getById(id)?.toDomain()
     }
+
+    /**
+     * Добавляет созданную в ручную запись в коллекцию (для позиций, которых нет в Discogs)
+     */
+    suspend fun addManualItem(
+        title: String,
+        artist: String,
+        year: Int?,
+        format: Format,
+        label: String?,
+        country: String?,
+        barcode: String?,
+        notes: String?
+    ): Long {
+        val entity = CollectionItemEntity(
+            releaseId = null,
+            title = title,
+            artist = artist,
+            year = year,
+            barcode = barcode,
+            coverImageUrl = null,
+            imageUrls = null,
+            label = label,
+            rawFormat = format.name,
+            country = country,
+            releaseDate = null,
+            catalogNumber = null,
+            releaseNotes = null,
+            format = format.name,
+            quantity = 1,
+            addedAt = System.currentTimeMillis(),
+            userNotes = notes
+        )
+        return dao.insert(entity)
+    }
+
+    /**
+     * Редактирование созданной в ручную записи в коллекции
+     */
+    suspend fun updateManualItem(
+        id: Long,
+        title: String,
+        artist: String,
+        year: Int?,
+        format: Format,
+        label: String?,
+        country: String?,
+        barcode: String?,
+        notes: String?
+    ) {
+        val existing = dao.getById(id) ?: return
+        dao.update(
+            existing.copy(
+                title = title,
+                artist = artist,
+                year = year,
+                format = format.name,
+                rawFormat = format.name,
+                label = label,
+                country = country,
+                barcode = barcode,
+                userNotes = notes
+            )
+        )
+    }
 }
 
 /**
  * Маппинг Entity → Domain.
+ *
+ * В ручных записях releaseId = 0
  */
 private fun CollectionItemEntity.toDomain(): CollectionItem {
     return CollectionItem(
         id = id,
         release = Release(
-            id = releaseId,
+            id = releaseId ?: 0L,
             title = title,
             artist = artist,
             year = year,
             barcode = barcode,
             coverImageUrl = coverImageUrl,
+            imageUrls = imageUrls?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
             label = label,
             rawFormat = rawFormat,
             country = country,

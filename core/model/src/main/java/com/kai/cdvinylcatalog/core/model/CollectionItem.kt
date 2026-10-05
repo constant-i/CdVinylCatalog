@@ -3,6 +3,8 @@ package com.kai.cdvinylcatalog.core.model
 /**
  * Запись в коллекции пользователя.
  * Хранится в локальной базе данных (Room).
+ *
+ * Release.id = 0L для дисков, добавленных вручную
  */
 data class CollectionItem(
     val id: Long,

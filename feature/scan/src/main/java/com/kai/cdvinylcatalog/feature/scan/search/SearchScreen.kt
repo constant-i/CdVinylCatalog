@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.feature.scan.search
 
+import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,7 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -127,5 +130,17 @@ fun SearchScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun ManualAddScreenPreview() {
+    CdVinylCatalogTheme {
+        SearchScreen(
+            state = SearchContract.State(),
+            onIntent = {}
+        )
     }
 }

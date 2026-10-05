@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.feature.collection
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,7 +18,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Search
@@ -35,9 +35,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.kai.cdvinylcatalog.core.model.CollectionItem
+import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -202,6 +204,22 @@ private fun EmptyCollection(modifier: Modifier = Modifier) {
         Text(
             text = "Отсканируйте первый диск",
             style = MaterialTheme.typography.bodyMedium
+        )
+    }
+}
+
+@Preview(name = "Light", showBackground = true)
+@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Composable
+private fun CollectionScreenPreview() {
+    CdVinylCatalogTheme {
+        CollectionScreen(
+            state = CollectionContract.State(
+                isLoading = false,
+                items = emptyList()
+            ),
+            onIntent = {},
+            onItemClicked = {}
         )
     }
 }

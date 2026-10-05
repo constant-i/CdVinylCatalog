@@ -1,4 +1,4 @@
-package com.kai.cdvinylcatalog.ui.theme
+package com.kai.cdvinylcatalog.core.ui
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

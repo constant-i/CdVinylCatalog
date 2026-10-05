@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.navigation
 
-import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -17,6 +16,7 @@ import com.kai.cdvinylcatalog.feature.collection.CollectionRoute
 import com.kai.cdvinylcatalog.feature.collection.detail.CollectionItemDetailRoute
 import com.kai.cdvinylcatalog.feature.scan.ScanRoute
 import com.kai.cdvinylcatalog.feature.scan.details.ReleaseDetailsRoute
+import com.kai.cdvinylcatalog.feature.scan.manual.ManualAddRoute
 import com.kai.cdvinylcatalog.feature.scan.search.SearchRoute
 import com.kai.cdvinylcatalog.feature.scan.selection.ReleaseSelectionContract
 import com.kai.cdvinylcatalog.feature.scan.selection.ReleaseSelectionRoute
@@ -30,9 +30,12 @@ object Routes {
     const val SEARCH = "search"
     const val RELEASE_DETAILS = "release_details/{releaseId}"
     const val SELECTION = "selection"
+    const val MANUAL_ADD = "manual_add"
+    const val MANUAL_EDIT = "manual_edit/{itemId}"
 
     fun collectionItem(itemId: Long) = "collection_item/$itemId"
     fun releaseDetails(releaseId: Long) = "release_details/$releaseId"
+    fun manualEdit(itemId: Long) = "manual_edit/$itemId"
 
 }
 
@@ -58,13 +61,7 @@ fun CdVinylNavHost(
                     pendingResults = null
                     navController.navigate(Routes.SEARCH)
                 },
-                onNavigateToManualAdd = {
-                    Toast.makeText(
-                        navController.context,
-                        "Ручное добавление в разработке",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                },
+                onNavigateToManualAdd = { navController.navigate(Routes.MANUAL_ADD) },
                 onNavigateToCollection = { navController.navigate(Routes.COLLECTION) }
             )
         }
@@ -149,5 +146,27 @@ fun CdVinylNavHost(
                 )
             }
         }
+        composable(Routes.MANUAL_ADD) {
+            ManualAddRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDetails = { itemId ->
+                    navController.navigate(Routes.collectionItem(itemId)) {
+                        popUpTo(Routes.HOME)
+                    }
+                }
+            )
+        }
+        composable(
+            route = Routes.MANUAL_EDIT,
+            arguments = listOf(navArgument("itemId") { type = NavType.LongType })
+        ) {
+            ManualAddRoute(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDetails = { itemId ->
+                    navController.popBackStack()
+                }
+            )
+        }
+
     }
 }
