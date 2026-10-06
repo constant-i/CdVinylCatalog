@@ -99,4 +99,14 @@ interface CollectionDao {
      */
     @Query("DELETE FROM collection_items WHERE id = :id")
     suspend fun deleteById(id: Long)
+
+    /**
+     * Возвращает `Flow` — Room автоматически эмитит новую запись при её изменении
+     * по её **локальному** ID.
+     *
+     * Принимает ID записи в локальной БД.
+     * @param id локальный ID записи в Room
+     */
+    @Query("SELECT * FROM collection_items WHERE id = :id LIMIT 1")
+    fun observeById(id: Long): Flow<CollectionItemEntity?>
 }

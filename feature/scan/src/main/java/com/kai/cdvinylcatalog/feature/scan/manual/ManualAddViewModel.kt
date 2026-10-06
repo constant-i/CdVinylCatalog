@@ -130,7 +130,15 @@ class ManualAddViewModel @Inject constructor(
                     }
                 }
                 _state.update { it.copy(isSaving = false) }
-                _effect.send(ManualAddContract.Effect.NavigateToDetails(itemId))
+
+                when (s.mode) {
+                    is ManualAddContract.Mode.Create -> {
+                        _effect.send(ManualAddContract.Effect.NavigateToDetails(itemId))
+                    }
+                    is ManualAddContract.Mode.Edit -> {
+                        _effect.send(ManualAddContract.Effect.NavigateBack)
+                    }
+                }
             } catch (e: Exception) {
                 _state.update { it.copy(isSaving = false, error = e.message) }
                 _effect.send(ManualAddContract.Effect.ShowToast("Ошибка: ${e.message}"))

@@ -147,6 +147,13 @@ class CollectionRepository @Inject constructor(
             )
         )
     }
+
+    /**
+     *  Для подписки на запись в коллекции созданной в ручную
+     */
+    fun observeItemById(id: Long): Flow<CollectionItem?> {
+        return dao.observeById(id).map { it?.toDomain() }
+    }
 }
 
 /**

@@ -15,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,13 +56,31 @@ fun CollectionItemDetailScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = { onIntent(CollectionItemDetailContract.Intent.OnBackClicked) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                    IconButton(
+                        onClick = { onIntent(CollectionItemDetailContract.Intent.OnBackClicked) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Назад"
+                        )
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onIntent(CollectionItemDetailContract.Intent.OnDeleteClicked) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Удалить")
+                    IconButton(
+                        onClick = { onIntent(CollectionItemDetailContract.Intent.OnEditClicked) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Редактировать"
+                        )
+                    }
+                    IconButton(
+                        onClick = { onIntent(CollectionItemDetailContract.Intent.OnDeleteClicked) }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Удалить"
+                        )
                     }
                 }
             )

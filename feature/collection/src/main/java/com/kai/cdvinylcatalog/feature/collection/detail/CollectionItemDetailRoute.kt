@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun CollectionItemDetailRoute(
     onNavigateBack: () -> Unit,
+    onNavigateToEdit: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionItemDetailViewModel = hiltViewModel()
 ) {
@@ -24,6 +25,9 @@ fun CollectionItemDetailRoute(
                 CollectionItemDetailContract.Effect.NavigateBack -> onNavigateBack()
                 is CollectionItemDetailContract.Effect.ShowToast -> {
                     Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                }
+                is CollectionItemDetailContract.Effect.NavigateToEdit -> {
+                    onNavigateToEdit(effect.itemId)
                 }
             }
         }

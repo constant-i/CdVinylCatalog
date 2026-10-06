@@ -103,7 +103,10 @@ fun CdVinylNavHost(
             arguments = listOf(navArgument("itemId") { type = NavType.LongType })
         ) {
             CollectionItemDetailRoute(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { itemId ->
+                    navController.navigate(Routes.manualEdit(itemId))
+                }
             )
         }
         composable(Routes.SEARCH) {
@@ -162,11 +165,8 @@ fun CdVinylNavHost(
         ) {
             ManualAddRoute(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToDetails = { itemId ->
-                    navController.popBackStack()
-                }
+                onNavigateToDetails = { }
             )
         }
-
     }
 }

@@ -19,14 +19,15 @@ object CollectionItemDetailContract {
 
     sealed class Intent {
         data object OnBackClicked : Intent()
-        data object OnLoadDetails : Intent()
         data object OnDeleteClicked : Intent()
         data object OnEditNotesClicked : Intent()
         data class OnNotesChanged(val notes: String) : Intent()
+        data object OnEditClicked : Intent()
     }
 
     sealed class Effect {
         data object NavigateBack : Effect()
         data class ShowToast(val message: String) : Effect()
+        data class NavigateToEdit(val itemId: Long) : Effect()
     }
 }
