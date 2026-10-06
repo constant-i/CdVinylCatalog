@@ -12,14 +12,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.kai.cdvinylcatalog.core.model.Release
-import com.kai.cdvinylcatalog.feature.collection.CollectionRoute
+import com.kai.cdvinylcatalog.feature.collection.crate.CollectionRoute
 import com.kai.cdvinylcatalog.feature.collection.detail.CollectionItemDetailRoute
-import com.kai.cdvinylcatalog.feature.scan.ScanRoute
-import com.kai.cdvinylcatalog.feature.scan.details.ReleaseDetailsRoute
-import com.kai.cdvinylcatalog.feature.scan.manual.ManualAddRoute
-import com.kai.cdvinylcatalog.feature.scan.search.SearchRoute
-import com.kai.cdvinylcatalog.feature.scan.selection.ReleaseSelectionContract
-import com.kai.cdvinylcatalog.feature.scan.selection.ReleaseSelectionRoute
+import com.kai.cdvinylcatalog.feature.add.scan.ScanRoute
+import com.kai.cdvinylcatalog.feature.add.details.ReleaseDetailsRoute
+import com.kai.cdvinylcatalog.feature.add.manual.ManualAddRoute
+import com.kai.cdvinylcatalog.feature.add.search.SearchRoute
+import com.kai.cdvinylcatalog.feature.add.selection.ReleaseSelectionContract
+import com.kai.cdvinylcatalog.feature.add.selection.ReleaseSelectionRoute
 import com.kai.cdvinylcatalog.home.HomeRoute
 
 object Routes {

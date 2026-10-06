@@ -1,67 +1,54 @@
 plugins {
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
 }
 
 android {
-    namespace = "com.kai.cdvinylcatalog"
+    namespace = "com.kai.cdvinylcatalog.feature.add"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.kai.cdvinylcatalog"
         minSdk = 26
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
     }
+
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"  // <-- ДОБАВИТЬ
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
 }
 
 dependencies {
-    // Наши модули
+    // Наши core-модули
     implementation(project(":core:model"))
+    implementation(project(":core:ui"))
     implementation(project(":core:network"))
     implementation(project(":core:database"))
-    implementation(project(":core:ui"))
-    implementation(project(":feature:add"))
-    implementation(project(":feature:collection"))
-
-    // Core
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)
     implementation(libs.androidx.compose.ui.tooling)
-    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.ui.tooling.preview)
+
+    // Lifecycle + ViewModel
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.runtime.compose)
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
@@ -72,10 +59,18 @@ dependencies {
     ksp(libs.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
+    // Core
+    implementation(libs.androidx.core.ktx)
+
+    // CameraX
+    implementation(libs.bundles.camera)
+
+    // ML Kit — сканирование штрихкодов
+    implementation(libs.mlkit.barcode)
+
+    // Coil
+    implementation(libs.coil.compose)
+
     // Testing
     testImplementation(libs.bundles.testing)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.compose.ui.tooling)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

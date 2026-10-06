@@ -28,12 +28,12 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"  // <-- ДОБАВИТЬ
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
 }
 
 dependencies {
-    // Наши core-модули
+    // core-модули
     implementation(project(":core:model"))
     implementation(project(":core:ui"))
     implementation(project(":core:network"))

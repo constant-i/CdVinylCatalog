@@ -41,7 +41,7 @@
 :core:network           — Retrofit, Discogs API, мапперы
 :core:database          — Room (в разработке)
 :core:ui                — общие Compose-компоненты, тема
-:feature:scan           — экран сканирования (MVI)
+:feature:add            — экраны сканирования, поиска по тексту, добавления в ручную (MVI)
 :feature:collection     — экран коллекции (в разработке)
 ```
 
@@ -49,7 +49,7 @@
 
 ```mermaid
 graph TD
-    Scan[:feature:scan]
+    Add[:feature:add]
     Coll[:feature:collection]
     
     Network[:core:network]
@@ -75,7 +75,7 @@ graph TD
 
 Фичи зависят от core-модулей, но **не знают друг о друге**.
 
-### MVI в :feature:scan
+### MVI в :feature:add
 
 - **State** — единый источник правды для UI
 - **Intent** — действия пользователя
