@@ -3,8 +3,10 @@ package com.kai.cdvinylcatalog.feature.collection.crate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.database.CollectionRepository
+import com.kai.cdvinylcatalog.core.database.SortOrder
 import com.kai.cdvinylcatalog.core.model.CollectionItem
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,18 +38,16 @@ class CollectionViewModel @Inject constructor(
      * Подписываемся на Flow из Room.
      * При изменении базы — список автоматически обновляется.
      */
+    private var currentJob: Job? = null
     private fun observeCollection() {
-        viewModelScope.launch {
-            repository.getAllItems()
+        currentJob?.cancel()
+        currentJob = viewModelScope.launch {
+            repository.getItems(_state.value.sortOrder)
                 .onEach { items ->
-                    _state.update {
-                        it.copy(isLoading = false, items = items, error = null)
-                    }
+                    _state.update { it.copy(isLoading = false, items = items, error = null) }
                 }
                 .catch { e ->
-                    _state.update {
-                        it.copy(isLoading = false, error = e.message)
-                    }
+                    _state.update { it.copy(isLoading = false, error = e.message) }
                 }
                 .collect()
         }
@@ -59,7 +59,14 @@ class CollectionViewModel @Inject constructor(
             is CollectionContract.Intent.OnDeleteItem -> onDeleteItem(intent.item)
             CollectionContract.Intent.OnScanClicked -> onScanClicked()
             CollectionContract.Intent.OnSearchClicked -> onSearchClicked()
+            is CollectionContract.Intent.OnSortChanged -> onSortChanged(intent.sortOrder)
         }
+    }
+
+    private fun onSortChanged(sortOrder: SortOrder) {
+        if (_state.value.sortOrder == sortOrder) return
+        _state.update { it.copy(sortOrder = sortOrder) }
+        observeCollection()
     }
 
     private fun onScanClicked() {

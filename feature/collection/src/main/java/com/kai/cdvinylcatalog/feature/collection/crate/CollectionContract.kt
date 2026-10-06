@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.feature.collection.crate
 
+import com.kai.cdvinylcatalog.core.database.SortOrder
 import com.kai.cdvinylcatalog.core.model.CollectionItem
 
 object CollectionContract {
@@ -7,6 +8,7 @@ object CollectionContract {
     data class State(
         val isLoading: Boolean = true,
         val items: List<CollectionItem> = emptyList(),
+        val sortOrder: SortOrder = SortOrder.ADDED_DESC,
         val error: String? = null
     ) {
         val isEmpty: Boolean
@@ -18,6 +20,7 @@ object CollectionContract {
         data class OnDeleteItem(val item: CollectionItem) : Intent()
         data object OnScanClicked : Intent()
         data object OnSearchClicked : Intent()
+        data class OnSortChanged(val sortOrder: SortOrder) : Intent()
     }
 
     sealed class Effect {

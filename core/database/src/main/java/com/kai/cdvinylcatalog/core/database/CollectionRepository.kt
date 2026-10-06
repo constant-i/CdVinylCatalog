@@ -18,10 +18,15 @@ class CollectionRepository @Inject constructor(
     /**
      * Все записи коллекции как доменные модели.
      */
-    fun getAllItems(): Flow<List<CollectionItem>> =
-        dao.getAllItems().map { entities ->
-            entities.map { it.toDomain() }
+    fun getItems(sortOrder: SortOrder): Flow<List<CollectionItem>> {
+        val flow = when (sortOrder) {
+            SortOrder.ADDED_DESC -> dao.getAllByAddedDesc()
+            SortOrder.ADDED_ASC -> dao.getAllByAddedAsc()
+            SortOrder.ARTIST_ASC -> dao.getAllByArtistAsc()
+            SortOrder.YEAR_DESC -> dao.getAllByYearDesc()
         }
+        return flow.map { entities -> entities.map { it.toDomain() } }
+    }
 
     /**
      * Проверяет, есть ли релиз в коллекции.

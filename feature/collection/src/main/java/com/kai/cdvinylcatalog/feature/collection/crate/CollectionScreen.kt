@@ -18,11 +18,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +35,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +46,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
+import com.kai.cdvinylcatalog.core.database.SortOrder
 import com.kai.cdvinylcatalog.core.model.CollectionItem
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 
@@ -49,31 +58,54 @@ fun CollectionScreen(
     onItemClicked: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showSortMenu by remember { mutableStateOf(false) }
+
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
                 title = { Text("Моя коллекция (${state.items.size})") },
                 navigationIcon = {
-                    IconButton(onClick = { onIntent(CollectionContract.Intent.OnBackClicked) }) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад"
-                        )
+                    IconButton(onClick = {
+                        onIntent(CollectionContract.Intent.OnBackClicked)
+                    }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
                     }
                 },
                 actions = {
-                    IconButton(onClick = { onIntent(CollectionContract.Intent.OnScanClicked) }) {
-                        Icon(
-                            imageVector = Icons.Default.PhotoCamera,
-                            contentDescription = "Сканировать"
-                        )
+                    // Меню сортировки
+                    IconButton(onClick = { showSortMenu = true }) {
+                        Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Сортировка")
                     }
-                    IconButton(onClick = { onIntent(CollectionContract.Intent.OnSearchClicked) }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Поиск"
-                        )
+                    DropdownMenu(
+                        expanded = showSortMenu,
+                        onDismissRequest = { showSortMenu = false }
+                    ) {
+                        SortOrder.entries.forEach { order ->
+                            DropdownMenuItem(
+                                text = { Text(order.label()) },
+                                onClick = {
+                                    onIntent(CollectionContract.Intent.OnSortChanged(order))
+                                    showSortMenu = false
+                                },
+                                leadingIcon = {
+                                    if (state.sortOrder == order) {
+                                        Icon(Icons.Default.Check, contentDescription = null)
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    IconButton(onClick = {
+                        onIntent(CollectionContract.Intent.OnScanClicked)
+                    }) {
+                        Icon(Icons.Default.PhotoCamera, contentDescription = "Сканировать")
+                    }
+                    IconButton(onClick = {
+                        onIntent(CollectionContract.Intent.OnSearchClicked)
+                    }) {
+                        Icon(Icons.Default.Search, contentDescription = "Поиск")
                     }
                 }
             )
@@ -109,6 +141,14 @@ fun CollectionScreen(
             }
         }
     }
+}
+
+@Composable
+private fun SortOrder.label(): String = when (this) {
+    SortOrder.ADDED_DESC -> "Сначала новые"
+    SortOrder.ADDED_ASC -> "Сначала старые"
+    SortOrder.ARTIST_ASC -> "По исполнителю (A→Z)"
+    SortOrder.YEAR_DESC -> "По году (новые)"
 }
 
 @Composable

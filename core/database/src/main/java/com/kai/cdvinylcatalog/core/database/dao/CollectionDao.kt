@@ -13,18 +13,6 @@ import kotlinx.coroutines.flow.Flow
 interface CollectionDao {
 
     /**
-     * Возвращает все записи коллекции, отсортированные по дате добавления (новые сверху).
-     *
-     * Возвращает `Flow` — Room автоматически эмитит новый список при любом изменении
-     * таблицы `collection_items`. Это позволяет UI обновляться в реальном времени
-     * без ручного перезапроса.
-     *
-     * @return реактивный поток со списком записей
-     */
-    @Query("SELECT * FROM collection_items ORDER BY addedAt DESC")
-    fun getAllItems(): Flow<List<CollectionItemEntity>>
-
-    /**
      * Возвращает запись по **ID релиза из Discogs**.
      *
      * Обрати внимание: это `releaseId` из Discogs, а НЕ локальный `id` записи в Room.
@@ -109,4 +97,16 @@ interface CollectionDao {
      */
     @Query("SELECT * FROM collection_items WHERE id = :id LIMIT 1")
     fun observeById(id: Long): Flow<CollectionItemEntity?>
+
+    @Query("SELECT * FROM collection_items ORDER BY addedAt DESC")
+    fun getAllByAddedDesc(): Flow<List<CollectionItemEntity>>
+
+    @Query("SELECT * FROM collection_items ORDER BY addedAt ASC")
+    fun getAllByAddedAsc(): Flow<List<CollectionItemEntity>>
+
+    @Query("SELECT * FROM collection_items ORDER BY artist COLLATE NOCASE ASC")
+    fun getAllByArtistAsc(): Flow<List<CollectionItemEntity>>
+
+    @Query("SELECT * FROM collection_items ORDER BY year DESC")
+    fun getAllByYearDesc(): Flow<List<CollectionItemEntity>>
 }
