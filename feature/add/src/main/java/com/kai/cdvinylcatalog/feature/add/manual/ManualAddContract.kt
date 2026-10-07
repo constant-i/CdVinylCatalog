@@ -15,13 +15,22 @@ object ManualAddContract {
         val barcode: String = "",
         val notes: String = "",
         val isSaving: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val photoPaths: List<String> = emptyList(),
+        val pendingPhotoPath: String? = null
     ) {
+        val canAddMorePhotos: Boolean
+            get() = photoPaths.size < MAX_PHOTOS
+
         val isValid: Boolean
             get() = title.isNotBlank() && artist.isNotBlank()
 
         val isEditMode: Boolean
             get() = mode is Mode.Edit
+
+        companion object {
+            const val MAX_PHOTOS = 5
+        }
     }
 
     sealed class Mode {
@@ -40,6 +49,12 @@ object ManualAddContract {
         data class OnBarcodeChanged(val value: String) : Intent()
         data class OnNotesChanged(val value: String) : Intent()
         data object OnSaveClicked : Intent()
+        data class OnPhotoAdded(val path: String) : Intent()
+        data class OnPhotoRemoved(val path: String) : Intent()
+        data class OnCameraLaunched(val pendingPath: String) : Intent()
+        data object OnCheckPendingPhoto : Intent()
+        data object OnPendingPhotoCleared : Intent()
+
     }
 
     sealed class Effect {

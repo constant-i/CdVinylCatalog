@@ -99,7 +99,8 @@ class CollectionRepository @Inject constructor(
         label: String?,
         country: String?,
         barcode: String?,
-        notes: String?
+        notes: String?,
+        photoPaths: List<String> = emptyList()
     ): Long {
         val entity = CollectionItemEntity(
             releaseId = null,
@@ -107,8 +108,8 @@ class CollectionRepository @Inject constructor(
             artist = artist,
             year = year,
             barcode = barcode,
-            coverImageUrl = null,
-            imageUrls = null,
+            coverImageUrl = photoPaths.firstOrNull(),
+            imageUrls = photoPaths.joinToString(","),
             label = label,
             rawFormat = format.name,
             country = country,
@@ -135,7 +136,8 @@ class CollectionRepository @Inject constructor(
         label: String?,
         country: String?,
         barcode: String?,
-        notes: String?
+        notes: String?,
+        photoPaths: List<String> = emptyList()
     ) {
         val existing = dao.getById(id) ?: return
         dao.update(
@@ -148,7 +150,17 @@ class CollectionRepository @Inject constructor(
                 label = label,
                 country = country,
                 barcode = barcode,
-                userNotes = notes
+                userNotes = notes,
+                coverImageUrl = if (photoPaths.isNotEmpty()) {
+                    photoPaths.firstOrNull()
+                } else {
+                    null
+                },
+                imageUrls = if (photoPaths.isNotEmpty()) {
+                    photoPaths.joinToString(",")
+                } else {
+                    existing.imageUrls
+                }
             )
         )
     }

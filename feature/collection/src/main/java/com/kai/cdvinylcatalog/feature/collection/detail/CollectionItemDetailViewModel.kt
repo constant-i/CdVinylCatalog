@@ -44,6 +44,9 @@ class CollectionItemDetailViewModel @Inject constructor(
             repository.observeItemById(itemId)
                 .collect { item ->
                     if (item == null) {
+                        // Если МЫ удаляем — не показываем Toast
+                        if (_state.value.isDeleting) return@collect
+
                         _effect.send(CollectionItemDetailContract.Effect.ShowToast("Запись не найдена"))
                         _effect.send(CollectionItemDetailContract.Effect.NavigateBack)
                         return@collect
@@ -96,6 +99,7 @@ class CollectionItemDetailViewModel @Inject constructor(
     private fun onDelete() {
         val item = _state.value.collectionItem ?: return
         viewModelScope.launch {
+            _state.update { it.copy(isDeleting = true) }
             repository.removeFromCollection(item.id)
             _effect.send(CollectionItemDetailContract.Effect.NavigateBack)
         }
