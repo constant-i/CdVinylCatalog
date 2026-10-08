@@ -1,7 +1,15 @@
 package com.kai.cdvinylcatalog.feature.add.manual
 
+import android.app.Activity
 import android.content.res.Configuration
+import android.graphics.Bitmap
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -13,61 +21,52 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.kai.cdvinylcatalog.core.model.Format
-import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.PhotoCamera
-import androidx.compose.material.icons.filled.PhotoLibrary
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
+import com.kai.cdvinylcatalog.core.model.Format
+import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.yalantis.ucrop.UCrop
+import com.yalantis.ucrop.model.AspectRatio
 import java.io.File
 import java.util.UUID
 
@@ -113,7 +112,15 @@ fun ManualAddScreen(
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
-    ) { /* результат обрабатывается в onResume через pendingPhotoPath */ }
+    ) { success ->
+        if (success) {
+            state.pendingPhotoPath?.let { path ->
+                onIntent(ManualAddContract.Intent.OnStartCrop(path))
+            }
+        } else {
+            onIntent(ManualAddContract.Intent.OnPendingPhotoCleared)
+        }
+    }
 
     val galleryLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
@@ -121,6 +128,36 @@ fun ManualAddScreen(
         uri?.let {
             copyToAppStorage(it)?.let { path ->
                 onIntent(ManualAddContract.Intent.OnPhotoAdded(path))
+            }
+        }
+    }
+
+    val uCropLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        when {
+            result.resultCode == Activity.RESULT_OK -> {
+                val croppedUri = result.data?.let { UCrop.getOutput(it) }
+                // Конвертируем content:// URI в абсолютный путь файла
+                val absolutePath = croppedUri?.let { uri ->
+                    if (uri.scheme == "file") {
+                        uri.path  // file:// URI — path уже абсолютный
+                    } else {
+                        // content:// URI — конвертируем через FileProvider
+                        // Но проще — сохранить копию файла в наше хранилище
+                        copyToAppStorage(uri)
+                    }
+                }
+                absolutePath?.let { path ->
+                    onIntent(ManualAddContract.Intent.OnCropFinished(path))
+                }
+            }
+            result.resultCode == UCrop.RESULT_ERROR -> {
+                val error = result.data?.let { UCrop.getError(it) }
+                onIntent(ManualAddContract.Intent.OnCropCancelled)
+            }
+            else -> {
+                onIntent(ManualAddContract.Intent.OnCropCancelled)
             }
         }
     }
@@ -141,6 +178,37 @@ fun ManualAddScreen(
 
     LaunchedEffect(Unit) {
         onIntent(ManualAddContract.Intent.OnCheckPendingPhoto)
+    }
+
+    LaunchedEffect(state.pendingCropPath) {
+        val path = state.pendingCropPath ?: return@LaunchedEffect
+        val sourceFile = File(path)
+        if (!sourceFile.exists()) return@LaunchedEffect
+
+        val sourceUri = getUriForFile(sourceFile)
+        val destFile = createPhotoFile()
+        val destUri = getUriForFile(destFile)
+
+        val options = UCrop.Options().apply {
+            setAspectRatioOptions(
+                0,
+                AspectRatio("Свободно", 0f, 0f),
+                AspectRatio("1:1", 1f, 1f),
+                AspectRatio("4:3", 4f, 3f),
+                AspectRatio("16:9", 16f, 9f)
+            )
+            setCompressionFormat(Bitmap.CompressFormat.JPEG)
+            setCompressionQuality(90)
+            setHideBottomControls(false)
+            setFreeStyleCropEnabled(true)
+        }
+
+        val intent = UCrop.of(sourceUri, destUri)
+            .withOptions(options)
+            .withMaxResultSize(1080, 1080)
+            .getIntent(context)
+
+        uCropLauncher.launch(intent)
     }
 
     Scaffold(

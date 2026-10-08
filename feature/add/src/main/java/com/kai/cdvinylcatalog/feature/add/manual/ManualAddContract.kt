@@ -17,7 +17,8 @@ object ManualAddContract {
         val isSaving: Boolean = false,
         val error: String? = null,
         val photoPaths: List<String> = emptyList(),
-        val pendingPhotoPath: String? = null
+        val pendingPhotoPath: String? = null,
+        val pendingCropPath: String? = null,
     ) {
         val canAddMorePhotos: Boolean
             get() = photoPaths.size < MAX_PHOTOS
@@ -54,7 +55,9 @@ object ManualAddContract {
         data class OnCameraLaunched(val pendingPath: String) : Intent()
         data object OnCheckPendingPhoto : Intent()
         data object OnPendingPhotoCleared : Intent()
-
+        data class OnStartCrop(val imagePath: String) : Intent()
+        data class OnCropFinished(val croppedPath: String) : Intent()
+        data object OnCropCancelled : Intent()
     }
 
     sealed class Effect {

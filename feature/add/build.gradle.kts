@@ -71,6 +71,9 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
+    // uCrop
+    implementation(libs.ucrop)
+
     // Testing
     testImplementation(libs.bundles.testing)
 }

@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.feature.add.manual
 
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -32,7 +31,6 @@ class ManualAddViewModel @Inject constructor(
 
     init {
         val alreadyInitialized = savedStateHandle.get<Boolean>(KEY_INITIALIZED) ?: false
-        Log.d(TAG, "init: editItemId=$editItemId, alreadyInitialized=$alreadyInitialized")
 
         if (editItemId != null && !alreadyInitialized) {
             loadExistingItem(editItemId)
@@ -65,7 +63,8 @@ class ManualAddViewModel @Inject constructor(
                 ?.split(SEPARATOR)
                 ?.filter { it.isNotBlank() }
                 ?: emptyList(),
-            pendingPhotoPath = savedStateHandle.get<String>(PENDING_PHOTO_PATH)
+            pendingPhotoPath = savedStateHandle.get<String>(KEY_PENDING_PHOTO_PATH),
+            pendingCropPath = savedStateHandle.get<String>(KEY_PENDING_CROP_PATH)
         )
     }
 
@@ -82,8 +81,8 @@ class ManualAddViewModel @Inject constructor(
         savedStateHandle[KEY_BARCODE] = state.barcode
         savedStateHandle[KEY_NOTES] = state.notes
         savedStateHandle[KEY_PHOTO_PATHS] = state.photoPaths.joinToString(SEPARATOR)
-        savedStateHandle[PENDING_PHOTO_PATH] = state.pendingPhotoPath
-
+        savedStateHandle[KEY_PENDING_PHOTO_PATH] = state.pendingPhotoPath
+        savedStateHandle[KEY_PENDING_CROP_PATH] = state.pendingCropPath
     }
 
     /**
@@ -99,7 +98,6 @@ class ManualAddViewModel @Inject constructor(
 
     private fun loadExistingItem(id: Long) {
         viewModelScope.launch {
-            Log.d(TAG, "loadExistingItem: id=$id")
             val item = repository.getItemById(id)
             if (item != null) {
                 update {
@@ -136,7 +134,33 @@ class ManualAddViewModel @Inject constructor(
             is ManualAddContract.Intent.OnCameraLaunched -> onCameraLaunched(intent.pendingPath)
             ManualAddContract.Intent.OnCheckPendingPhoto -> onCheckPendingPhoto()
             ManualAddContract.Intent.OnPendingPhotoCleared -> onPendingPhotoCleared()
+            is ManualAddContract.Intent.OnStartCrop -> onStartCrop(intent.imagePath)
+            is ManualAddContract.Intent.OnCropFinished -> onCropFinished(intent.croppedPath)
+            ManualAddContract.Intent.OnCropCancelled -> onCropCancelled()
+
         }
+    }
+
+    private fun onStartCrop(imagePath: String) {
+        update {
+            it.copy(
+                pendingPhotoPath = null,
+                pendingCropPath = imagePath
+            )
+        }
+    }
+
+    private fun onCropFinished(croppedPath: String) {
+        update {
+            it.copy(
+                photoPaths = it.photoPaths + croppedPath,
+                pendingCropPath = null
+            )
+        }
+    }
+
+    private fun onCropCancelled() {
+        update { it.copy(pendingCropPath = null) }
     }
 
     private fun onCameraLaunched(pendingPath: String) {
@@ -148,13 +172,16 @@ class ManualAddViewModel @Inject constructor(
         val file = java.io.File(pendingPath)
 
         if (file.exists() && file.length() > 0) {
-            // Фото успешно сохранено — добавляем
+            // Файл успешно сохранён камерой — запускаем обрезку
             update {
                 it.copy(
-                    photoPaths = it.photoPaths + pendingPath,
-                    pendingPhotoPath = null
+                    pendingPhotoPath = null,
+                    pendingCropPath = pendingPath
                 )
             }
+        } else {
+            // Файл не сохранился — сбрасываем
+            update { it.copy(pendingPhotoPath = null) }
         }
     }
 
@@ -254,8 +281,8 @@ class ManualAddViewModel @Inject constructor(
         private const val KEY_BARCODE = "barcode"
         private const val KEY_NOTES = "notes"
         private const val KEY_PHOTO_PATHS = "photo_paths"
+        private const val KEY_PENDING_PHOTO_PATH = "pending_photo_path"
+        private const val KEY_PENDING_CROP_PATH = "pending_crop_path"
         private const val SEPARATOR = "|"
-
-        private const val PENDING_PHOTO_PATH = "pending_photo_path"
     }
 }
