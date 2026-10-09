@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.database.CollectionRepository
+import com.kai.cdvinylcatalog.core.model.mergeWith
 import com.kai.cdvinylcatalog.feature.collection.domain.GetReleaseDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -35,26 +36,25 @@ class CollectionItemDetailViewModel @Inject constructor(
         observeItem()
     }
 
-    /**
-     * Подписка на изменения записи в Room.
-     * При обновлении в базе — State обновляется автоматически.
-     */
     private fun observeItem() {
         viewModelScope.launch {
             repository.observeItemById(itemId)
                 .collect { item ->
                     if (item == null) {
-                        // Если МЫ удаляем — не показываем Toast
                         if (_state.value.isDeleting) return@collect
-
                         _effect.send(CollectionItemDetailContract.Effect.ShowToast("Запись не найдена"))
                         _effect.send(CollectionItemDetailContract.Effect.NavigateBack)
                         return@collect
                     }
 
-                    _state.update { it.copy(collectionItem = item, isLoadingDetails = false) }
+                    _state.update { current ->
+                        current.copy(
+                            collectionItem = item,
+                            displayRelease = item.release.mergeWith(current.detailedRelease),
+                            isLoadingDetails = false
+                        )
+                    }
 
-                    // Детали из Discogs загружаем ОДИН раз
                     if (!detailsLoaded && item.release.id > 0) {
                         detailsLoaded = true
                         loadDetails(item.release.id)
@@ -67,15 +67,17 @@ class CollectionItemDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoadingDetails = true) }
             getReleaseDetails(releaseId)
-                .onSuccess { release ->
-                    _state.update {
-                        it.copy(isLoadingDetails = false, detailedRelease = release)
+                .onSuccess { discogsRelease ->
+                    _state.update { current ->
+                        current.copy(
+                            isLoadingDetails = false,
+                            detailedRelease = discogsRelease,
+                            displayRelease = current.collectionItem?.release?.mergeWith(discogsRelease)
+                        )
                     }
                 }
                 .onFailure { e ->
-                    _state.update {
-                        it.copy(isLoadingDetails = false, error = e.message)
-                    }
+                    _state.update { it.copy(isLoadingDetails = false, error = e.message) }
                 }
         }
     }
@@ -84,8 +86,6 @@ class CollectionItemDetailViewModel @Inject constructor(
         when (intent) {
             CollectionItemDetailContract.Intent.OnBackClicked -> onBack()
             CollectionItemDetailContract.Intent.OnDeleteClicked -> onDelete()
-            CollectionItemDetailContract.Intent.OnEditNotesClicked -> { /* TODO */ }
-            is CollectionItemDetailContract.Intent.OnNotesChanged -> { /* TODO */ }
             CollectionItemDetailContract.Intent.OnEditClicked -> onEditClicked()
         }
     }

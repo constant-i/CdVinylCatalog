@@ -2,6 +2,7 @@ package com.kai.cdvinylcatalog.feature.collection.detail
 
 import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -50,7 +51,7 @@ fun CollectionItemDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = state.collectionItem?.release?.title ?: "Детали",
+                        text = state.displayRelease?.title ?: "Детали",
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -86,8 +87,20 @@ fun CollectionItemDetailScreen(
             )
         }
     ) { padding ->
-        val item = state.collectionItem ?: return@Scaffold
-        val release = state.detailedRelease ?: item.release
+        val item = state.collectionItem
+        val release = state.displayRelease
+
+        if (item == null || release == null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
+        }
 
         Column(
             modifier = Modifier
@@ -97,12 +110,9 @@ fun CollectionItemDetailScreen(
                 .padding(16.dp)
         ) {
             CollectionItemImageGallery(
-                images = release.imageUrls.ifEmpty {
-                    listOfNotNull(release.coverImageUrl ?: item.release.coverImageUrl)
-                },
+                images = state.displayImages,
                 modifier = Modifier.fillMaxWidth()
             )
-            Spacer(modifier = Modifier.height(16.dp))
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -126,7 +136,9 @@ fun CollectionItemDetailScreen(
 
             // Треклист
             if (state.isLoadingDetails) {
-                CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                )
             } else if (state.tracklist.isNotEmpty()) {
                 Text(text = "Треклист", style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(8.dp))

@@ -9,19 +9,21 @@ object CollectionItemDetailContract {
     data class State(
         val collectionItem: CollectionItem? = null,
         val detailedRelease: Release? = null,
+        val displayRelease: Release? = null,
         val isLoadingDetails: Boolean = false,
         val isDeleting: Boolean = false,
         val error: String? = null
     ) {
         val tracklist: List<Track>
-            get() = detailedRelease?.tracklist ?: emptyList()
+            get() = displayRelease?.tracklist ?: emptyList()
+
+        val displayImages: List<String>
+            get() = displayRelease?.imageUrls ?: emptyList()
     }
 
     sealed class Intent {
         data object OnBackClicked : Intent()
         data object OnDeleteClicked : Intent()
-        data object OnEditNotesClicked : Intent()
-        data class OnNotesChanged(val notes: String) : Intent()
         data object OnEditClicked : Intent()
     }
 
