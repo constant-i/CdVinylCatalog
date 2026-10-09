@@ -25,7 +25,23 @@ class CollectionRepository @Inject constructor(
             SortOrder.ARTIST_ASC -> dao.getAllByArtistAsc()
             SortOrder.YEAR_DESC -> dao.getAllByYearDesc()
         }
-        return flow.map { entities -> entities.map { it.toDomain() } }
+        return flow.map { entities ->
+            // Считаем количество копий для каждого releaseId
+            val countByReleaseId = entities
+                .filter { it.releaseId != null }
+                .groupingBy { it.releaseId!! }
+                .eachCount()
+
+            entities.map { entity ->
+                entity.toDomain().copy(
+                    copyCount = if (entity.releaseId != null) {
+                        countByReleaseId[entity.releaseId] ?: 1
+                    } else {
+                        1
+                    }
+                )
+            }
+        }
     }
 
     /**
@@ -43,35 +59,25 @@ class CollectionRepository @Inject constructor(
         format: Format,
         notes: String? = null
     ): Long {
-        val existing = dao.getByReleaseId(release.id)
-
-        return if (existing != null) {
-            // Уже есть — увеличиваем количество
-            val updated = existing.copy(quantity = existing.quantity + 1)
-            dao.update(updated)
-            updated.id
-        } else {
-            // Новая запись
-            val entity = CollectionItemEntity(
-                releaseId = release.id,
-                title = release.title,
-                artist = release.artist,
-                year = release.year,
-                barcode = release.barcode,
-                coverImageUrl = release.coverImageUrl,
-                label = release.label,
-                rawFormat = release.rawFormat,
-                country = release.country,
-                releaseDate = release.releaseDate,
-                catalogNumber = release.catalogNumber,
-                releaseNotes = release.notes,
-                format = format.name,
-                quantity = 1,
-                addedAt = System.currentTimeMillis(),
-                userNotes = notes
-            )
-            dao.insert(entity)
-        }
+        val entity = CollectionItemEntity(
+            releaseId = release.id,
+            title = release.title,
+            artist = release.artist,
+            year = release.year,
+            barcode = release.barcode,
+            coverImageUrl = release.coverImageUrl,
+            imageUrls = release.imageUrls.joinToString(",").ifBlank { null },
+            label = release.label,
+            rawFormat = release.rawFormat,
+            country = release.country,
+            releaseDate = release.releaseDate,
+            catalogNumber = release.catalogNumber,
+            releaseNotes = release.notes,
+            format = format.name,
+            addedAt = System.currentTimeMillis(),
+            userNotes = notes
+        )
+        return dao.insert(entity)
     }
 
     /**
@@ -109,7 +115,7 @@ class CollectionRepository @Inject constructor(
             year = year,
             barcode = barcode,
             coverImageUrl = photoPaths.firstOrNull(),
-            imageUrls = photoPaths.joinToString(","),
+            imageUrls = photoPaths.joinToString(",").ifBlank { null },
             label = label,
             rawFormat = format.name,
             country = country,
@@ -117,7 +123,6 @@ class CollectionRepository @Inject constructor(
             catalogNumber = null,
             releaseNotes = null,
             format = format.name,
-            quantity = 1,
             addedAt = System.currentTimeMillis(),
             userNotes = notes
         )
@@ -202,7 +207,6 @@ private fun CollectionItemEntity.toDomain(): CollectionItem {
         } catch (e: IllegalArgumentException) {
             Format.UNKNOWN
         },
-        quantity = quantity,
         addedAt = addedAt,
         notes = userNotes
     )

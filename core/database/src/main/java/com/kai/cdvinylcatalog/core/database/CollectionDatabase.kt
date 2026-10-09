@@ -9,7 +9,7 @@ import com.kai.cdvinylcatalog.core.database.entity.CollectionItemEntity
 
 @Database(
     entities = [CollectionItemEntity::class],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(FormatConverter::class)

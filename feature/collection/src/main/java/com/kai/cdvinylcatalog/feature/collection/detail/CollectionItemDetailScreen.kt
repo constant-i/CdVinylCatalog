@@ -129,7 +129,6 @@ fun CollectionItemDetailScreen(
             MetadataRow("Лейбл", release.label)
             MetadataRow("Страна", release.country)
             MetadataRow("Catalog#", release.catalogNumber)
-            MetadataRow("Копий", item.quantity.toString())
             item.notes?.let { MetadataRow("Заметка", it) }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -229,7 +228,6 @@ private fun CollectionItemDetailScreenPreview() {
                         )
                     ),
                     format = Format.CD,
-                    quantity = 1,
                     addedAt = 0,
                     notes = "Фирменный диск",
                 )

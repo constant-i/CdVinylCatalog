@@ -21,7 +21,6 @@ data class CollectionItemEntity(
     val catalogNumber: String?,
     val releaseNotes: String?,
     val format: String,
-    val quantity: Int,
     val addedAt: Long,
     val userNotes: String?
 )
