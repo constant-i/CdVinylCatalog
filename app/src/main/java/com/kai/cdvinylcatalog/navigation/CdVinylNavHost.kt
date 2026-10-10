@@ -106,6 +106,11 @@ fun CdVinylNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToEdit = { itemId ->
                     navController.navigate(Routes.manualEdit(itemId))
+                },
+                onNavigateToCopy = { copyId ->
+                    navController.navigate(Routes.collectionItem(copyId)) {
+                        popUpTo(Routes.COLLECTION_ITEM) { inclusive = true }
+                    }
                 }
             )
         }

@@ -12,7 +12,8 @@ object CollectionItemDetailContract {
         val displayRelease: Release? = null,
         val isLoadingDetails: Boolean = false,
         val isDeleting: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val otherCopies: List<CollectionItem> = emptyList(),
     ) {
         val tracklist: List<Track>
             get() = displayRelease?.tracklist ?: emptyList()
@@ -25,11 +26,13 @@ object CollectionItemDetailContract {
         data object OnBackClicked : Intent()
         data object OnDeleteClicked : Intent()
         data object OnEditClicked : Intent()
+        data class OnOtherCopyClicked(val itemId: Long) : Intent()
     }
 
     sealed class Effect {
         data object NavigateBack : Effect()
         data class ShowToast(val message: String) : Effect()
         data class NavigateToEdit(val itemId: Long) : Effect()
+        data class NavigateToCopy(val itemId: Long) : Effect()
     }
 }

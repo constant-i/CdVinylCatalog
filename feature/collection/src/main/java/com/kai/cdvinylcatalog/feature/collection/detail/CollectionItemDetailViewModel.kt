@@ -55,11 +55,25 @@ class CollectionItemDetailViewModel @Inject constructor(
                         )
                     }
 
+                    if (item.release.id > 0) {
+                        loadOtherCopies(item.release.id, item.id)
+                    }
+
                     if (!detailsLoaded && item.release.id > 0) {
                         detailsLoaded = true
                         loadDetails(item.release.id)
                     }
                 }
+        }
+    }
+
+    /**
+     * Загружает другие копии того же релиза.
+     */
+    private fun loadOtherCopies(releaseId: Long, currentItemId: Long) {
+        viewModelScope.launch {
+            val copies = repository.getOtherCopies(releaseId, currentItemId)
+            _state.update { it.copy(otherCopies = copies) }
         }
     }
 
@@ -87,6 +101,13 @@ class CollectionItemDetailViewModel @Inject constructor(
             CollectionItemDetailContract.Intent.OnBackClicked -> onBack()
             CollectionItemDetailContract.Intent.OnDeleteClicked -> onDelete()
             CollectionItemDetailContract.Intent.OnEditClicked -> onEditClicked()
+            is CollectionItemDetailContract.Intent.OnOtherCopyClicked -> onOtherCopyClicked(intent.itemId)
+        }
+    }
+
+    private fun onOtherCopyClicked(copyId: Long) {
+        viewModelScope.launch {
+            _effect.send(CollectionItemDetailContract.Effect.NavigateToCopy(copyId))
         }
     }
 

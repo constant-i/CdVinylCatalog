@@ -13,6 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun CollectionItemDetailRoute(
     onNavigateBack: () -> Unit,
     onNavigateToEdit: (Long) -> Unit,
+    onNavigateToCopy: (Long) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionItemDetailViewModel = hiltViewModel()
 ) {
@@ -28,6 +29,9 @@ fun CollectionItemDetailRoute(
                 }
                 is CollectionItemDetailContract.Effect.NavigateToEdit -> {
                     onNavigateToEdit(effect.itemId)
+                }
+                is CollectionItemDetailContract.Effect.NavigateToCopy -> {
+                    onNavigateToCopy(effect.itemId)
                 }
             }
         }

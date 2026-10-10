@@ -177,6 +177,16 @@ class CollectionRepository @Inject constructor(
     fun observeItemById(id: Long): Flow<CollectionItem?> {
         return dao.observeById(id).map { it?.toDomain() }
     }
+
+    /**
+     * Возвращает все копии указанного релиза.
+     * Исключает текущую (текущая уже показана на экране).
+     */
+    suspend fun getOtherCopies(releaseId: Long, currentItemId: Long): List<CollectionItem> {
+        return dao.getAllByReleaseId(releaseId)
+            .filter { it.id != currentItemId }
+            .map { it.toDomain() }
+    }
 }
 
 /**

@@ -33,7 +33,7 @@ interface CollectionDao {
      * @param releaseId ID релиза в Discogs
      * @return список записей (может быть пустым)
      */
-    @Query("SELECT * FROM collection_items WHERE releaseId = :releaseId")
+    @Query("SELECT * FROM collection_items WHERE releaseId = :releaseId ORDER BY addedAt ASC")
     suspend fun getAllByReleaseId(releaseId: Long): List<CollectionItemEntity>
 
     /**
