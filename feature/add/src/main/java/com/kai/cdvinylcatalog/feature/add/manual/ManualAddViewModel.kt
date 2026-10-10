@@ -63,6 +63,10 @@ class ManualAddViewModel @Inject constructor(
                 ?.split(SEPARATOR)
                 ?.filter { it.isNotBlank() }
                 ?: emptyList(),
+            discogsImages = savedStateHandle.get<String>(KEY_DISCOGS_IMAGES)
+                ?.split(SEPARATOR)
+                ?.filter { it.isNotBlank() }
+                ?: emptyList(),
             pendingPhotoPath = savedStateHandle.get<String>(KEY_PENDING_PHOTO_PATH),
             pendingCropPath = savedStateHandle.get<String>(KEY_PENDING_CROP_PATH)
         )
@@ -81,6 +85,7 @@ class ManualAddViewModel @Inject constructor(
         savedStateHandle[KEY_BARCODE] = state.barcode
         savedStateHandle[KEY_NOTES] = state.notes
         savedStateHandle[KEY_PHOTO_PATHS] = state.photoPaths.joinToString(SEPARATOR)
+        savedStateHandle[KEY_DISCOGS_IMAGES] = state.discogsImages.joinToString(SEPARATOR)
         savedStateHandle[KEY_PENDING_PHOTO_PATH] = state.pendingPhotoPath
         savedStateHandle[KEY_PENDING_CROP_PATH] = state.pendingCropPath
     }
@@ -100,6 +105,11 @@ class ManualAddViewModel @Inject constructor(
         viewModelScope.launch {
             val item = repository.getItemById(id)
             if (item != null) {
+                // Разделяем фото: свои (локальные) vs Discogs (URL)
+                val allImages = item.release.imageUrls
+                val userPhotos = allImages.filter { !it.startsWith("http") }
+                val discogsImages = allImages.filter { it.startsWith("http") }
+
                 update {
                     it.copy(
                         title = item.release.title,
@@ -110,7 +120,8 @@ class ManualAddViewModel @Inject constructor(
                         country = item.release.country ?: "",
                         barcode = item.release.barcode ?: "",
                         notes = item.notes ?: "",
-                        photoPaths = item.release.imageUrls
+                        photoPaths = userPhotos,
+                        discogsImages = discogsImages
                     )
                 }
             }
@@ -247,7 +258,8 @@ class ManualAddViewModel @Inject constructor(
                             country = s.country.ifBlank { null },
                             barcode = s.barcode.ifBlank { null },
                             notes = s.notes.ifBlank { null },
-                            photoPaths = s.photoPaths
+                            photoPaths = s.photoPaths,
+                            preserveDiscogsImages = s.discogsImages
                         )
                         mode.itemId
                     }
@@ -283,6 +295,7 @@ class ManualAddViewModel @Inject constructor(
         private const val KEY_PHOTO_PATHS = "photo_paths"
         private const val KEY_PENDING_PHOTO_PATH = "pending_photo_path"
         private const val KEY_PENDING_CROP_PATH = "pending_crop_path"
+        private const val KEY_DISCOGS_IMAGES = "discogs_images"
         private const val SEPARATOR = "|"
     }
 }

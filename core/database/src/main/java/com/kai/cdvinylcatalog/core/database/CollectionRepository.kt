@@ -142,9 +142,12 @@ class CollectionRepository @Inject constructor(
         country: String?,
         barcode: String?,
         notes: String?,
-        photoPaths: List<String> = emptyList()
+        photoPaths: List<String> = emptyList(),
+        preserveDiscogsImages: List<String> = emptyList()
     ) {
         val existing = dao.getById(id) ?: return
+        val allImages = photoPaths + preserveDiscogsImages
+
         dao.update(
             existing.copy(
                 title = title,
@@ -156,13 +159,11 @@ class CollectionRepository @Inject constructor(
                 country = country,
                 barcode = barcode,
                 userNotes = notes,
-                coverImageUrl = if (photoPaths.isNotEmpty()) {
-                    photoPaths.firstOrNull()
-                } else {
-                    null
-                },
-                imageUrls = if (photoPaths.isNotEmpty()) {
-                    photoPaths.joinToString(",")
+                coverImageUrl = photoPaths.firstOrNull()
+                    ?: preserveDiscogsImages.firstOrNull()
+                    ?: existing.coverImageUrl,
+                imageUrls = if (allImages.isNotEmpty()) {
+                    allImages.joinToString(",")
                 } else {
                     existing.imageUrls
                 }

@@ -17,6 +17,7 @@ object ManualAddContract {
         val isSaving: Boolean = false,
         val error: String? = null,
         val photoPaths: List<String> = emptyList(),
+        val discogsImages: List<String> = emptyList(),
         val pendingPhotoPath: String? = null,
         val pendingCropPath: String? = null,
     ) {
