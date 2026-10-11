@@ -31,7 +31,7 @@ private val LightColorScheme = lightColorScheme(
  */
 @Composable
 fun CdVinylCatalogTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = true,
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
