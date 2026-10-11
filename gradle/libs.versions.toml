@@ -37,6 +37,7 @@ androidxJunit = "1.1.5"
 espresso = "3.5.1"
 turbine = "1.0.0"
 mockk = "1.13.9"
+coroutinesTest = "1.7.3"
 
 [libraries]
 # Core
@@ -95,6 +96,7 @@ androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "a
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutinesTest" }
 
 # Coil
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
@@ -140,5 +142,6 @@ testing = [
     "androidx-junit",
     "androidx-espresso-core",
     "turbine",
-    "mockk"
+    "mockk",
+    "kotlinx-coroutines-test"
 ]
