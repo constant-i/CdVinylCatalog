@@ -12,7 +12,7 @@ fun SearchResultDto.toDomain(): Release {
         id = id,
         title = parseTitle(title).second,
         artist = parseTitle(title).first,
-        year = year?.toIntOrNull(),
+        year = year?.toIntOrNull()?.takeIf { it > 0 },
         barcode = barcode?.firstOrNull(),
         coverImageUrl = coverImage,
         imageUrls = listOfNotNull(coverImage),
@@ -45,7 +45,7 @@ fun ReleaseDetailsDto.toDomain(): Release {
         id = id,
         title = parseTitle(title).second,
         artist = artists?.joinToString(", ") { it.name } ?: parseTitle(title).first,
-        year = year,
+        year = year?.takeIf { it > 0 },
         barcode = null,
         coverImageUrl = images?.firstOrNull { it.type == "primary" }?.uri
             ?: allImages.firstOrNull(),

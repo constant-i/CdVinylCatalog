@@ -228,7 +228,7 @@ class ManualAddViewModel @Inject constructor(
             return
         }
 
-        val yearInt = s.year.trim().toIntOrNull()
+        val yearInt = s.year.trim().toIntOrNull()?.takeIf { it > 0 }
 
         viewModelScope.launch {
             update { it.copy(isSaving = true, error = null) }

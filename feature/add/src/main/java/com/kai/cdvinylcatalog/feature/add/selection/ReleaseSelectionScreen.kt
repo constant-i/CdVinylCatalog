@@ -157,19 +157,19 @@ private fun ReleaseCard(
                 Spacer(modifier = Modifier.height(4.dp))
                 InfoRow(
                     label = "Формат",
-                    value = release.rawFormat ?: "N/A"
+                    value = release.rawFormat
                 )
                 InfoRow(
                     label = "Год",
-                    value = release.year?.toString() ?: "N/A"
+                    value = release.year?.toString()
                 )
                 InfoRow(
                     label = "Лейбл",
-                    value = release.label ?: "N/A",
+                    value = release.label
                 )
                 InfoRow(
                     label = "Страна",
-                    value = release.country ?: "N/A"
+                    value = release.country
                 )
                 if (isInCollection) {
                     Spacer(Modifier.height(6.dp))
@@ -196,9 +196,10 @@ private fun ReleaseCard(
 @Composable
 private fun InfoRow(
     label: String,
-    value: String,
+    value: String?,
     maxLines: Int = 3
 ) {
+    if (value.isNullOrBlank()) return
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = "$label: ",

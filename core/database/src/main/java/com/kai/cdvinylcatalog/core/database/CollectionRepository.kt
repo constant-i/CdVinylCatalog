@@ -201,7 +201,7 @@ private fun CollectionItemEntity.toDomain(): CollectionItem {
             id = releaseId ?: 0L,
             title = title,
             artist = artist,
-            year = year,
+            year = year?.takeIf { it > 0 },
             barcode = barcode,
             coverImageUrl = coverImageUrl,
             imageUrls = imageUrls?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
