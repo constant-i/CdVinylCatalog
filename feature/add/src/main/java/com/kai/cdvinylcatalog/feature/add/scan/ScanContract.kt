@@ -1,6 +1,7 @@
 package com.kai.cdvinylcatalog.feature.add.scan
 
 import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.core.model.UiMessage
 
 object ScanContract {
 
@@ -16,7 +17,7 @@ object ScanContract {
     }
 
     sealed class Effect {
-        data class ShowToast(val message: String) : Effect()
+        data class ShowToast(val message: UiMessage) : Effect()
         data class NavigateToSelection(val results: List<Release>) : Effect()
     }
 }

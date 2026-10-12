@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.model.Format
+import com.kai.cdvinylcatalog.core.model.UiMessage
 import com.kai.cdvinylcatalog.core.model.parseFormat
 import com.kai.cdvinylcatalog.core.network.DiscogsRepository
 import com.kai.cdvinylcatalog.feature.add.domain.AddToCollectionUseCase
@@ -134,10 +135,10 @@ class ReleaseDetailsViewModel @Inject constructor(
             try {
                 addToCollection(release, format, notes)
                 _state.update { it.copy(justAdded = true, isInCollection = true) }
-                _effect.send(ReleaseDetailsContract.Effect.ShowToast("Добавлено: ${release.title}"))
+                _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.AddedSuccessfully(release.title)))
                 _effect.send(ReleaseDetailsContract.Effect.NavigateToCollection)
             } catch (e: Exception) {
-                _effect.send(ReleaseDetailsContract.Effect.ShowToast("Ошибка: ${e.message}"))
+                _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.SaveError(e.message)))
             }
         }
     }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Scan Screen -->
     <string name="scan_hint">Наведите камеру на штрихкод</string>
     <string name="scan_simulate">Симулировать сканирование</string>
     <string name="scan_add_to_collection">Добавить в коллекцию</string>
@@ -9,17 +10,28 @@
     <string name="scan_year_format">Год: %1$d</string>
     <string name="scan_format_format">Формат: %1$s</string>
 
-    <!-- Ошибки -->
-    <string name="error_no_internet">Нет подключения к интернету</string>
-    <string name="error_timeout">Сервер не отвечает, попробуйте позже</string>
-    <string name="error_unauthorized">Проблема с токеном Discogs</string>
-    <string name="error_rate_limited">Слишком много запросов, подождите минуту</string>
-    <string name="error_not_found">Релиз не найден</string>
-    <string name="error_server">Ошибка сервера: %1$d</string>
-    <string name="error_unknown">Что-то пошло не так: %1$s</string>
-
-    <!-- Toast -->
-    <string name="toast_release_not_found">Релиз не найден в Discogs</string>
-    <string name="toast_already_in_collection">Этот диск уже есть в коллекции</string>
-    <string name="toast_saved">Сохранено: %1$s</string>
+    <!-- Manual Add Screen -->
+    <string name="add_manual_aspect_ratio_free">Свободно</string>
+    <string name="add_manual_aspect_ratio_1_1">1:1</string>
+    <string name="add_manual_aspect_ratio_4_3">4:3</string>
+    <string name="add_manual_aspect_ratio_16_9">16:9</string>
+    <string name="add_manual_title_edit">Редактирование</string>
+    <string name="add_manual_title_add">Добавить вручную</string>
+    <string name="add_manual_back">Назад</string>
+    <string name="add_manual_required_fields">Обязательные поля *</string>
+    <string name="add_manual_field_title">Название *</string>
+    <string name="add_manual_field_artist">Исполнитель *</string>
+    <string name="add_manual_field_year">Год</string>
+    <string name="add_manual_field_format">Формат *</string>
+    <string name="add_manual_field_label">Лейбл</string>
+    <string name="add_manual_field_country">Страна</string>
+    <string name="add_manual_field_barcode">Штрихкод</string>
+    <string name="add_manual_field_notes">Заметка</string>
+    <string name="add_manual_field_notes_placeholder">Например: подарок, подписана</string>
+    <string name="add_manual_photos_count">Фотографии (%1$d/%2$d)</string>
+    <string name="add_manual_photo_delete">Удалить</string>
+    <string name="add_manual_button_camera">Камера</string>
+    <string name="add_manual_button_gallery">Галерея</string>
+    <string name="add_manual_button_update">Обновить</string>
+    <string name="add_manual_button_save">Сохранить в коллекцию</string>
 </resources>

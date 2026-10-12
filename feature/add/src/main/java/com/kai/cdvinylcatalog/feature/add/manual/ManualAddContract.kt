@@ -1,6 +1,7 @@
 package com.kai.cdvinylcatalog.feature.add.manual
 
 import com.kai.cdvinylcatalog.core.model.Format
+import com.kai.cdvinylcatalog.core.model.UiMessage
 
 object ManualAddContract {
 
@@ -64,6 +65,6 @@ object ManualAddContract {
     sealed class Effect {
         data object NavigateBack : Effect()
         data class NavigateToDetails(val itemId: Long) : Effect()
-        data class ShowToast(val message: String) : Effect()
+        data class ShowToast(val message: UiMessage) : Effect()
     }
 }

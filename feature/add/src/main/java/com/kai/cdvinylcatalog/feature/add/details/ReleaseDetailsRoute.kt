@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.kai.cdvinylcatalog.core.ui.asText
 
 @Composable
 fun ReleaseDetailsRoute(
@@ -23,7 +24,7 @@ fun ReleaseDetailsRoute(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is ReleaseDetailsContract.Effect.ShowToast -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, effect.message.asText(context), Toast.LENGTH_SHORT).show()
                 }
                 ReleaseDetailsContract.Effect.NavigateBack -> onNavigateBack()
                 ReleaseDetailsContract.Effect.NavigateToCollection -> onNavigateToCollection()

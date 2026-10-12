@@ -1,6 +1,7 @@
 package com.kai.cdvinylcatalog.feature.add.search
 
 import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.core.model.UiMessage
 
 object SearchContract {
 
@@ -18,7 +19,7 @@ object SearchContract {
 
     sealed class Effect {
         data object NavigateBack : Effect()
-        data class ShowToast(val message: String) : Effect()
+        data class ShowToast(val message: UiMessage) : Effect()
         data class NavigateToSelection(val results: List<Release>) : Effect()
     }
 }

@@ -2,6 +2,7 @@ package com.kai.cdvinylcatalog.feature.add.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kai.cdvinylcatalog.core.model.UiMessage
 import com.kai.cdvinylcatalog.feature.add.domain.SearchByTextUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -44,7 +45,7 @@ class SearchViewModel @Inject constructor(
                 .onSuccess { releases ->
                     _state.update { it.copy(isLoading = false) }
                     if (releases.isEmpty()) {
-                        _effect.send(SearchContract.Effect.ShowToast("Ничего не найдено"))
+                        _effect.send(SearchContract.Effect.ShowToast(UiMessage.SearchEmpty))
                     } else {
                         _effect.send(SearchContract.Effect.NavigateToSelection(releases))
                     }

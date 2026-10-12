@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.database.CollectionRepository
 import com.kai.cdvinylcatalog.core.model.Format
+import com.kai.cdvinylcatalog.core.model.UiMessage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -223,7 +224,7 @@ class ManualAddViewModel @Inject constructor(
         val s = _state.value
         if (!s.isValid) {
             viewModelScope.launch {
-                _effect.send(ManualAddContract.Effect.ShowToast("Заполните обязательные поля"))
+                _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.RequiredFieldsEmpty))
             }
             return
         }
@@ -276,7 +277,7 @@ class ManualAddViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 update { it.copy(isSaving = false, error = e.message) }
-                _effect.send(ManualAddContract.Effect.ShowToast("Ошибка: ${e.message}"))
+                _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.SaveError(e.message)))
             }
         }
     }

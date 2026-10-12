@@ -2,6 +2,7 @@ package com.kai.cdvinylcatalog.feature.add.details
 
 import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.core.model.UiMessage
 
 object ReleaseDetailsContract {
 
@@ -29,7 +30,7 @@ object ReleaseDetailsContract {
     }
 
     sealed class Effect {
-        data class ShowToast(val message: String) : Effect()
+        data class ShowToast(val message: UiMessage) : Effect()
         data object NavigateBack : Effect()
         data object NavigateToCollection : Effect()
     }

@@ -2,6 +2,7 @@ package com.kai.cdvinylcatalog.feature.add.scan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kai.cdvinylcatalog.core.model.UiMessage
 import com.kai.cdvinylcatalog.feature.add.domain.SearchReleaseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -26,10 +27,6 @@ class ScanViewModel @Inject constructor(
 
     private var lastScanTime: Long = 0L
 
-    companion object {
-        private const val SCAN_DEBOUNCE_MS = 2000L
-    }
-
     fun onIntent(intent: ScanContract.Intent) {
         when (intent) {
             is ScanContract.Intent.OnBarcodeScanned -> onBarcodeScanned(intent.barcode)
@@ -52,7 +49,7 @@ class ScanViewModel @Inject constructor(
                         it.copy(isLoading = false, scannedBarcode = barcode)
                     }
                     if (releases.isEmpty()) {
-                        _effect.send(ScanContract.Effect.ShowToast("Релиз не найден в Discogs"))
+                        _effect.send(ScanContract.Effect.ShowToast(UiMessage.ReleaseNotFound))
                     } else {
                         _effect.send(ScanContract.Effect.NavigateToSelection(releases))
                     }
@@ -67,5 +64,9 @@ class ScanViewModel @Inject constructor(
 
     private fun dismissError() {
         _state.update { it.copy(error = null) }
+    }
+
+    companion object {
+        private const val SCAN_DEBOUNCE_MS = 2000L
     }
 }

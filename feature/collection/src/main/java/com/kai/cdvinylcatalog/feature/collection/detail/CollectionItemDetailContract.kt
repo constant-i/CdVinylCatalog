@@ -3,6 +3,7 @@ package com.kai.cdvinylcatalog.feature.collection.detail
 import com.kai.cdvinylcatalog.core.model.CollectionItem
 import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.Track
+import com.kai.cdvinylcatalog.core.model.UiMessage
 
 object CollectionItemDetailContract {
 
@@ -31,7 +32,7 @@ object CollectionItemDetailContract {
 
     sealed class Effect {
         data object NavigateBack : Effect()
-        data class ShowToast(val message: String) : Effect()
+        data class ShowToast(val message: UiMessage) : Effect()
         data class NavigateToEdit(val itemId: Long) : Effect()
         data class NavigateToCopy(val itemId: Long) : Effect()
     }

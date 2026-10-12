@@ -9,6 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.core.ui.asText
 
 @Composable
 fun SearchRoute(
@@ -25,7 +26,11 @@ fun SearchRoute(
             when (effect) {
                 SearchContract.Effect.NavigateBack -> onNavigateBack()
                 is SearchContract.Effect.ShowToast -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        context,
+                        effect.message.asText(context),
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
                 is SearchContract.Effect.NavigateToSelection -> {
                     onNavigateToSelection(effect.results)

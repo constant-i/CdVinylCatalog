@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.database.CollectionRepository
+import com.kai.cdvinylcatalog.core.model.UiMessage
 import com.kai.cdvinylcatalog.core.model.mergeWith
 import com.kai.cdvinylcatalog.feature.collection.domain.GetReleaseDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,7 +43,7 @@ class CollectionItemDetailViewModel @Inject constructor(
                 .collect { item ->
                     if (item == null) {
                         if (_state.value.isDeleting) return@collect
-                        _effect.send(CollectionItemDetailContract.Effect.ShowToast("Запись не найдена"))
+                        _effect.send(CollectionItemDetailContract.Effect.ShowToast(UiMessage.ItemNotFound))
                         _effect.send(CollectionItemDetailContract.Effect.NavigateBack)
                         return@collect
                     }
