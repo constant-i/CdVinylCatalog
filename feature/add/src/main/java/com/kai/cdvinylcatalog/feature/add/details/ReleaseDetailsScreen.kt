@@ -50,6 +50,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
@@ -57,6 +58,7 @@ import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.Track
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.feature.add.R
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -75,12 +77,14 @@ fun ReleaseDetailsScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(state.release?.title ?: "Детали") },
+                title = { Text(state.release?.title ?: stringResource(R.string.details_title_default)) },
                 navigationIcon = {
                     IconButton(onClick = {
                         onIntent(ReleaseDetailsContract.Intent.OnBackClicked)
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -149,22 +153,27 @@ fun ReleaseDetailsScreen(
             onDismissRequest = {
                 onIntent(ReleaseDetailsContract.Intent.OnAddAnotherDismissed)
             },
-            title = { Text("Уже в коллекции") },
+            title = { Text(stringResource(R.string.details_already_in_collection_title)) },
             text = {
-                Text("«${state.release.title}» уже есть в вашей коллекции. Добавить ещё одну копию?")
+                Text(
+                    stringResource(
+                        R.string.details_already_in_collection_message,
+                        state.release.title
+                    )
+                )
             },
             confirmButton = {
                 TextButton(onClick = {
                     onIntent(ReleaseDetailsContract.Intent.OnAddAnotherConfirmed)
                 }) {
-                    Text("Добавить")
+                    Text(stringResource(R.string.common_add))
                 }
             },
             dismissButton = {
                 TextButton(onClick = {
                     onIntent(ReleaseDetailsContract.Intent.OnAddAnotherDismissed)
                 }) {
-                    Text("Отмена")
+                    Text(stringResource(R.string.common_cancel))
                 }
             }
         )
@@ -213,11 +222,11 @@ private fun ReleaseContent(
         // Метаданные
         Card(modifier = Modifier.fillMaxWidth()) {
             Column(modifier = Modifier.padding(16.dp)) {
-                MetadataRow("Год", release.year?.toString())
-                MetadataRow("Формат", release.rawFormat)
-                MetadataRow("Лейбл", release.label)
-                MetadataRow("Страна", release.country)
-                MetadataRow("Catalog#", release.catalogNumber)
+                MetadataRow(stringResource(R.string.details_label_year), release.year?.toString())
+                MetadataRow(stringResource(R.string.details_label_format), release.rawFormat)
+                MetadataRow(stringResource(R.string.details_label_label), release.label)
+                MetadataRow(stringResource(R.string.details_label_country), release.country)
+                MetadataRow(stringResource(R.string.details_label_catalog_number), release.catalogNumber)
             }
         }
 
@@ -225,7 +234,7 @@ private fun ReleaseContent(
         if (release.tracklist.isNotEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Треклист",
+                text = stringResource(R.string.details_tracklist),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -241,29 +250,27 @@ private fun ReleaseContent(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Статус
         if (state.justAdded) {
             Text(
-                text = "Добавлено в коллекцию",
+                text = stringResource(R.string.details_added_successfully),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(16.dp))
         } else if (state.isInCollection) {
             Text(
-                text = "Этот диск уже в коллекции!",
+                text = stringResource(R.string.details_already_in_collection),
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // Заметка
         OutlinedTextField(
             value = state.userNotes,
             onValueChange = { onIntent(ReleaseDetailsContract.Intent.OnNotesChanged(it)) },
-            label = { Text("Заметка (необязательно)") },
-            placeholder = { Text("Например: подарок, подписана") },
+            label = { Text(stringResource(R.string.details_note_label)) },
+            placeholder = { Text(stringResource(R.string.details_note_placeholder)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .bringIntoViewRequester(bringIntoViewRequester)
@@ -278,7 +285,6 @@ private fun ReleaseContent(
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Кнопки
         Button(
             onClick = {
                 onKeyboardDismiss()
@@ -286,7 +292,12 @@ private fun ReleaseContent(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(if (state.isInCollection) "Добавить ещё копию" else "Добавить в коллекцию")
+            Text(
+                stringResource(
+                    if (state.isInCollection) R.string.details_add_another_copy
+                    else R.string.details_add_to_collection
+                )
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
         TextButton(
@@ -296,7 +307,7 @@ private fun ReleaseContent(
             },
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text("Назад")
+            Text(stringResource(R.string.common_back))
         }
         Spacer(modifier = Modifier.height(24.dp))
     }
@@ -316,7 +327,7 @@ private fun CoverImageGallery(images: List<String>) {
         ) {
             Icon(
                 imageVector = Icons.Default.MusicNote,
-                contentDescription = "Нет обложки",
+                contentDescription = stringResource(R.string.cd_no_cover),
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -356,7 +367,7 @@ private fun CoverImageGallery(images: List<String>) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.BrokenImage,
-                            contentDescription = "Ошибка загрузки",
+                            contentDescription = stringResource(R.string.cd_load_error),
                             modifier = Modifier.size(48.dp),
                             tint = MaterialTheme.colorScheme.error
                         )
@@ -441,7 +452,7 @@ private fun FormatPickerDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Выберите формат") },
+        title = { Text(stringResource(R.string.details_choose_format)) },
         text = {
             Column {
                 Format.entries
@@ -463,10 +474,10 @@ private fun FormatPickerDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onConfirm) { Text("Добавить") }
+            TextButton(onClick = onConfirm) { Text(stringResource(R.string.common_add)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.common_cancel)) }
         }
     )
 }

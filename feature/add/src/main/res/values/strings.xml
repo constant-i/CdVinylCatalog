@@ -20,7 +20,29 @@
     <string name="search_empty">Ничего не найдено</string>
     <string name="search_prompt">Введите название или исполнителя</string>
 
+    <!-- Release Details -->
+    <string name="details_title_default">Детали</string>
+    <string name="details_already_in_collection_title">Уже в коллекции</string>
+    <string name="details_already_in_collection_message">«%1$s» уже есть в вашей коллекции. Добавить ещё одну копию?</string>
+    <string name="details_add_to_collection">Добавить в коллекцию</string>
+    <string name="details_add_another_copy">Добавить ещё копию</string>
+    <string name="details_added_successfully">Добавлено в коллекцию</string>
+    <string name="details_already_in_collection">Этот диск уже в коллекции!</string>
+    <string name="details_note_label">Заметка (необязательно)</string>
+    <string name="details_note_placeholder">Например: подарок, подписана</string>
+    <string name="details_tracklist">Треклист</string>
+    <string name="details_choose_format">Выберите формат</string>
+
+    <!-- Metadata labels -->
+    <string name="details_label_year">Год</string>
+    <string name="details_label_format">Формат</string>
+    <string name="details_label_label">Лейбл</string>
+    <string name="details_label_country">Страна</string>
+    <string name="details_label_catalog_number">Catalog#</string>
+
     <!-- Content descriptions -->
+    <string name="cd_no_cover">Нет обложки</string>
+    <string name="cd_load_error">Ошибка загрузки</string>
     <string name="cd_back">Назад</string>
     <string name="cd_search">Поиск</string>
     <string name="cd_collection">Моя коллекция</string>
@@ -50,5 +72,10 @@
     <string name="add_manual_button_gallery">Галерея</string>
     <string name="add_manual_button_update">Обновить</string>
     <string name="add_manual_button_save">Сохранить в коллекцию</string>
+
+    <!-- Common -->
+    <string name="common_add">Добавить</string>
+    <string name="common_cancel">Отмена</string>
+    <string name="common_back">Назад</string>
 
 </resources>
