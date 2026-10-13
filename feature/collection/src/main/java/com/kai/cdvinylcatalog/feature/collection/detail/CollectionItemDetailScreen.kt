@@ -269,55 +269,40 @@ private fun TrackRow(track: Track) {
 @Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun CollectionItemDetailScreenPreview() {
+    val sampleRelease = Release(
+        id = 1,
+        title = "Nevermind",
+        artist = "Nirvana",
+        year = 1991,
+        barcode = null,
+        coverImageUrl = null,
+        label = "DGC",
+        rawFormat = "CD, Album",
+        country = "US",
+        releaseDate = null,
+        catalogNumber = null,
+        notes = null,
+        tracklist = listOf(
+            Track("1", "Smells Like Teen Spirit", "5:01"),
+            Track("2", "In Bloom", "4:14")
+        )
+    )
+
     CdVinylCatalogTheme {
         CollectionItemDetailScreen(
             state = State(
                 isLoadingDetails = false,
-                detailedRelease = Release(
-                    id = 1,
-                    title = "Nevermind",
-                    artist = "Nirvana",
-                    year = 1991,
-                    barcode = null,
-                    coverImageUrl = null,
-                    label = "DGC",
-                    rawFormat = "CD, Album",
-                    country = "US",
-                    releaseDate = null,
-                    catalogNumber = null,
-                    notes = null,
-                    tracklist = listOf(
-                        Track("1", "Smells Like Teen Spirit", "5:01"),
-                        Track("2", "In Bloom", "4:14")
-                    )
-                ),
+                detailedRelease = sampleRelease,
+                displayRelease = sampleRelease,
                 collectionItem = CollectionItem(
                     id = 1,
-                    release = Release(
-                        id = 1,
-                        title = "Nevermind",
-                        artist = "Nirvana",
-                        year = 1991,
-                        barcode = null,
-                        coverImageUrl = null,
-                        label = "DGC",
-                        rawFormat = "CD, Album",
-                        country = "US",
-                        releaseDate = null,
-                        catalogNumber = null,
-                        notes = null,
-                        tracklist = listOf(
-                            Track("1", "Smells Like Teen Spirit", "5:01"),
-                            Track("2", "In Bloom", "4:14")
-                        )
-                    ),
+                    release = sampleRelease,
                     format = Format.CD,
                     addedAt = 0,
-                    notes = "Фирменный диск",
+                    notes = "Фирменный диск"
                 )
             ),
             onIntent = {}
-
         )
     }
 }
