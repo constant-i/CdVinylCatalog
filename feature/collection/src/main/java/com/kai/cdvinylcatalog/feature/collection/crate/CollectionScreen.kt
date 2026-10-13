@@ -23,7 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -102,7 +102,7 @@ fun CollectionScreen(
                     IconButton(onClick = {
                         onIntent(CollectionContract.Intent.OnScanClicked)
                     }) {
-                        Icon(Icons.Default.PhotoCamera, contentDescription = "Сканировать")
+                        Icon(Icons.Default.QrCodeScanner, contentDescription = "Сканировать")
                     }
                     IconButton(onClick = {
                         onIntent(CollectionContract.Intent.OnSearchClicked)
