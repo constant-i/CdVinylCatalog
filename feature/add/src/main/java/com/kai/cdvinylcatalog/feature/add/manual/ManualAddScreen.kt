@@ -90,22 +90,22 @@ fun ManualAddScreen(
     val aspectRatio16_9 = stringResource(R.string.add_manual_aspect_ratio_16_9)
 
     fun createPhotoFile(): File {
-        val dir = File(context.filesDir, "photos").apply { mkdirs() }
-        return File(dir, "${UUID.randomUUID()}.jpg")
+        val dir = File(context.filesDir, PHOTOS_SUB_DIR).apply { mkdirs() }
+        return File(dir, "${UUID.randomUUID()}.$PHOTO_EXTENSION")
     }
 
     fun getUriForFile(file: File): Uri {
         return FileProvider.getUriForFile(
             context,
-            "${context.packageName}.fileprovider",
+            "${context.packageName}$FILE_PROVIDER_SUFFIX",
             file
         )
     }
 
     fun copyToAppStorage(sourceUri: Uri): String? {
         return try {
-            val dir = File(context.filesDir, "photos").apply { mkdirs() }
-            val destFile = File(dir, "${UUID.randomUUID()}.jpg")
+            val dir = File(context.filesDir, PHOTOS_SUB_DIR).apply { mkdirs() }
+            val destFile = File(dir, "${UUID.randomUUID()}.$PHOTO_EXTENSION")
             context.contentResolver.openInputStream(sourceUri)?.use { input ->
                 destFile.outputStream().use { output ->
                     input.copyTo(output)
@@ -483,3 +483,7 @@ private fun ManualAddScreenPreview() {
         )
     }
 }
+
+private const val PHOTOS_SUB_DIR = "photos"
+private const val PHOTO_EXTENSION = "jpg"
+private const val FILE_PROVIDER_SUFFIX = ".fileprovider"
