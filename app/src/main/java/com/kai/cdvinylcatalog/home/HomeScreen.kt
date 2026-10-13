@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LibraryMusic
-import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,8 +34,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.kai.cdvinylcatalog.R
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 
 /**
@@ -55,7 +57,7 @@ fun HomeScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Vinyl & CD") }
+                title = { Text(stringResource(R.string.home_title)) }
             )
         }
     ) { padding ->
@@ -68,9 +70,9 @@ fun HomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HomeActionCard(
-                icon = Icons.Default.PhotoCamera,
-                title = "Сканировать",
-                subtitle = "Наведите камеру на штрихкод",
+                icon = Icons.Default.QrCodeScanner,
+                title = stringResource(R.string.home_scan_title),
+                subtitle = stringResource(R.string.home_scan_subtitle),
                 onClick = onNavigateToScan,
                 isPrimary = true
             )
@@ -78,24 +80,24 @@ fun HomeScreen(
 
             HomeActionCard(
                 icon = Icons.Default.Search,
-                title = "Поиск по названию",
-                subtitle = "Найдите диск, если штрихкод не сработал",
+                title = stringResource(R.string.home_search_title),
+                subtitle = stringResource(R.string.home_search_subtitle),
                 onClick = onNavigateToSearch
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             HomeActionCard(
                 icon = Icons.Default.Edit,
-                title = "Добавить вручную",
-                subtitle = "Если диска нет в Discogs",
+                title = stringResource(R.string.home_manual_title),
+                subtitle = stringResource(R.string.home_manual_subtitle),
                 onClick = onNavigateToManualAdd
             )
             Spacer(modifier = Modifier.height(16.dp))
 
             HomeActionCard(
                 icon = Icons.Default.LibraryMusic,
-                title = "Моя коллекция",
-                subtitle = "Посмотреть все диски",
+                title = stringResource(R.string.home_collection_title),
+                subtitle = stringResource(R.string.home_collection_subtitle),
                 onClick = onNavigateToCollection
             )
         }

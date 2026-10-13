@@ -1,3 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Vinyl &amp; CD</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">Vinyl &amp; CD</string>
+    <string name="home_scan_title">Сканировать</string>
+    <string name="home_scan_subtitle">Наведите камеру на штрихкод</string>
+    <string name="home_search_title">Поиск по названию</string>
+    <string name="home_search_subtitle">Найдите диск, если штрихкод не сработал</string>
+    <string name="home_manual_title">Добавить вручную</string>
+    <string name="home_manual_subtitle">Если диска нет в Discogs</string>
+    <string name="home_collection_title">Моя коллекция</string>
+    <string name="home_collection_subtitle">Посмотреть все диски</string>
 </resources>
