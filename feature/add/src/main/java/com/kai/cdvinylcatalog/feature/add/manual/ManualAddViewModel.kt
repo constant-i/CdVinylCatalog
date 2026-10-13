@@ -283,7 +283,6 @@ class ManualAddViewModel @Inject constructor(
     }
 
     companion object {
-        private const val TAG = "ManualAddVM"
         private const val KEY_INITIALIZED = "initialized"
         private const val KEY_TITLE = "title"
         private const val KEY_ARTIST = "artist"

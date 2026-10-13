@@ -47,6 +47,7 @@
     <string name="cd_search">Поиск</string>
     <string name="cd_collection">Моя коллекция</string>
     <string name="cd_search_action">Найти</string>
+    <string name="cd_delete">Удалить</string>
 
     <!-- Manual Add Screen -->
     <string name="add_manual_aspect_ratio_free">Свободно</string>

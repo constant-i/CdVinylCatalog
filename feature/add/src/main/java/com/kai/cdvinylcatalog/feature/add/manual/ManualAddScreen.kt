@@ -57,6 +57,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -65,6 +66,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
 import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.feature.add.R
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.model.AspectRatio
 import java.io.File
@@ -81,6 +83,11 @@ fun ManualAddScreen(
     val focus = LocalFocusManager.current
 
     val context = LocalContext.current
+
+    val aspectRatioFree = stringResource(R.string.add_manual_aspect_ratio_free)
+    val aspectRatio1_1 = stringResource(R.string.add_manual_aspect_ratio_1_1)
+    val aspectRatio4_3 = stringResource(R.string.add_manual_aspect_ratio_4_3)
+    val aspectRatio16_9 = stringResource(R.string.add_manual_aspect_ratio_16_9)
 
     fun createPhotoFile(): File {
         val dir = File(context.filesDir, "photos").apply { mkdirs() }
@@ -192,10 +199,10 @@ fun ManualAddScreen(
         val options = UCrop.Options().apply {
             setAspectRatioOptions(
                 0,
-                AspectRatio("Свободно", 0f, 0f),
-                AspectRatio("1:1", 1f, 1f),
-                AspectRatio("4:3", 4f, 3f),
-                AspectRatio("16:9", 16f, 9f)
+                AspectRatio(aspectRatioFree, 0f, 0f),
+                AspectRatio(aspectRatio1_1, 1f, 1f),
+                AspectRatio(aspectRatio4_3, 4f, 3f),
+                AspectRatio(aspectRatio16_9, 16f, 9f)
             )
             setCompressionFormat(Bitmap.CompressFormat.JPEG)
             setCompressionQuality(90)
@@ -216,13 +223,20 @@ fun ManualAddScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(if (state.isEditMode) "Редактирование" else "Добавить вручную")
+                    Text(
+                        if (state.isEditMode)
+                            stringResource(R.string.add_manual_title_edit)
+                        else
+                            stringResource(R.string.add_manual_title_add)
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = {
                         onIntent(ManualAddContract.Intent.OnBackClicked)
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -236,13 +250,16 @@ fun ManualAddScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            Text("Обязательные поля *", style = MaterialTheme.typography.labelSmall)
+            Text(
+                text = stringResource(R.string.add_manual_required_fields),
+                style = MaterialTheme.typography.labelSmall
+            )
             Spacer(Modifier.height(8.dp))
 
             OutlinedTextField(
                 value = state.title,
                 onValueChange = { onIntent(ManualAddContract.Intent.OnTitleChanged(it)) },
-                label = { Text("Название *") },
+                label = { Text(stringResource(R.string.add_manual_field_title)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -251,7 +268,7 @@ fun ManualAddScreen(
             OutlinedTextField(
                 value = state.artist,
                 onValueChange = { onIntent(ManualAddContract.Intent.OnArtistChanged(it)) },
-                label = { Text("Исполнитель *") },
+                label = { Text(stringResource(R.string.add_manual_field_artist)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -260,13 +277,16 @@ fun ManualAddScreen(
             OutlinedTextField(
                 value = state.year,
                 onValueChange = { onIntent(ManualAddContract.Intent.OnYearChanged(it)) },
-                label = { Text("Год") },
+                label = { Text(stringResource(R.string.add_manual_field_year)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
             Spacer(Modifier.height(12.dp))
 
-            Text("Формат *", style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = stringResource(R.string.add_manual_field_format),
+                style = MaterialTheme.typography.bodyMedium
+            )
             Spacer(Modifier.height(4.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -300,7 +320,7 @@ fun ManualAddScreen(
             OutlinedTextField(
                 value = state.label,
                 onValueChange = { onIntent(ManualAddContract.Intent.OnLabelChanged(it)) },
-                label = { Text("Лейбл") },
+                label = { Text(stringResource(R.string.add_manual_field_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -309,7 +329,7 @@ fun ManualAddScreen(
             OutlinedTextField(
                 value = state.country,
                 onValueChange = { onIntent(ManualAddContract.Intent.OnCountryChanged(it)) },
-                label = { Text("Страна") },
+                label = { Text(stringResource(R.string.add_manual_field_country)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -318,7 +338,7 @@ fun ManualAddScreen(
             OutlinedTextField(
                 value = state.barcode,
                 onValueChange = { onIntent(ManualAddContract.Intent.OnBarcodeChanged(it)) },
-                label = { Text("Штрихкод") },
+                label = { Text(stringResource(R.string.add_manual_field_barcode)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -327,15 +347,17 @@ fun ManualAddScreen(
             OutlinedTextField(
                 value = state.notes,
                 onValueChange = { onIntent(ManualAddContract.Intent.OnNotesChanged(it)) },
-                label = { Text("Заметка") },
-                placeholder = { Text("Например: подарок, подписана") },
+                label = { Text(stringResource(R.string.add_manual_field_notes)) },
+                placeholder = { Text(stringResource(R.string.add_manual_field_notes_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 maxLines = 3
             )
             Spacer(Modifier.height(16.dp))
 
             Text(
-                text = "Фотографии (${state.photoPaths.size}/${ManualAddContract.State.MAX_PHOTOS})",
+                text = stringResource(
+                    R.string.add_manual_photos_count, state.photoPaths.size, ManualAddContract.State.MAX_PHOTOS
+                ),
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(Modifier.height(8.dp))
@@ -372,7 +394,7 @@ fun ManualAddScreen(
                             ) {
                                 Icon(
                                     Icons.Default.Close,
-                                    contentDescription = "Удалить",
+                                    contentDescription = stringResource(R.string.cd_delete),
                                     tint = MaterialTheme.colorScheme.onError,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -399,7 +421,7 @@ fun ManualAddScreen(
                 ) {
                     Icon(Icons.Default.PhotoCamera, contentDescription = null)
                     Spacer(Modifier.width(4.dp))
-                    Text("Камера")
+                    Text(stringResource(R.string.add_manual_button_camera))
                 }
                 OutlinedButton(
                     onClick = {
@@ -412,7 +434,7 @@ fun ManualAddScreen(
                 ) {
                     Icon(Icons.Default.PhotoLibrary, contentDescription = null)
                     Spacer(Modifier.width(4.dp))
-                    Text("Галерея")
+                    Text(stringResource(R.string.add_manual_button_gallery))
                 }
             }
 
@@ -433,7 +455,11 @@ fun ManualAddScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text(if (state.isEditMode) "Обновить" else "Сохранить в коллекцию")
+                    Text(
+                        if (state.isEditMode)
+                            stringResource(R.string.add_manual_button_update)
+                        else stringResource(R.string.add_manual_button_save)
+                    )
                 }
             }
             Spacer(Modifier.height(24.dp))
