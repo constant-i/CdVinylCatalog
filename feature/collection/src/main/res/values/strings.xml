@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Collection Screen -->
+    <string name="collection_title">Моя коллекция (%1$d)</string>
+    <string name="collection_empty">Коллекция пуста</string>
+    <string name="collection_empty_hint">Отсканируйте первый диск</string>
+    <string name="collection_label_year">Год: %1$d</string>
+    <string name="collection_label_format">Формат: %1$s</string>
+    <string name="collection_label_note">Заметка: %1$s</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_back">Назад</string>
+    <string name="cd_scan">Сканировать</string>
+    <string name="cd_search">Поиск</string>
+    <string name="cd_sort">Сортировка</string>
+
+    <!-- Sort order -->
+    <string name="sort_added_desc">Сначала новые</string>
+    <string name="sort_added_asc">Сначала старые</string>
+    <string name="sort_artist_asc">По исполнителю (A→Z)</string>
+    <string name="sort_year_desc">По году (новые)</string>
+
+    <!-- Plural: copies -->
+    <plurals name="collection_copies">
+        <item quantity="one">%1$d копия</item>
+        <item quantity="few">%1$d копии</item>
+        <item quantity="many">%1$d копий</item>
+        <item quantity="other">%1$d копий</item>
+    </plurals>
+
+    <!-- Collection Item Detail -->
+    <string name="detail_title_default">Детали</string>
+    <string name="detail_tracklist">Треклист</string>
+    <string name="detail_other_copies">Другие копии (%1$d)</string>
+    <string name="detail_no_note">Без заметки</string>
+
+    <!-- Metadata labels -->
+    <string name="detail_label_year">Год</string>
+    <string name="detail_label_format">Формат</string>
+    <string name="detail_label_label">Лейбл</string>
+    <string name="detail_label_country">Страна</string>
+    <string name="detail_label_catalog">Catalog#</string>
+    <string name="detail_label_copies">Копий</string>
+    <string name="detail_label_note">Заметка</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_edit">Редактировать</string>
+    <string name="cd_delete">Удалить</string>
+    <string name="cd_no_cover">Нет обложки</string>
+    <string name="cd_load_error">Ошибка загрузки</string>
+</resources>

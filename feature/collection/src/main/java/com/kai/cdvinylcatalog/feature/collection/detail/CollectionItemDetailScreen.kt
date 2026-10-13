@@ -34,6 +34,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -42,6 +43,7 @@ import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.Track
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.feature.collection.R
 import com.kai.cdvinylcatalog.feature.collection.detail.CollectionItemDetailContract.State
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -57,7 +59,7 @@ fun CollectionItemDetailScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = state.displayRelease?.title ?: "Детали",
+                        text = state.displayRelease?.title ?: stringResource(R.string.detail_title_default),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -68,7 +70,7 @@ fun CollectionItemDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -78,7 +80,7 @@ fun CollectionItemDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Редактировать"
+                            contentDescription = stringResource(R.string.cd_edit)
                         )
                     }
                     IconButton(
@@ -86,7 +88,7 @@ fun CollectionItemDetailScreen(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Удалить"
+                            contentDescription = stringResource(R.string.cd_delete)
                         )
                     }
                 }
@@ -130,12 +132,14 @@ fun CollectionItemDetailScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Метаданные
-            MetadataRow("Год", release.year?.toString())
-            MetadataRow("Формат", release.rawFormat)
-            MetadataRow("Лейбл", release.label)
-            MetadataRow("Страна", release.country)
-            MetadataRow("Catalog#", release.catalogNumber)
-            item.notes?.let { MetadataRow("Заметка", it) }
+            MetadataRow(stringResource(R.string.detail_label_year), release.year?.toString())
+            MetadataRow(stringResource(R.string.detail_label_format), release.rawFormat)
+            MetadataRow(stringResource(R.string.detail_label_label), release.label)
+            MetadataRow(stringResource(R.string.detail_label_country), release.country)
+            MetadataRow(stringResource(R.string.detail_label_catalog), release.catalogNumber)
+            item.notes?.let {
+                MetadataRow(stringResource(R.string.detail_label_note), it)
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -145,7 +149,10 @@ fun CollectionItemDetailScreen(
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
             } else if (state.tracklist.isNotEmpty()) {
-                Text(text = "Треклист", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = stringResource(R.string.detail_tracklist),
+                    style = MaterialTheme.typography.titleLarge
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 state.tracklist.forEach { track ->
                     TrackRow(track)
@@ -155,7 +162,7 @@ fun CollectionItemDetailScreen(
             if (state.otherCopies.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(24.dp))
                 Text(
-                    text = "Другие копии (${state.otherCopies.size})",
+                    text = stringResource(R.string.detail_other_copies, state.otherCopies.size),
                     style = MaterialTheme.typography.titleLarge
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -211,7 +218,7 @@ private fun OtherCopyCard(
                         overflow = TextOverflow.Ellipsis
                     )
                 } ?: Text(
-                    text = "Без заметки",
+                    text = stringResource(R.string.detail_no_note),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

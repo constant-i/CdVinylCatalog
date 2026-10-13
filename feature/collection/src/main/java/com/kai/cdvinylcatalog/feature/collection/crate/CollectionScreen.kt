@@ -51,6 +51,9 @@ import coil.compose.SubcomposeAsyncImage
 import com.kai.cdvinylcatalog.core.database.SortOrder
 import com.kai.cdvinylcatalog.core.model.CollectionItem
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
+import com.kai.cdvinylcatalog.feature.collection.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,18 +69,24 @@ fun CollectionScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Моя коллекция (${state.items.size})") },
+                title = { Text(stringResource(R.string.collection_title, state.items.size)) },
                 navigationIcon = {
                     IconButton(onClick = {
                         onIntent(CollectionContract.Intent.OnBackClicked)
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back)
+                        )
                     }
                 },
                 actions = {
                     // Меню сортировки
                     IconButton(onClick = { showSortMenu = true }) {
-                        Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Сортировка")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
+                            contentDescription = stringResource(R.string.cd_sort)
+                        )
                     }
                     DropdownMenu(
                         expanded = showSortMenu,
@@ -102,12 +111,17 @@ fun CollectionScreen(
                     IconButton(onClick = {
                         onIntent(CollectionContract.Intent.OnScanClicked)
                     }) {
-                        Icon(Icons.Default.QrCodeScanner, contentDescription = "Сканировать")
+                        Icon(
+                            imageVector = Icons.Default.QrCodeScanner,
+                            contentDescription = stringResource(R.string.cd_scan)
+                        )
                     }
                     IconButton(onClick = {
                         onIntent(CollectionContract.Intent.OnSearchClicked)
                     }) {
-                        Icon(Icons.Default.Search, contentDescription = "Поиск")
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = stringResource(R.string.cd_search))
                     }
                 }
             )
@@ -147,10 +161,10 @@ fun CollectionScreen(
 
 @Composable
 private fun SortOrder.label(): String = when (this) {
-    SortOrder.ADDED_DESC -> "Сначала новые"
-    SortOrder.ADDED_ASC -> "Сначала старые"
-    SortOrder.ARTIST_ASC -> "По исполнителю (A→Z)"
-    SortOrder.YEAR_DESC -> "По году (новые)"
+    SortOrder.ADDED_DESC -> stringResource(R.string.sort_added_desc)
+    SortOrder.ADDED_ASC -> stringResource(R.string.sort_added_asc)
+    SortOrder.ARTIST_ASC -> stringResource(R.string.sort_artist_asc)
+    SortOrder.YEAR_DESC -> stringResource(R.string.sort_year_desc)
 }
 
 @Composable
@@ -211,19 +225,19 @@ private fun CollectionItemCard(
                 )
                 item.release.year?.let {
                     Text(
-                        text = "Год: $it",
+                        text = stringResource(R.string.collection_label_year, it),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Text(
-                    text = "Формат: ${item.format.name}",
+                    text = stringResource(R.string.collection_label_format, item.format.name),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 item.notes?.let {
                     Text(
-                        text = "Заметка: $it",
+                        text = stringResource(R.string.collection_label_note, it),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -239,7 +253,11 @@ private fun CollectionItemCard(
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            text = pluralizeCopies(item.copyCount),
+                            text = pluralStringResource(
+                                R.plurals.collection_copies,
+                                item.copyCount,
+                                item.copyCount
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -250,18 +268,6 @@ private fun CollectionItemCard(
     }
 }
 
-private fun pluralizeCopies(count: Int): String {
-    val mod10 = count % 10
-    val mod100 = count % 100
-    val word = when {
-        mod100 in 11..19 -> "копий"
-        mod10 == 1 -> "копия"
-        mod10 in 2..4 -> "копии"
-        else -> "копий"
-    }
-    return "$count $word"
-}
-
 @Composable
 private fun EmptyCollection(modifier: Modifier = Modifier) {
     Column(
@@ -269,11 +275,11 @@ private fun EmptyCollection(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Коллекция пуста",
+            text = stringResource(R.string.collection_empty),
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = "Отсканируйте первый диск",
+            text = stringResource(R.string.collection_empty_hint),
             style = MaterialTheme.typography.bodyMedium
         )
     }
