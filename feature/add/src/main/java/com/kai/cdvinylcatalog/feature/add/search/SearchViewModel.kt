@@ -43,15 +43,13 @@ class SearchViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true, error = null) }
             searchByText(query)
                 .onSuccess { releases ->
-                    _state.update { it.copy(isLoading = false) }
-                    if (releases.isEmpty()) {
-                        _effect.send(SearchContract.Effect.ShowToast(UiMessage.SearchEmpty))
-                    } else {
+                    _state.update { it.copy(isLoading = false, hasSearched = true) }
+                    if (releases.isNotEmpty()) {
                         _effect.send(SearchContract.Effect.NavigateToSelection(releases))
                     }
                 }
                 .onFailure { e ->
-                    _state.update { it.copy(isLoading = false, error = e.message) }
+                    _state.update { it.copy(isLoading = false, hasSearched = true, error = e.message) }
                 }
         }
     }

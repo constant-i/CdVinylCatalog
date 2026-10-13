@@ -9,6 +9,22 @@
     <string name="scan_ok">Понятно</string>
     <string name="scan_year_format">Год: %1$d</string>
     <string name="scan_format_format">Формат: %1$s</string>
+    <string name="scan_title">Сканирование</string>
+    <string name="scan_permission_denied">Нет доступа к камере. Разрешите в настройках.</string>
+    <string name="scan_camera_error">Ошибка камеры</string>
+
+    <!-- Search Screen -->
+    <string name="search_title">Ручной поиск</string>
+    <string name="search_label">Исполнитель или альбом</string>
+    <string name="search_placeholder">Например: Nightwish Once</string>
+    <string name="search_empty">Ничего не найдено</string>
+    <string name="search_prompt">Введите название или исполнителя</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_back">Назад</string>
+    <string name="cd_search">Поиск</string>
+    <string name="cd_collection">Моя коллекция</string>
+    <string name="cd_search_action">Найти</string>
 
     <!-- Manual Add Screen -->
     <string name="add_manual_aspect_ratio_free">Свободно</string>
@@ -34,4 +50,5 @@
     <string name="add_manual_button_gallery">Галерея</string>
     <string name="add_manual_button_update">Обновить</string>
     <string name="add_manual_button_save">Сохранить в коллекцию</string>
+
 </resources>

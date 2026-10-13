@@ -12,9 +12,6 @@ class SearchByTextUseCase @Inject constructor(
     private val repository: DiscogsRepository
 ) {
     suspend operator fun invoke(query: String): Result<List<Release>> {
-        if (query.isBlank()) {
-            return Result.failure(Exception("Введите название или исполнителя"))
-        }
         return repository.searchByText(query)
     }
 }

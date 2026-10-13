@@ -36,12 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.feature.add.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,7 +66,9 @@ fun ReleaseSelectionScreen(
                     IconButton(onClick = {
                         onIntent(ReleaseSelectionContract.Intent.OnBackClicked)
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Назад")
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -75,7 +79,7 @@ fun ReleaseSelectionScreen(
                 modifier = Modifier.fillMaxSize().padding(padding),
                 contentAlignment = Alignment.Center
             ) {
-                Text("Ничего не найдено")
+                Text(stringResource(R.string.search_empty))
             }
         } else {
             LazyColumn(

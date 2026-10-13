@@ -8,6 +8,7 @@ object SearchContract {
     data class State(
         val query: String = "",
         val isLoading: Boolean = false,
+        val hasSearched: Boolean = false,
         val error: String? = null
     )
 

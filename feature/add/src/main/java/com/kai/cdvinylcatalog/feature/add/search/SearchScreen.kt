@@ -27,9 +27,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.feature.add.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,14 +47,14 @@ fun SearchScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text("Ручной поиск") },
+                title = { Text(stringResource(R.string.search_title)) },
                 navigationIcon = {
                     IconButton(onClick = {
                         onIntent(SearchContract.Intent.OnBackClicked)
                     }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Назад"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 }
@@ -72,8 +74,8 @@ fun SearchScreen(
                 OutlinedTextField(
                     value = state.query,
                     onValueChange = { onIntent(SearchContract.Intent.OnQueryChanged(it)) },
-                    label = { Text("Исполнитель или альбом") },
-                    placeholder = { Text("Например: Nirvana Nevermind") },
+                    label = { Text(stringResource(R.string.search_label)) },
+                    placeholder = { Text(stringResource(R.string.search_placeholder)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
@@ -88,7 +90,7 @@ fun SearchScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Найти"
+                        contentDescription = stringResource(R.string.cd_search_action)
                     )
                 }
             }
@@ -116,13 +118,22 @@ fun SearchScreen(
                         )
                     }
                 }
+                state.hasSearched -> {
+                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = stringResource(R.string.search_empty),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
                 else -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Введите название или исполнителя",
+                            text = stringResource(R.string.search_prompt),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )

@@ -25,9 +25,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.feature.add.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,7 +71,7 @@ fun ScanScreen(
                         Button(onClick = {
                             onIntent(ScanContract.Intent.OnErrorDismissed)
                         }) {
-                            Text("Понятно")
+                            Text(stringResource(R.string.scan_ok))
                         }
                     }
                 }
@@ -93,7 +95,7 @@ fun ScanScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
-                                text = "Нет доступа к камере.\nРазрешите в настройках.",
+                                text = stringResource(R.string.scan_permission_denied),
                                 color = Color.White,
                                 style = MaterialTheme.typography.bodyLarge
                             )
@@ -107,12 +109,12 @@ fun ScanScreen(
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .statusBarsPadding(),
-            title = { Text("Сканирование", color = Color.White) },
+            title = { Text(stringResource(R.string.scan_title), color = Color.White) },
             navigationIcon = {
                 IconButton(onClick = onNavigateBack) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Назад",
+                        contentDescription = stringResource(R.string.cd_back),
                         tint = Color.White
                     )
                 }
@@ -121,14 +123,14 @@ fun ScanScreen(
                 IconButton(onClick = onNavigateToSearch) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = "Поиск",
+                        stringResource(R.string.cd_search),
                         tint = Color.White
                     )
                 }
                 IconButton(onClick = onNavigateToCollection) {
                     Icon(
                         imageVector = Icons.Default.LibraryMusic,
-                        contentDescription = "Коллекция",
+                        stringResource(R.string.cd_collection),
                         tint = Color.White
                     )
                 }
