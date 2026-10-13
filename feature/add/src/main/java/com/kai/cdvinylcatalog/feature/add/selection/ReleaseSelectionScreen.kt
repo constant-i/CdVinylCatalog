@@ -53,8 +53,10 @@ fun ReleaseSelectionScreen(
     modifier: Modifier = Modifier
 ) {
     val title = when (state.source) {
-        ReleaseSelectionContract.Source.SCAN -> "Найдено изданий (${state.results.size})"
-        ReleaseSelectionContract.Source.SEARCH -> "Результаты поиска (${state.results.size})"
+        ReleaseSelectionContract.Source.SCAN ->
+            stringResource(R.string.selection_title_scan, state.results.size)
+        ReleaseSelectionContract.Source.SEARCH ->
+            stringResource(R.string.selection_title_search, state.results.size)
     }
 
     Scaffold(
@@ -160,19 +162,19 @@ private fun ReleaseCard(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 InfoRow(
-                    label = "Формат",
+                    label = stringResource(R.string.selection_label_format),
                     value = release.rawFormat
                 )
                 InfoRow(
-                    label = "Год",
+                    label = stringResource(R.string.selection_label_year),
                     value = release.year?.toString()
                 )
                 InfoRow(
-                    label = "Лейбл",
+                    label = stringResource(R.string.selection_label_label),
                     value = release.label
                 )
                 InfoRow(
-                    label = "Страна",
+                    label = stringResource(R.string.selection_label_country),
                     value = release.country
                 )
                 if (isInCollection) {
@@ -186,7 +188,7 @@ private fun ReleaseCard(
                         )
                         Spacer(Modifier.width(4.dp))
                         Text(
-                            text = "Уже в коллекции",
+                            text = stringResource(R.string.selection_already_in_collection),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )

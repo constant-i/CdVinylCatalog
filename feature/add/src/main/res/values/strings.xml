@@ -40,6 +40,16 @@
     <string name="details_label_country">Страна</string>
     <string name="details_label_catalog_number">Catalog#</string>
 
+    <!-- Release Selection -->
+    <string name="selection_title_scan">Найдено изданий (%1$d)</string>
+    <string name="selection_title_search">Результаты поиска (%1$d)</string>
+    <string name="selection_empty">Ничего не найдено</string>
+    <string name="selection_already_in_collection">Уже в коллекции</string>
+    <string name="selection_label_format">Формат</string>
+    <string name="selection_label_year">Год</string>
+    <string name="selection_label_label">Лейбл</string>
+    <string name="selection_label_country">Страна</string>
+
     <!-- Content descriptions -->
     <string name="cd_no_cover">Нет обложки</string>
     <string name="cd_load_error">Ошибка загрузки</string>
