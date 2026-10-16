@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.core.network
 
-import com.kai.cdvinylcatalog.core.model.DiscogsError
 import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.network.dto.toDomain
 import kotlinx.coroutines.Dispatchers
@@ -44,16 +43,6 @@ class DiscogsRepository @Inject constructor(
                 Result.failure(e)
             }
         }
-
-    private fun mapHttpException(e: HttpException): DiscogsError {
-        return when (e.code()) {
-            401, 403 -> DiscogsError.Unauthorized
-            404 -> DiscogsError.NotFound
-            429 -> DiscogsError.RateLimited
-            in 500..599 -> DiscogsError.ServerError(e.code())
-            else -> DiscogsError.Unknown(e.message())
-        }
-    }
 
     /**
      * Поиск информации о конкретном релизе по ID релиза в базе Discogs (releaseId).

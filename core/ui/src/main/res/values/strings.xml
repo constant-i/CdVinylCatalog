@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Ошибки -->
-    <string name="error_no_internet">Нет подключения к интернету</string>
-    <string name="error_timeout">Сервер не отвечает, попробуйте позже</string>
-    <string name="error_unauthorized">Проблема с токеном Discogs</string>
-    <string name="error_rate_limited">Слишком много запросов, подождите минуту</string>
+    <!-- ─── Domain errors (AppError) ─── -->
+    <string name="error_no_connection">Нет подключения к интернету</string>
+    <string name="error_server_unavailable">Сервер недоступен, попробуйте позже</string>
+    <string name="error_auth_required">Требуется авторизация</string>
+    <string name="error_rate_limit">Слишком много запросов, подождите минуту</string>
     <string name="error_not_found">Релиз не найден в Discogs</string>
-    <string name="error_search_empty">Ничего не найдено</string>
-    <string name="error_invalid_barcode">Некорректный штрихкод</string>
-    <string name="error_item_not_found">Запись не найдена</string>
-    <string name="error_required_fields">Заполните обязательные поля</string>
-    <string name="error_server">Ошибка сервера: %1$d</string>
-    <string name="error_save">Ошибка сохранения: %1$s</string>
-    <string name="error_unknown">Что-то пошло не так: %1$s</string>
+    <string name="error_unknown">Что-то пошло не так</string>
 
-    <!-- Успех -->
-    <string name="success_added">Добавлено: %1$s</string>
+    <!-- ─── UI messages ─── -->
+    <string name="msg_release_not_found">Релиз не найден в Discogs</string>
+    <string name="msg_search_empty">Ничего не найдено</string>
+    <string name="msg_invalid_barcode">Некорректный штрихкод</string>
+    <string name="msg_item_not_found">Запись не найдена</string>
+    <string name="msg_required_fields">Заполните обязательные поля</string>
+    <string name="msg_added">Добавлено: %1$s</string>
+    <string name="msg_save_failed">Не удалось сохранить</string>
 </resources>

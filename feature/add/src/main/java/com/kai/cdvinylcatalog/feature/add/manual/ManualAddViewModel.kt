@@ -277,7 +277,7 @@ class ManualAddViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 update { it.copy(isSaving = false, error = e.message) }
-                _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.SaveError(e.message)))
+                _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.SaveFailed))
             }
         }
     }

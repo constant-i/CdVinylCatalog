@@ -138,7 +138,7 @@ class ReleaseDetailsViewModel @Inject constructor(
                 _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.AddedSuccessfully(release.title)))
                 _effect.send(ReleaseDetailsContract.Effect.NavigateToCollection)
             } catch (e: Exception) {
-                _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.SaveError(e.message)))
+                _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.SaveFailed))
             }
         }
     }
