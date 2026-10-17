@@ -2,7 +2,8 @@ package com.kai.cdvinylcatalog.feature.add.selection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.feature.add.domain.CheckCollectionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -29,7 +30,11 @@ class ReleaseSelectionViewModel @Inject constructor(
         _state.update { it.copy(results = releases, source = source) }
         viewModelScope.launch {
             val inCollection = releases
-                .filter { checkCollection(it.id) }
+                .filter { release ->
+                    // Разворачиваем Outcome для каждого релиза
+                    val outcome = checkCollection(release.id)
+                    outcome is Outcome.Success && outcome.data
+                }
                 .map { it.id }
                 .toSet()
             _state.update { it.copy(inCollectionIds = inCollection) }

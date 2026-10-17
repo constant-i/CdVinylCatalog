@@ -1,7 +1,8 @@
 package com.kai.cdvinylcatalog.feature.add.manual
 
-import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.result.AppError
 
 object ManualAddContract {
 
@@ -16,7 +17,7 @@ object ManualAddContract {
         val barcode: String = "",
         val notes: String = "",
         val isSaving: Boolean = false,
-        val error: String? = null,
+        val error: AppError? = null,
         val photoPaths: List<String> = emptyList(),
         val discogsImages: List<String> = emptyList(),
         val pendingPhotoPath: String? = null,

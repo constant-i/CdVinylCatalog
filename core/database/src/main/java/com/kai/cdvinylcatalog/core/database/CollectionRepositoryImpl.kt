@@ -1,0 +1,226 @@
+package com.kai.cdvinylcatalog.core.database
+
+import com.kai.cdvinylcatalog.core.database.dao.CollectionDao
+import com.kai.cdvinylcatalog.core.database.entity.CollectionItemEntity
+import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.collection.CollectionItem
+import com.kai.cdvinylcatalog.domain.collection.SortOrder
+import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.result.AppError
+import com.kai.cdvinylcatalog.domain.result.Outcome
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
+
+@Singleton
+class CollectionRepositoryImpl @Inject constructor(
+    private val dao: CollectionDao
+) : CollectionRepository {
+
+    override fun observeAll(): Flow<List<CollectionItem>> {
+        return dao.getAllByAddedDesc().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun getItems(sortOrder: SortOrder): Flow<List<CollectionItem>> {
+        val flow = when (sortOrder) {
+            SortOrder.ADDED_DESC -> dao.getAllByAddedDesc()
+            SortOrder.ADDED_ASC -> dao.getAllByAddedAsc()
+            SortOrder.ARTIST_ASC -> dao.getAllByArtistAsc()
+            SortOrder.YEAR_DESC -> dao.getAllByYearDesc()
+        }
+        return flow.map { entities ->
+            // Считаем количество копий для каждого releaseId
+            val countByReleaseId = entities
+                .filter { it.releaseId != null }
+                .groupingBy { it.releaseId!! }
+                .eachCount()
+
+            entities.map { entity ->
+                entity.toDomain().copy(
+                    copyCount = if (entity.releaseId != null) {
+                        countByReleaseId[entity.releaseId] ?: 1
+                    } else {
+                        1
+                    }
+                )
+            }
+        }
+    }
+
+    override fun observeItemById(id: Long): Flow<CollectionItem?> { //  TODO выглядит как дублирование
+        return dao.observeById(id).map { it?.toDomain() }
+    }
+
+    override suspend fun getItemById(id: Long): Outcome<CollectionItem?> { //  TODO выглядит как дублирование
+        return try {
+            val entity = dao.getById(id)
+            Outcome.Success(entity?.toDomain())
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
+        }
+    }
+
+    override suspend fun getOtherCopies(releaseId: Long, currentItemId: Long): List<CollectionItem> {
+        return dao.getAllByReleaseId(releaseId)
+            .filter { it.id != currentItemId }
+            .map { it.toDomain() }
+    }
+
+    override suspend fun isInCollection(releaseId: Long): Outcome<Boolean> {
+        return try {
+            val exists = dao.getByReleaseId(releaseId) != null
+            Outcome.Success(exists)
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
+        }
+    }
+
+    override suspend fun addToCollection(release: Release, format: Format, notes: String?): Outcome<Long> {
+        return try {
+            // Используем переданный format
+            val entity = release.toEntity(format = format, notes = notes)
+            val id = dao.insert(entity)
+            Outcome.Success(id)
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
+        }
+    }
+
+    override suspend fun addManualItem(
+        title: String,
+        artist: String,
+        year: Int?,
+        format: Format,
+        label: String?,
+        country: String?,
+        barcode: String?,
+        notes: String?,
+        photoPaths: List<String>
+    ): Outcome<Long> {
+        return try {
+            val entity = CollectionItemEntity(
+                releaseId = null,
+                title = title,
+                artist = artist,
+                year = year,
+                barcode = barcode,
+                coverImageUrl = photoPaths.firstOrNull(),
+                imageUrls = photoPaths.joinToString(",").ifBlank { null },
+                label = label,
+                rawFormat = format.name,
+                country = country,
+                releaseDate = null,
+                catalogNumber = null,
+                releaseNotes = null,
+                format = format.name,
+                addedAt = System.currentTimeMillis(),
+                userNotes = notes
+            )
+            val id = dao.insert(entity)
+            Outcome.Success(id)
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
+        }
+    }
+
+    override suspend fun updateItem(
+        id: Long,
+        title: String,
+        artist: String,
+        year: Int?,
+        format: Format,
+        label: String?,
+        country: String?,
+        barcode: String?,
+        notes: String?,
+        photoPaths: List<String>,
+        preserveDiscogsImages: List<String>
+    ): Outcome<Unit> {
+        return try {
+            val existing = dao.getById(id) ?: return Outcome.Failure(AppError.ResourceNotFound)
+            val allImages = photoPaths + preserveDiscogsImages
+
+            dao.update(
+                existing.copy(
+                    title = title,
+                    artist = artist,
+                    year = year,
+                    format = format.name,
+                    rawFormat = format.name,
+                    label = label,
+                    country = country,
+                    barcode = barcode,
+                    userNotes = notes,
+                    coverImageUrl = photoPaths.firstOrNull() ?: preserveDiscogsImages.firstOrNull() ?: existing.coverImageUrl,
+                    imageUrls = if (allImages.isNotEmpty()) allImages.joinToString(",") else existing.imageUrls
+                )
+            )
+            Outcome.Success(Unit)
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
+        }
+    }
+
+    override suspend fun removeFromCollection(id: Long): Outcome<Unit> {
+        return try {
+            dao.deleteById(id)
+            Outcome.Success(Unit)
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
+        }
+    }
+}
+
+private fun CollectionItemEntity.toDomain(): CollectionItem {
+    return CollectionItem(
+        id = id,
+        release = Release(
+            id = releaseId ?: 0L,
+            title = title,
+            artist = artist,
+            year = year,
+            barcode = barcode,
+            coverImageUrl = coverImageUrl,
+            imageUrls = imageUrls?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
+            label = label,
+            rawFormat = rawFormat,
+            country = country,
+            releaseDate = releaseDate,
+            catalogNumber = catalogNumber,
+            notes = releaseNotes,
+            tracklist = emptyList()
+        ),
+        format = try {
+            Format.valueOf(format)
+        } catch (e: IllegalArgumentException) {
+            Format.UNKNOWN
+        },
+        addedAt = addedAt,
+        notes = userNotes
+    )
+}
+
+private fun Release.toEntity(format: Format, notes: String?): CollectionItemEntity {
+    return CollectionItemEntity(
+        releaseId = id,
+        title = title,
+        artist = artist,
+        year = year,
+        barcode = barcode,
+        coverImageUrl = coverImageUrl,
+        imageUrls = imageUrls.joinToString(",").ifBlank { null },
+        label = label,
+        rawFormat = rawFormat,
+        country = country,
+        releaseDate = releaseDate,
+        catalogNumber = catalogNumber,
+        releaseNotes = notes,
+        format = format.name,
+        addedAt = System.currentTimeMillis(),
+        userNotes = notes
+    )
+}

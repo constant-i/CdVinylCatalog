@@ -6,7 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.domain.catalog.Release
 
 @Composable
 fun ReleaseSelectionRoute(

@@ -1,15 +1,13 @@
 package com.kai.cdvinylcatalog.feature.add.domain
 
-import com.kai.cdvinylcatalog.core.database.CollectionRepository
+import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.result.Outcome
 import javax.inject.Inject
 
-/**
- * Проверяет, есть ли релиз уже в коллекции пользователя.
- */
 class CheckCollectionUseCase @Inject constructor(
     private val repository: CollectionRepository
 ) {
-    suspend operator fun invoke(releaseId: Long): Boolean {
+    suspend operator fun invoke(releaseId: Long): Outcome<Boolean> {
         return repository.isInCollection(releaseId)
     }
 }

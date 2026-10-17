@@ -1,6 +1,7 @@
 package com.kai.cdvinylcatalog.core.model
 
-import com.kai.cdvinylcatalog.core.model.error.AppError
+import com.kai.cdvinylcatalog.domain.result.AppError
+
 
 /**
  * UI-сообщения — то, что показывается пользователю.

@@ -1,6 +1,7 @@
 package com.kai.cdvinylcatalog.feature.add.selection
 
-import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.domain.catalog.Release
+
 
 object ReleaseSelectionContract {
 

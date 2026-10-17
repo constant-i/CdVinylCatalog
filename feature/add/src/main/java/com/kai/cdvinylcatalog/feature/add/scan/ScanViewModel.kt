@@ -3,6 +3,7 @@ package com.kai.cdvinylcatalog.feature.add.scan
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.feature.add.domain.SearchReleaseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -43,22 +44,24 @@ class ScanViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            searchRelease(barcode)
-                .onSuccess { releases ->
+            when (val outcome = searchRelease(barcode)) {
+                is Outcome.Success -> {
                     _state.update {
                         it.copy(isLoading = false, scannedBarcode = barcode)
                     }
-                    if (releases.isEmpty()) {
+                    if (outcome.data.isEmpty()) {
                         _effect.send(ScanContract.Effect.ShowToast(UiMessage.ReleaseNotFound))
                     } else {
-                        _effect.send(ScanContract.Effect.NavigateToSelection(releases))
+                        _effect.send(ScanContract.Effect.NavigateToSelection(outcome.data))
                     }
                 }
-                .onFailure { e ->
+                is Outcome.Failure -> {
                     _state.update {
-                        it.copy(isLoading = false, error = e.message)
+                        it.copy(isLoading = false, error = outcome.error)
                     }
+                    _effect.send(ScanContract.Effect.ShowToast(UiMessage.Error(outcome.error)))
                 }
+            }
         }
     }
 

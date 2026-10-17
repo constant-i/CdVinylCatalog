@@ -3,12 +3,14 @@ package com.kai.cdvinylcatalog.feature.add.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.UiMessage
-import com.kai.cdvinylcatalog.core.model.parseFormat
-import com.kai.cdvinylcatalog.core.network.DiscogsRepository
+import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.catalog.parseFormat
+import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.feature.add.domain.AddToCollectionUseCase
 import com.kai.cdvinylcatalog.feature.add.domain.CheckCollectionUseCase
+import com.kai.cdvinylcatalog.feature.add.domain.GetReleaseDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +24,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ReleaseDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: DiscogsRepository,
+    private val getReleaseDetails: GetReleaseDetailsUseCase,
     private val checkCollection: CheckCollectionUseCase,
     private val addToCollection: AddToCollectionUseCase
 ) : ViewModel() {
@@ -43,9 +45,13 @@ class ReleaseDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            repository.getReleaseDetails(releaseId)
-                .onSuccess { release ->
-                    val inCollection = checkCollection(release.id)
+            when (val outcome = getReleaseDetails(releaseId)) {
+                is Outcome.Success -> {
+                    val release = outcome.data
+                    val inCollection = when (val checkOutcome = checkCollection(release.id)) {
+                        is Outcome.Success -> checkOutcome.data
+                        is Outcome.Failure -> false
+                    }
                     _state.update {
                         it.copy(
                             isLoading = false,
@@ -54,11 +60,12 @@ class ReleaseDetailsViewModel @Inject constructor(
                         )
                     }
                 }
-                .onFailure { e ->
+                is Outcome.Failure -> {
                     _state.update {
-                        it.copy(isLoading = false, error = e.message)
+                        it.copy(isLoading = false, error = outcome.error)
                     }
                 }
+            }
         }
     }
 
@@ -129,16 +136,18 @@ class ReleaseDetailsViewModel @Inject constructor(
         _state.update { it.copy(userNotes = notes) }
     }
 
-    private fun addRelease(release: com.kai.cdvinylcatalog.core.model.Release, format: Format) {
+    private fun addRelease(release: Release, format: Format) {
         val notes = _state.value.userNotes.ifBlank { null }
         viewModelScope.launch {
-            try {
-                addToCollection(release, format, notes)
-                _state.update { it.copy(justAdded = true, isInCollection = true) }
-                _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.AddedSuccessfully(release.title)))
-                _effect.send(ReleaseDetailsContract.Effect.NavigateToCollection)
-            } catch (e: Exception) {
-                _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.SaveFailed))
+            when (val outcome = addToCollection(release, format, notes)) {
+                is Outcome.Success -> {
+                    _state.update { it.copy(justAdded = true, isInCollection = true) }
+                    _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.AddedSuccessfully(release.title)))
+                    _effect.send(ReleaseDetailsContract.Effect.NavigateToCollection)
+                }
+                is Outcome.Failure -> {
+                    _effect.send(ReleaseDetailsContract.Effect.ShowToast(UiMessage.Error(outcome.error)))
+                }
             }
         }
     }

@@ -3,6 +3,7 @@ package com.kai.cdvinylcatalog.feature.add.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.feature.add.domain.SearchByTextUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -41,16 +42,20 @@ class SearchViewModel @Inject constructor(
         val query = _state.value.query
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
-            searchByText(query)
-                .onSuccess { releases ->
+            when (val outcome = searchByText(query)) {
+                is Outcome.Success -> {
                     _state.update { it.copy(isLoading = false, hasSearched = true) }
-                    if (releases.isNotEmpty()) {
-                        _effect.send(SearchContract.Effect.NavigateToSelection(releases))
+                    if (outcome.data.isNotEmpty()) {
+                        _effect.send(SearchContract.Effect.NavigateToSelection(outcome.data))
                     }
                 }
-                .onFailure { e ->
-                    _state.update { it.copy(isLoading = false, hasSearched = true, error = e.message) }
+                is Outcome.Failure -> {
+                    _state.update {
+                        it.copy(isLoading = false, hasSearched = true, error = outcome.error)
+                    }
+                    _effect.send(SearchContract.Effect.ShowToast(UiMessage.Error(outcome.error)))
                 }
+            }
         }
     }
 

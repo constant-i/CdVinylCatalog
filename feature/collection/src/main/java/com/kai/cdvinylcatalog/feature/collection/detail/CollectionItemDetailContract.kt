@@ -1,9 +1,10 @@
 package com.kai.cdvinylcatalog.feature.collection.detail
 
-import com.kai.cdvinylcatalog.core.model.CollectionItem
-import com.kai.cdvinylcatalog.core.model.Release
-import com.kai.cdvinylcatalog.core.model.Track
 import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.catalog.Track
+import com.kai.cdvinylcatalog.domain.collection.CollectionItem
+import com.kai.cdvinylcatalog.domain.result.AppError
 
 object CollectionItemDetailContract {
 
@@ -13,7 +14,7 @@ object CollectionItemDetailContract {
         val displayRelease: Release? = null,
         val isLoadingDetails: Boolean = false,
         val isDeleting: Boolean = false,
-        val error: String? = null,
+        val error: AppError? = null,
         val otherCopies: List<CollectionItem> = emptyList(),
     ) {
         val tracklist: List<Track>

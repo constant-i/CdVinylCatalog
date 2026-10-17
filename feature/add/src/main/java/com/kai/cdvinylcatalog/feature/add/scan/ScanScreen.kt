@@ -25,10 +25,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.core.ui.asText
+import com.kai.cdvinylcatalog.domain.result.AppError
 import com.kai.cdvinylcatalog.feature.add.R
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,6 +44,7 @@ fun ScanScreen(
     onNavigateToSearch: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -63,7 +67,7 @@ fun ScanScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = state.error,
+                            text = state.error.asText(context),
                             color = Color.White,
                             style = MaterialTheme.typography.bodyLarge
                         )
@@ -151,7 +155,7 @@ private fun ScanScreenPreview() {
             state = ScanContract.State(
                 isLoading = false,
                 scannedBarcode = null,
-                error = "Нет доступа к камере"
+                error = AppError.Unknown
             ),
             onIntent = {},
             onNavigateBack = {},

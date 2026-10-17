@@ -32,6 +32,7 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":domain"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose)

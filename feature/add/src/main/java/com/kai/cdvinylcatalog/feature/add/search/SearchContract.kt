@@ -1,7 +1,8 @@
 package com.kai.cdvinylcatalog.feature.add.search
 
-import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.result.AppError
 
 object SearchContract {
 
@@ -9,7 +10,7 @@ object SearchContract {
         val query: String = "",
         val isLoading: Boolean = false,
         val hasSearched: Boolean = false,
-        val error: String? = null
+        val error: AppError? = null
     )
 
     sealed class Intent {

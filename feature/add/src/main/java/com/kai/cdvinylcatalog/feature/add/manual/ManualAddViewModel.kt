@@ -3,9 +3,10 @@ package com.kai.cdvinylcatalog.feature.add.manual
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.cdvinylcatalog.core.database.CollectionRepository
-import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.result.Outcome
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,26 +105,32 @@ class ManualAddViewModel @Inject constructor(
 
     private fun loadExistingItem(id: Long) {
         viewModelScope.launch {
-            val item = repository.getItemById(id)
-            if (item != null) {
-                // Разделяем фото: свои (локальные) vs Discogs (URL)
-                val allImages = item.release.imageUrls
-                val userPhotos = allImages.filter { !it.startsWith("http") }
-                val discogsImages = allImages.filter { it.startsWith("http") }
+            when (val outcome = repository.getItemById(id)) {
+                is Outcome.Success -> {
+                    val item = outcome.data
+                    if (item != null) {
+                        val allImages = item.release.imageUrls
+                        val userPhotos = allImages.filter { !it.startsWith("http") }
+                        val discogsImages = allImages.filter { it.startsWith("http") }
 
-                update {
-                    it.copy(
-                        title = item.release.title,
-                        artist = item.release.artist,
-                        year = item.release.year?.toString() ?: "",
-                        format = item.format,
-                        label = item.release.label ?: "",
-                        country = item.release.country ?: "",
-                        barcode = item.release.barcode ?: "",
-                        notes = item.notes ?: "",
-                        photoPaths = userPhotos,
-                        discogsImages = discogsImages
-                    )
+                        update {
+                            it.copy(
+                                title = item.release.title,
+                                artist = item.release.artist,
+                                year = item.release.year?.toString() ?: "",
+                                format = item.format,
+                                label = item.release.label ?: "",
+                                country = item.release.country ?: "",
+                                barcode = item.release.barcode ?: "",
+                                notes = item.notes ?: "",
+                                photoPaths = userPhotos,
+                                discogsImages = discogsImages
+                            )
+                        }
+                    }
+                }
+                is Outcome.Failure -> {
+                    _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.Error(outcome.error)))
                 }
             }
         }
@@ -233,51 +240,61 @@ class ManualAddViewModel @Inject constructor(
 
         viewModelScope.launch {
             update { it.copy(isSaving = true, error = null) }
-            try {
-                val itemId = when (val mode = s.mode) {
-                    is ManualAddContract.Mode.Create -> {
-                        repository.addManualItem(
-                            title = s.title.trim(),
-                            artist = s.artist.trim(),
-                            year = yearInt,
-                            format = s.format,
-                            label = s.label.ifBlank { null },
-                            country = s.country.ifBlank { null },
-                            barcode = s.barcode.ifBlank { null },
-                            notes = s.notes.ifBlank { null },
-                            photoPaths = s.photoPaths
-                        )
-                    }
-                    is ManualAddContract.Mode.Edit -> {
-                        repository.updateManualItem(
-                            id = mode.itemId,
-                            title = s.title.trim(),
-                            artist = s.artist.trim(),
-                            year = yearInt,
-                            format = s.format,
-                            label = s.label.ifBlank { null },
-                            country = s.country.ifBlank { null },
-                            barcode = s.barcode.ifBlank { null },
-                            notes = s.notes.ifBlank { null },
-                            photoPaths = s.photoPaths,
-                            preserveDiscogsImages = s.discogsImages
-                        )
-                        mode.itemId
-                    }
-                }
-                update { it.copy(isSaving = false) }
 
-                when (s.mode) {
-                    is ManualAddContract.Mode.Create -> {
-                        _effect.send(ManualAddContract.Effect.NavigateToDetails(itemId))
-                    }
-                    is ManualAddContract.Mode.Edit -> {
-                        _effect.send(ManualAddContract.Effect.NavigateBack)
+            when (val mode = s.mode) {
+                is ManualAddContract.Mode.Create -> {
+                    // Вызываем addManualItem (возвращает Outcome<Long>)
+                    val outcome = repository.addManualItem(
+                        title = s.title.trim(),
+                        artist = s.artist.trim(),
+                        year = yearInt,
+                        format = s.format,
+                        label = s.label.ifBlank { null },
+                        country = s.country.ifBlank { null },
+                        barcode = s.barcode.ifBlank { null },
+                        notes = s.notes.ifBlank { null },
+                        photoPaths = s.photoPaths
+                    )
+                    // Обрабатываем результат тут же
+                    when (outcome) {
+                        is Outcome.Success -> {
+                            update { it.copy(isSaving = false) }
+                            _effect.send(ManualAddContract.Effect.NavigateToDetails(itemId = outcome.data))
+                        }
+                        is Outcome.Failure -> {
+                            update { it.copy(isSaving = false, error = outcome.error) }
+                            _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.Error(outcome.error)))
+                        }
                     }
                 }
-            } catch (e: Exception) {
-                update { it.copy(isSaving = false, error = e.message) }
-                _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.SaveFailed))
+
+                is ManualAddContract.Mode.Edit -> {
+                    // Вызываем updateItem (возвращает Outcome<Unit>)
+                    val outcome = repository.updateItem(
+                        id = mode.itemId,
+                        title = s.title.trim(),
+                        artist = s.artist.trim(),
+                        year = yearInt,
+                        format = s.format,
+                        label = s.label.ifBlank { null },
+                        country = s.country.ifBlank { null },
+                        barcode = s.barcode.ifBlank { null },
+                        notes = s.notes.ifBlank { null },
+                        photoPaths = s.photoPaths,
+                        preserveDiscogsImages = s.discogsImages
+                    )
+                    // Обрабатываем результат
+                    when (outcome) {
+                        is Outcome.Success -> {
+                            update { it.copy(isSaving = false) }
+                            _effect.send(ManualAddContract.Effect.NavigateBack)
+                        }
+                        is Outcome.Failure -> {
+                            update { it.copy(isSaving = false, error = outcome.error) }
+                            _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.Error(outcome.error)))
+                        }
+                    }
+                }
             }
         }
     }

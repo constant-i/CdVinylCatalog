@@ -39,12 +39,13 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.8"  // <-- ДОБАВИТЬ
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
 }
 
 dependencies {
     // Наши модули
+    implementation(project(":domain"))
     implementation(project(":core:model"))
     implementation(project(":core:network"))
     implementation(project(":core:database"))

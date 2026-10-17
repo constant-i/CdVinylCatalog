@@ -2,9 +2,10 @@ package com.kai.cdvinylcatalog.feature.collection.crate
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.cdvinylcatalog.core.database.CollectionRepository
-import com.kai.cdvinylcatalog.core.database.SortOrder
-import com.kai.cdvinylcatalog.core.model.CollectionItem
+import com.kai.cdvinylcatalog.domain.collection.SortOrder
+import com.kai.cdvinylcatalog.domain.collection.CollectionItem
+import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.result.AppError
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -46,8 +47,8 @@ class CollectionViewModel @Inject constructor(
                 .onEach { items ->
                     _state.update { it.copy(isLoading = false, items = items, error = null) }
                 }
-                .catch { e ->
-                    _state.update { it.copy(isLoading = false, error = e.message) }
+                .catch { _ ->
+                    _state.update { it.copy(isLoading = false, error = AppError.Unknown) }
                 }
                 .collect()
         }

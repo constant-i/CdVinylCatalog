@@ -1,7 +1,7 @@
 package com.kai.cdvinylcatalog.core.network.dto
 
-import com.kai.cdvinylcatalog.core.model.Release
-import com.kai.cdvinylcatalog.core.model.Track
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.catalog.Track
 
 /**
  * Маппер DTO → Domain модель.

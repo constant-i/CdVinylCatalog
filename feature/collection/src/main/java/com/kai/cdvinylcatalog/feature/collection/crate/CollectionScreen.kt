@@ -48,11 +48,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import com.kai.cdvinylcatalog.core.database.SortOrder
-import com.kai.cdvinylcatalog.core.model.CollectionItem
+import com.kai.cdvinylcatalog.domain.collection.SortOrder
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
+import com.kai.cdvinylcatalog.domain.collection.CollectionItem
 import com.kai.cdvinylcatalog.feature.collection.R
 
 @OptIn(ExperimentalMaterial3Api::class)

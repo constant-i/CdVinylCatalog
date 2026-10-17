@@ -26,9 +26,11 @@ android {
 }
 
 dependencies {
+    implementation(project(":domain"))
+    implementation(project(":core:model"))
+
     // Core
     implementation(libs.androidx.core.ktx)
-    implementation(project(":core:model"))
 
     // Room
     implementation(libs.bundles.room)

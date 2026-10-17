@@ -11,7 +11,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.feature.collection.crate.CollectionRoute
 import com.kai.cdvinylcatalog.feature.collection.detail.CollectionItemDetailRoute
 import com.kai.cdvinylcatalog.feature.add.scan.ScanRoute

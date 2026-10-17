@@ -48,16 +48,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
-import com.kai.cdvinylcatalog.core.model.Format
-import com.kai.cdvinylcatalog.core.model.Release
-import com.kai.cdvinylcatalog.core.model.Track
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.core.ui.asText
+import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.catalog.Track
 import com.kai.cdvinylcatalog.feature.add.R
 import kotlinx.coroutines.launch
 
@@ -72,6 +74,7 @@ fun ReleaseDetailsScreen(
     val keyboardController = LocalSoftwareKeyboardController.current
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -110,7 +113,7 @@ fun ReleaseDetailsScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = state.error,
+                        text = state.error.asText(context),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyLarge
                     )

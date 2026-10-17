@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:model"))
+    implementation(project(":domain"))
     implementation(libs.bundles.network)
     implementation(libs.kotlinx.coroutines.core)
 

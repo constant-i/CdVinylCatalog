@@ -3,9 +3,10 @@ package com.kai.cdvinylcatalog.feature.collection.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.cdvinylcatalog.core.database.CollectionRepository
 import com.kai.cdvinylcatalog.core.model.UiMessage
-import com.kai.cdvinylcatalog.core.model.mergeWith
+import com.kai.cdvinylcatalog.domain.catalog.mergeWith  // ← из :domain
+import com.kai.cdvinylcatalog.domain.repository.CollectionRepository  // ← интерфейс из :domain
+import com.kai.cdvinylcatalog.domain.result.Outcome  // ← для Outcome
 import com.kai.cdvinylcatalog.feature.collection.domain.GetReleaseDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -20,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CollectionItemDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: CollectionRepository,
+    private val repository: CollectionRepository,  // ← интерфейс
     private val getReleaseDetails: GetReleaseDetailsUseCase
 ) : ViewModel() {
 
@@ -68,9 +69,6 @@ class CollectionItemDetailViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Загружает другие копии того же релиза.
-     */
     private fun loadOtherCopies(releaseId: Long, currentItemId: Long) {
         viewModelScope.launch {
             val copies = repository.getOtherCopies(releaseId, currentItemId)
@@ -81,8 +79,11 @@ class CollectionItemDetailViewModel @Inject constructor(
     private fun loadDetails(releaseId: Long) {
         viewModelScope.launch {
             _state.update { it.copy(isLoadingDetails = true) }
-            getReleaseDetails(releaseId)
-                .onSuccess { discogsRelease ->
+
+            // ← ЗАМЕНА onSuccess/onFailure на when(outcome)
+            when (val outcome = getReleaseDetails(releaseId)) {
+                is Outcome.Success -> {
+                    val discogsRelease = outcome.data
                     _state.update { current ->
                         current.copy(
                             isLoadingDetails = false,
@@ -91,9 +92,10 @@ class CollectionItemDetailViewModel @Inject constructor(
                         )
                     }
                 }
-                .onFailure { e ->
-                    _state.update { it.copy(isLoadingDetails = false, error = e.message) }
+                is Outcome.Failure -> {
+                    _state.update { it.copy(isLoadingDetails = false, error = outcome.error) }
                 }
+            }
         }
     }
 
@@ -122,8 +124,17 @@ class CollectionItemDetailViewModel @Inject constructor(
         val item = _state.value.collectionItem ?: return
         viewModelScope.launch {
             _state.update { it.copy(isDeleting = true) }
-            repository.removeFromCollection(item.id)
-            _effect.send(CollectionItemDetailContract.Effect.NavigateBack)
+
+            // ← Обработка Outcome
+            when (val outcome = repository.removeFromCollection(item.id)) {
+                is Outcome.Success -> {
+                    _effect.send(CollectionItemDetailContract.Effect.NavigateBack)
+                }
+                is Outcome.Failure -> {
+                    _state.update { it.copy(isDeleting = false) }
+                    _effect.send(CollectionItemDetailContract.Effect.ShowToast(UiMessage.Error(outcome.error)))
+                }
+            }
         }
     }
 

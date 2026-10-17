@@ -1,7 +1,7 @@
 package com.kai.cdvinylcatalog.core.ui
 
 import android.content.Context
-import com.kai.cdvinylcatalog.core.model.error.AppError
+import com.kai.cdvinylcatalog.domain.result.AppError
 
 /**
  * Превращает доменную ошибку в текст для пользователя.

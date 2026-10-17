@@ -1,6 +1,9 @@
 package com.kai.cdvinylcatalog.core.network
 
-import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
+import com.kai.cdvinylcatalog.domain.result.AppError
+import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.core.network.dto.toDomain
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,87 +14,65 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Репозиторий для работы с Discogs API.
- * Инкапсулирует вызовы API, обработку ошибок и маппинг.
+ * Реализация ReleaseRepository для работы с Discogs API.
+ *
+ * Возвращает Outcome<T> с доменным AppError — никакие технические
+ * детали (HTTP-коды, исключения) не утекают наружу.
  */
 @Singleton
 class DiscogsRepository @Inject constructor(
     private val api: DiscogsApi
-) {
+) : ReleaseRepository {
 
-    /**
-     * Ищет релизы по штрихкоду.
-     *
-     * @param barcode штрихкод с диска
-     * @return ScanResult.Found или ScanResult.Error
-     */
-    suspend fun searchByBarcode(barcode: String): Result<List<Release>> =
-        withContext(Dispatchers.IO) {
-            try {
-                val response = api.searchByBarcode(
-                    barcode = barcode,
-                    token = NetworkConstants.DISCOGS_TOKEN
-                )
-                Result.success(response.results.map { it.toDomain() })
-            } catch (e: UnknownHostException) {
-                Result.failure(Exception("Нет подключения к интернету"))
-            } catch (e: SocketTimeoutException) {
-                Result.failure(Exception("Сервер не отвечает"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Ошибка сервера: ${e.code()}"))
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
+    override suspend fun searchByBarcode(barcode: String): Outcome<List<Release>> =
+        safeApiCall {
+            api.searchByBarcode(
+                barcode = barcode,
+                token = NetworkConstants.DISCOGS_TOKEN
+            ).results.map { it.toDomain() }
+        }
+
+    override suspend fun searchByText(query: String): Outcome<List<Release>> =
+        safeApiCall {
+            api.searchByText(
+                query = query.trim(),
+                token = NetworkConstants.DISCOGS_TOKEN
+            ).results.map { it.toDomain() }
+        }
+
+    override suspend fun getReleaseDetails(releaseId: Long): Outcome<Release> =
+        safeApiCall {
+            api.getReleaseDetails(
+                releaseId = releaseId,
+                token = NetworkConstants.DISCOGS_TOKEN
+            ).toDomain()
         }
 
     /**
-     * Поиск информации о конкретном релизе по ID релиза в базе Discogs (releaseId).
-     *
-     * @param releaseId ID релиза в базе Discogs
-     * @return ScanResult.Found или ScanResult.Error
+     * Общий безопасный вызов API.
+     * Маппит исключения в доменный AppError.
      */
-    suspend fun getReleaseDetails(releaseId: Long): Result<Release> =
-        withContext(Dispatchers.IO) {
-            try {
-                val dto = api.getReleaseDetails(
-                    releaseId = releaseId,
-                    token = NetworkConstants.DISCOGS_TOKEN
-                )
-                Result.success(dto.toDomain())
-            } catch (e: UnknownHostException) {
-                Result.failure(Exception("Нет подключения к интернету"))
-            } catch (e: SocketTimeoutException) {
-                Result.failure(Exception("Сервер не отвечает"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Ошибка сервера: ${e.code()}"))
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
+    private suspend inline fun <T> safeApiCall(
+        crossinline block: suspend () -> T
+    ): Outcome<T> = withContext(Dispatchers.IO) {
+        try {
+            Outcome.Success(block())
+        } catch (e: UnknownHostException) {
+            Outcome.Failure(AppError.NoConnection)
+        } catch (e: SocketTimeoutException) {
+            Outcome.Failure(AppError.ServerUnavailable)
+        } catch (e: HttpException) {
+            Outcome.Failure(mapHttpException(e))
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
         }
+    }
 
-    /**
-     * Ищет релизы по текстовому запросу в базе Discogs.
-     *
-     * @param query поисковая строка (обрезается от пробелов)
-     * @return [Result.success] со списком релизов или [Result.failure] с причиной ошибки
-     */
-    suspend fun searchByText(query: String): Result<List<Release>> =
-        withContext(Dispatchers.IO) {
-            try {
-                val response = api.searchByText(
-                    query = query.trim(),
-                    token = NetworkConstants.DISCOGS_TOKEN
-                )
-                val releases = response.results.map { it.toDomain() }
-                Result.success(releases)
-            } catch (e: UnknownHostException) {
-                Result.failure(Exception("Нет подключения к интернету"))
-            } catch (e: SocketTimeoutException) {
-                Result.failure(Exception("Сервер не отвечает"))
-            } catch (e: HttpException) {
-                Result.failure(Exception("Ошибка сервера: ${e.code()}"))
-            } catch (e: Exception) {
-                Result.failure(e)
-            }
-        }
+    private fun mapHttpException(e: HttpException): AppError = when (e.code()) {
+        401, 403 -> AppError.AuthenticationRequired
+        404 -> AppError.ResourceNotFound
+        429 -> AppError.RateLimitExceeded
+        in 500..599 -> AppError.ServerUnavailable
+        else -> AppError.Unknown
+    }
 }

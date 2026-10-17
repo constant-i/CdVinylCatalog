@@ -1,8 +1,9 @@
 package com.kai.cdvinylcatalog.feature.add.details
 
-import com.kai.cdvinylcatalog.core.model.Format
-import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.result.AppError
 
 object ReleaseDetailsContract {
 
@@ -10,7 +11,7 @@ object ReleaseDetailsContract {
         val isLoading: Boolean = true,
         val release: Release? = null,
         val isInCollection: Boolean = false,
-        val error: String? = null,
+        val error: AppError? = null,
         val selectedFormat: Format = Format.CD,
         val showFormatPicker: Boolean = false,
         val askAddAnother: Boolean = false,

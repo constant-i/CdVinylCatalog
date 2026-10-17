@@ -1,4 +1,4 @@
-package com.kai.cdvinylcatalog.core.database
+package com.kai.cdvinylcatalog.domain.collection
 
 enum class SortOrder {
     ADDED_DESC,      // по дате добавления (новые сверху)

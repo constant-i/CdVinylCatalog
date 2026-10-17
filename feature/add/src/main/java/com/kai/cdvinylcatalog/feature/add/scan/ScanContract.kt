@@ -1,14 +1,15 @@
 package com.kai.cdvinylcatalog.feature.add.scan
 
-import com.kai.cdvinylcatalog.core.model.Release
 import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.result.AppError
 
 object ScanContract {
 
     data class State(
         val isLoading: Boolean = false,
         val scannedBarcode: String? = null,
-        val error: String? = null
+        val error: AppError? = null
     )
 
     sealed class Intent {

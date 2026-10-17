@@ -1,8 +1,10 @@
 package com.kai.cdvinylcatalog.feature.add.domain
 
-import com.kai.cdvinylcatalog.core.database.CollectionRepository
-import com.kai.cdvinylcatalog.core.model.Format
-import com.kai.cdvinylcatalog.core.model.Release
+import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.result.Outcome
+
 import javax.inject.Inject
 
 /**
@@ -20,7 +22,7 @@ class AddToCollectionUseCase @Inject constructor(
         release: Release,
         format: Format,
         notes: String? = null
-    ): Long {
+    ): Outcome<Long> {
         return repository.addToCollection(release, format, notes)
     }
 }

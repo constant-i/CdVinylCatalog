@@ -64,8 +64,8 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
-import com.kai.cdvinylcatalog.core.model.Format
 import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.feature.add.R
 import com.yalantis.ucrop.UCrop
 import com.yalantis.ucrop.model.AspectRatio

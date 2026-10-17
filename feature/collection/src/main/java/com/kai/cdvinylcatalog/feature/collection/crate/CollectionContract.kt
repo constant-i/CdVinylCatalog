@@ -1,7 +1,8 @@
 package com.kai.cdvinylcatalog.feature.collection.crate
 
-import com.kai.cdvinylcatalog.core.database.SortOrder
-import com.kai.cdvinylcatalog.core.model.CollectionItem
+import com.kai.cdvinylcatalog.domain.collection.SortOrder
+import com.kai.cdvinylcatalog.domain.collection.CollectionItem
+import com.kai.cdvinylcatalog.domain.result.AppError
 
 object CollectionContract {
 
@@ -9,7 +10,7 @@ object CollectionContract {
         val isLoading: Boolean = true,
         val items: List<CollectionItem> = emptyList(),
         val sortOrder: SortOrder = SortOrder.ADDED_DESC,
-        val error: String? = null
+        val error: AppError? = null
     ) {
         val isEmpty: Boolean
             get() = !isLoading && items.isEmpty()
