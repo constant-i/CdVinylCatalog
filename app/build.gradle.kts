@@ -46,10 +46,9 @@ android {
 dependencies {
     // Наши модули
     implementation(project(":domain"))
-    implementation(project(":core:model"))
     implementation(project(":core:network"))
     implementation(project(":core:database"))
-    implementation(project(":core:ui"))
+    implementation(project(":common-ui"))
     implementation(project(":feature:add"))
     implementation(project(":feature:collection"))
 

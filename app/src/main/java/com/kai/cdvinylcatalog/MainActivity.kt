@@ -10,10 +10,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.common.ui.OrientationHandler
 import com.kai.cdvinylcatalog.navigation.CdVinylNavHost
-import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 import dagger.hilt.android.AndroidEntryPoint
-import com.kai.cdvinylcatalog.core.ui.OrientationHandler
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

@@ -49,9 +49,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.kai.cdvinylcatalog.domain.collection.SortOrder
-import com.kai.cdvinylcatalog.core.ui.CdVinylCatalogTheme
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
+import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
 import com.kai.cdvinylcatalog.feature.collection.R
 

@@ -37,10 +37,10 @@
 
 ```text
 :app                    — точка входа, DI, навигация
-:core:model             — доменные модели (Release, Track, Format)
+:domain                 — доменные модели (Release, Track, Format)
 :core:network           — Retrofit, Discogs API, мапперы
 :core:database          — Room (в разработке)
-:core:ui                — общие Compose-компоненты, тема
+:common-ui              — общие Compose-компоненты, тема
 :feature:add            — экраны сканирования, поиска по тексту, добавления в ручную (MVI)
 :feature:collection     — экран коллекции (в разработке)
 ```
@@ -55,7 +55,7 @@ graph TD
     Network[:core:network]
     Database[:core:database]
     Model[:core:model]
-    Ui[:core:ui]
+    Ui[:common-ui]
     
     Api[Discogs API]
     Room[Room]

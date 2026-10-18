@@ -38,6 +38,8 @@ espresso = "3.5.1"
 turbine = "1.0.0"
 mockk = "1.13.9"
 coroutinesTest = "1.7.3"
+appcompat = "1.6.1"
+material = "1.10.0"
 
 [libraries]
 # Core
@@ -103,6 +105,8 @@ coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coi
 
 # uCrop
 ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "uCrop" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

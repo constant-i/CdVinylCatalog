@@ -2,7 +2,7 @@ package com.kai.cdvinylcatalog.feature.add.scan
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.feature.add.domain.SearchReleaseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

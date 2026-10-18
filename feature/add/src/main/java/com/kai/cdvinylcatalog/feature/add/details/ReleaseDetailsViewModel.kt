@@ -3,7 +3,7 @@ package com.kai.cdvinylcatalog.feature.add.details
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.parseFormat

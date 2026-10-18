@@ -25,10 +25,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "CdVinylCatalog"
 include(":app")
-include(":core:model")
 include(":core:network")
 include(":core:database")
-include(":core:ui")
+include(":common-ui")
 include(":feature:add")
 include(":feature:collection")
 include(":domain")

@@ -1,6 +1,6 @@
 package com.kai.cdvinylcatalog.feature.collection.detail
 
-import com.kai.cdvinylcatalog.core.model.UiMessage
+import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.Track
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
