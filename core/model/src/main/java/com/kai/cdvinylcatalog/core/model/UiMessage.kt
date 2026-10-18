@@ -11,8 +11,7 @@ import com.kai.cdvinylcatalog.domain.result.AppError
  * - Бизнес-сообщения — результат операции не про ошибку.
  * - UI-нотификации — обратная связь по действиям пользователя.
  *
- * Живёт в Domain, потому что используется в Effect ViewModel,
- * но не содержит Android-зависимостей. Маппинг в строку — в :common-ui.
+ * Не содержит Android-зависимостей. Маппинг в строку — в :common-ui.
  */
 sealed interface UiMessage {
 

@@ -1,7 +1,7 @@
 package com.kai.cdvinylcatalog.core.database.converter
 
 import androidx.room.TypeConverter
-import com.kai.cdvinylcatalog.core.model.Format
+import com.kai.cdvinylcatalog.domain.catalog.Format
 
 class FormatConverter {
 
