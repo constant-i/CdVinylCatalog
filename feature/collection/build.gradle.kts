@@ -34,8 +34,8 @@ android {
 
 dependencies {
     implementation(project(":common-ui"))
-    implementation(project(":core:network"))
-    implementation(project(":core:database"))
+    implementation(project(":data:network"))
+    implementation(project(":data:database"))
     implementation(project(":domain"))
 
     // Compose

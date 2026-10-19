@@ -1,7 +1,7 @@
 package com.kai.cdvinylcatalog.feature.add.domain
 
 import com.kai.cdvinylcatalog.domain.catalog.Release
-import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
+import com.kai.cdvinylcatalog.domain.repository.ReleaseRepositoryImpl
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import javax.inject.Inject
 
@@ -11,7 +11,7 @@ import javax.inject.Inject
  * Валидация запроса — на уровне UI.
  */
 class SearchByTextUseCase @Inject constructor(
-    private val repository: ReleaseRepository
+    private val repository: ReleaseRepositoryImpl
 ) {
     suspend operator fun invoke(query: String): Outcome<List<Release>> =
         repository.searchByText(query)

@@ -1,0 +1,19 @@
+package com.kai.cdvinylcatalog.data.database.converter
+
+import androidx.room.TypeConverter
+import com.kai.cdvinylcatalog.domain.catalog.Format
+
+class FormatConverter {
+
+    @TypeConverter
+    fun fromFormat(format: Format): String = format.name
+
+    @TypeConverter
+    fun toFormat(value: String): Format {
+        return try {
+            Format.valueOf(value)
+        } catch (e: IllegalArgumentException) {
+            Format.UNKNOWN
+        }
+    }
+}
