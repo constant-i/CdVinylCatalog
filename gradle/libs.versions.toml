@@ -41,6 +41,9 @@ coroutinesTest = "1.7.3"
 appcompat = "1.6.1"
 material = "1.10.0"
 
+# Paging
+paging = "3.2.1"
+
 [libraries]
 # Core
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -108,6 +111,12 @@ ucrop = { group = "com.github.yalantis", name = "ucrop", version.ref = "uCrop" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
+# Paging
+androidx-paging-runtime = { group = "androidx.paging", name = "paging-runtime", version.ref = "paging" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "paging" }
+androidx-room-paging = { group = "androidx.room", name = "room-paging", version.ref = "room" }
+androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
@@ -133,7 +142,12 @@ network = [
 ]
 room = [
     "androidx-room-runtime",
-    "androidx-room-ktx"
+    "androidx-room-ktx",
+    "androidx-room-paging"
+]
+paging = [
+    "androidx-paging-runtime",
+    "androidx-paging-compose"
 ]
 camera = [
     "androidx-camera-core",

@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.domain.repository
 
+import androidx.paging.PagingData
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
@@ -9,11 +10,14 @@ import kotlinx.coroutines.flow.Flow
 
 interface CollectionRepository {
 
-    fun observeAll(): Flow<List<CollectionItem>>
+    // Изменено: теперь возвращает PagingData
+    fun observeAll(): Flow<PagingData<CollectionItem>>
+
+    // Изменено: теперь возвращает PagingData
+    fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>>
+
     fun observeItemById(id: Long): Flow<CollectionItem?>
     suspend fun getItemById(id: Long): Outcome<CollectionItem?>
-
-    fun getItems(sortOrder: SortOrder): Flow<List<CollectionItem>>
 
     suspend fun getOtherCopies(releaseId: Long, currentItemId: Long): List<CollectionItem>
 
@@ -29,7 +33,7 @@ interface CollectionRepository {
         title: String,
         artist: String,
         year: Int?,
-        format: com.kai.cdvinylcatalog.domain.catalog.Format,
+        format: Format,
         label: String?,
         country: String?,
         barcode: String?,
@@ -42,7 +46,7 @@ interface CollectionRepository {
         title: String,
         artist: String,
         year: Int?,
-        format: com.kai.cdvinylcatalog.domain.catalog.Format,
+        format: Format,
         label: String?,
         country: String?,
         barcode: String?,

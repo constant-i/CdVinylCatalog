@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Collection Screen -->
-    <string name="collection_title">Моя коллекция (%1$d)</string>
+    <string name="collection_title">Моя коллекция</string>
     <string name="collection_empty">Коллекция пуста</string>
     <string name="collection_empty_hint">Отсканируйте первый диск</string>
     <string name="collection_label_year">Год: %1$d</string>

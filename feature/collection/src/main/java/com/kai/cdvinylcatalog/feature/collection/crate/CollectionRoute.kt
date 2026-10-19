@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 
 @Composable
 fun CollectionRoute(
@@ -17,6 +18,7 @@ fun CollectionRoute(
     viewModel: CollectionViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val pagingItems = viewModel.items.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -30,6 +32,7 @@ fun CollectionRoute(
 
     CollectionScreen(
         state = state,
+        pagingItems = pagingItems,
         onIntent = viewModel::onIntent,
         onItemClicked = onItemClicked,
         modifier = modifier

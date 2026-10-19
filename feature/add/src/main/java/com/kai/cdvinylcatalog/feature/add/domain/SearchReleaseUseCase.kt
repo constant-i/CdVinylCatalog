@@ -1,7 +1,7 @@
 package com.kai.cdvinylcatalog.feature.add.domain
 
 import com.kai.cdvinylcatalog.domain.catalog.Release
-import com.kai.cdvinylcatalog.domain.repository.ReleaseRepositoryImpl
+import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import javax.inject.Inject
 
@@ -12,7 +12,7 @@ import javax.inject.Inject
  * UseCase предполагает валидный вход.
  */
 class SearchReleaseUseCase @Inject constructor(
-    private val repository: ReleaseRepositoryImpl
+    private val repository: ReleaseRepository
 ) {
     suspend operator fun invoke(barcode: String): Outcome<List<Release>> =
         repository.searchByBarcode(barcode.trim())

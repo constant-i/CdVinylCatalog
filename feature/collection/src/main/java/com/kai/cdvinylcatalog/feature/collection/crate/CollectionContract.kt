@@ -7,18 +7,12 @@ import com.kai.cdvinylcatalog.domain.result.AppError
 object CollectionContract {
 
     data class State(
-        val isLoading: Boolean = true,
-        val items: List<CollectionItem> = emptyList(),
         val sortOrder: SortOrder = SortOrder.ADDED_DESC,
         val error: AppError? = null
-    ) {
-        val isEmpty: Boolean
-            get() = !isLoading && items.isEmpty()
-    }
+    )
 
     sealed class Intent {
         data object OnBackClicked : Intent()
-        data class OnDeleteItem(val item: CollectionItem) : Intent()
         data object OnScanClicked : Intent()
         data object OnSearchClicked : Intent()
         data class OnSortChanged(val sortOrder: SortOrder) : Intent()

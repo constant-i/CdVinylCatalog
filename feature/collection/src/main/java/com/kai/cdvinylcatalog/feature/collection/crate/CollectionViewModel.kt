@@ -2,24 +2,26 @@ package com.kai.cdvinylcatalog.feature.collection.crate
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kai.cdvinylcatalog.domain.collection.SortOrder
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
+import com.kai.cdvinylcatalog.domain.collection.SortOrder
 import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
-import com.kai.cdvinylcatalog.domain.result.AppError
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
     private val repository: CollectionRepository
@@ -31,33 +33,21 @@ class CollectionViewModel @Inject constructor(
     private val _effect = Channel<CollectionContract.Effect>()
     val effect = _effect.receiveAsFlow()
 
-    init {
-        observeCollection()
-    }
-
-    /**
-     * Подписываемся на Flow из Room.
-     * При изменении базы — список автоматически обновляется.
-     */
-    private var currentJob: Job? = null
-    private fun observeCollection() {
-        currentJob?.cancel()
-        currentJob = viewModelScope.launch {
-            repository.getItems(_state.value.sortOrder)
-                .onEach { items ->
-                    _state.update { it.copy(isLoading = false, items = items, error = null) }
-                }
-                .catch { _ ->
-                    _state.update { it.copy(isLoading = false, error = AppError.Unknown) }
-                }
-                .collect()
+    // Создаем Flow для PagingData, который реагирует на смену сортировки
+    val items: StateFlow<PagingData<CollectionItem>> = _state
+        .flatMapLatest { state ->
+            repository.getItems(state.sortOrder)
         }
-    }
+        .cachedIn(viewModelScope)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagingData.empty()
+        )
 
     fun onIntent(intent: CollectionContract.Intent) {
         when (intent) {
             CollectionContract.Intent.OnBackClicked -> onBack()
-            is CollectionContract.Intent.OnDeleteItem -> onDeleteItem(intent.item)
             CollectionContract.Intent.OnScanClicked -> onScanClicked()
             CollectionContract.Intent.OnSearchClicked -> onSearchClicked()
             is CollectionContract.Intent.OnSortChanged -> onSortChanged(intent.sortOrder)
@@ -67,30 +57,17 @@ class CollectionViewModel @Inject constructor(
     private fun onSortChanged(sortOrder: SortOrder) {
         if (_state.value.sortOrder == sortOrder) return
         _state.update { it.copy(sortOrder = sortOrder) }
-        observeCollection()
     }
 
     private fun onScanClicked() {
-        viewModelScope.launch {
-            _effect.send(CollectionContract.Effect.NavigateToScan)
-        }
+        viewModelScope.launch { _effect.send(CollectionContract.Effect.NavigateToScan) }
     }
 
     private fun onSearchClicked() {
-        viewModelScope.launch {
-            _effect.send(CollectionContract.Effect.NavigateToSearch)
-        }
+        viewModelScope.launch { _effect.send(CollectionContract.Effect.NavigateToSearch) }
     }
 
     private fun onBack() {
-        viewModelScope.launch {
-            _effect.send(CollectionContract.Effect.NavigateBack)
-        }
-    }
-
-    private fun onDeleteItem(item: CollectionItem) {
-        viewModelScope.launch {
-            repository.removeFromCollection(item.id)
-        }
+        viewModelScope.launch { _effect.send(CollectionContract.Effect.NavigateBack) }
     }
 }

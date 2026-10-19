@@ -21,7 +21,7 @@ import javax.inject.Inject
 @HiltViewModel
 class CollectionItemDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: CollectionRepository,  // ← интерфейс
+    private val repository: CollectionRepository,
     private val getReleaseDetails: GetReleaseDetailsUseCase
 ) : ViewModel() {
 

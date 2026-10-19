@@ -1,7 +1,7 @@
 package com.kai.cdvinylcatalog.data.network
 
 import com.kai.cdvinylcatalog.domain.catalog.Release
-import com.kai.cdvinylcatalog.domain.repository.ReleaseRepositoryImpl
+import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
 import com.kai.cdvinylcatalog.domain.result.AppError
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.data.network.dto.toDomain
@@ -22,7 +22,7 @@ import javax.inject.Singleton
 @Singleton
 class DiscogsRepositoryImpl @Inject constructor(
     private val api: DiscogsApi
-) : ReleaseRepositoryImpl {
+) : ReleaseRepository {
 
     override suspend fun searchByBarcode(barcode: String): Outcome<List<Release>> =
         safeApiCall {

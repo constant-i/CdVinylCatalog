@@ -9,7 +9,7 @@ import com.kai.cdvinylcatalog.domain.result.Outcome
  * Domain-интерфейс. Реализация — в :data:network.
  * Возвращает Outcome с доменным AppError — никаких Throwable наружу.
  */
-interface ReleaseRepositoryImpl {
+interface ReleaseRepository {
 
     /**
      * Ищет релизы по штрихкоду.

@@ -1,7 +1,12 @@
 package com.kai.cdvinylcatalog.data.database
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import com.kai.cdvinylcatalog.data.database.dao.CollectionDao
 import com.kai.cdvinylcatalog.data.database.entity.CollectionItemEntity
+import com.kai.cdvinylcatalog.data.database.entity.CollectionItemWithCount
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
@@ -19,43 +24,42 @@ class CollectionRepositoryImpl @Inject constructor(
     private val dao: CollectionDao
 ) : CollectionRepository {
 
-    override fun observeAll(): Flow<List<CollectionItem>> {
-        return dao.getAllByAddedDesc().map { entities ->
-            entities.map { it.toDomain() }
-        }
+    // Оставляем метод, но переводим его на Paging (сортировка по умолчанию)
+    override fun observeAll(): Flow<PagingData<CollectionItem>> {
+        return getItems(SortOrder.ADDED_DESC)
     }
 
-    override fun getItems(sortOrder: SortOrder): Flow<List<CollectionItem>> {
-        val flow = when (sortOrder) {
-            SortOrder.ADDED_DESC -> dao.getAllByAddedDesc()
-            SortOrder.ADDED_ASC -> dao.getAllByAddedAsc()
-            SortOrder.ARTIST_ASC -> dao.getAllByArtistAsc()
-            SortOrder.YEAR_DESC -> dao.getAllByYearDesc()
+    override fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>> {
+        // 1. Выбираем нужный PagingSource
+        val pagingSourceFactory = {
+            when (sortOrder) {
+                SortOrder.ADDED_DESC -> dao.getPagingByAddedDesc()
+                SortOrder.ADDED_ASC -> dao.getPagingByAddedAsc()
+                SortOrder.ARTIST_ASC -> dao.getPagingByArtistAsc()
+                SortOrder.YEAR_DESC -> dao.getPagingByYearDesc()
+            }
         }
-        return flow.map { entities ->
-            // Считаем количество копий для каждого releaseId
-            val countByReleaseId = entities
-                .filter { it.releaseId != null }
-                .groupingBy { it.releaseId!! }
-                .eachCount()
 
-            entities.map { entity ->
-                entity.toDomain().copy(
-                    copyCount = if (entity.releaseId != null) {
-                        countByReleaseId[entity.releaseId] ?: 1
-                    } else {
-                        1
-                    }
-                )
+        // 2. Создаем Pager и мапим данные
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                enablePlaceholders = false,
+                initialLoadSize = 40 // Грузим сразу 2 страницы при старте
+            ),
+            pagingSourceFactory = pagingSourceFactory
+        ).flow.map { pagingData ->
+            pagingData.map { entityWithCount ->
+                entityWithCount.toDomain()
             }
         }
     }
 
-    override fun observeItemById(id: Long): Flow<CollectionItem?> { //  TODO выглядит как дублирование
+    override fun observeItemById(id: Long): Flow<CollectionItem?> {
         return dao.observeById(id).map { it?.toDomain() }
     }
 
-    override suspend fun getItemById(id: Long): Outcome<CollectionItem?> { //  TODO выглядит как дублирование
+    override suspend fun getItemById(id: Long): Outcome<CollectionItem?> {
         return try {
             val entity = dao.getById(id)
             Outcome.Success(entity?.toDomain())
@@ -81,7 +85,6 @@ class CollectionRepositoryImpl @Inject constructor(
 
     override suspend fun addToCollection(release: Release, format: Format, notes: String?): Outcome<Long> {
         return try {
-            // Используем переданный format
             val entity = release.toEntity(format = format, notes = notes)
             val id = dao.insert(entity)
             Outcome.Success(id)
@@ -91,33 +94,18 @@ class CollectionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun addManualItem(
-        title: String,
-        artist: String,
-        year: Int?,
-        format: Format,
-        label: String?,
-        country: String?,
-        barcode: String?,
-        notes: String?,
+        title: String, artist: String, year: Int?, format: Format,
+        label: String?, country: String?, barcode: String?, notes: String?,
         photoPaths: List<String>
     ): Outcome<Long> {
         return try {
             val entity = CollectionItemEntity(
-                releaseId = null,
-                title = title,
-                artist = artist,
-                year = year,
-                barcode = barcode,
-                coverImageUrl = photoPaths.firstOrNull(),
+                releaseId = null, title = title, artist = artist, year = year,
+                barcode = barcode, coverImageUrl = photoPaths.firstOrNull(),
                 imageUrls = photoPaths.joinToString(",").ifBlank { null },
-                label = label,
-                rawFormat = format.name,
-                country = country,
-                releaseDate = null,
-                catalogNumber = null,
-                releaseNotes = null,
-                format = format.name,
-                addedAt = System.currentTimeMillis(),
+                label = label, rawFormat = format.name, country = country,
+                releaseDate = null, catalogNumber = null, releaseNotes = null,
+                format = format.name, addedAt = System.currentTimeMillis(),
                 userNotes = notes
             )
             val id = dao.insert(entity)
@@ -128,17 +116,9 @@ class CollectionRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateItem(
-        id: Long,
-        title: String,
-        artist: String,
-        year: Int?,
-        format: Format,
-        label: String?,
-        country: String?,
-        barcode: String?,
-        notes: String?,
-        photoPaths: List<String>,
-        preserveDiscogsImages: List<String>
+        id: Long, title: String, artist: String, year: Int?, format: Format,
+        label: String?, country: String?, barcode: String?, notes: String?,
+        photoPaths: List<String>, preserveDiscogsImages: List<String>
     ): Outcome<Unit> {
         return try {
             val existing = dao.getById(id) ?: return Outcome.Failure(AppError.ResourceNotFound)
@@ -146,14 +126,9 @@ class CollectionRepositoryImpl @Inject constructor(
 
             dao.update(
                 existing.copy(
-                    title = title,
-                    artist = artist,
-                    year = year,
-                    format = format.name,
-                    rawFormat = format.name,
-                    label = label,
-                    country = country,
-                    barcode = barcode,
+                    title = title, artist = artist, year = year,
+                    format = format.name, rawFormat = format.name,
+                    label = label, country = country, barcode = barcode,
                     userNotes = notes,
                     coverImageUrl = photoPaths.firstOrNull() ?: preserveDiscogsImages.firstOrNull() ?: existing.coverImageUrl,
                     imageUrls = if (allImages.isNotEmpty()) allImages.joinToString(",") else existing.imageUrls
@@ -175,24 +150,24 @@ class CollectionRepositoryImpl @Inject constructor(
     }
 }
 
+// ==========================================
+// MAPPERS
+// ==========================================
+
+private fun CollectionItemWithCount.toDomain(): CollectionItem {
+    return this.item.toDomain().copy(copyCount = this.copyCount)
+}
+
 private fun CollectionItemEntity.toDomain(): CollectionItem {
     return CollectionItem(
         id = id,
         release = Release(
-            id = releaseId ?: 0L,
-            title = title,
-            artist = artist,
-            year = year,
-            barcode = barcode,
-            coverImageUrl = coverImageUrl,
+            id = releaseId ?: 0L, title = title, artist = artist, year = year,
+            barcode = barcode, coverImageUrl = coverImageUrl,
             imageUrls = imageUrls?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
-            label = label,
-            rawFormat = rawFormat,
-            country = country,
-            releaseDate = releaseDate,
-            catalogNumber = catalogNumber,
-            notes = releaseNotes,
-            tracklist = emptyList()
+            label = label, rawFormat = rawFormat, country = country,
+            releaseDate = releaseDate, catalogNumber = catalogNumber,
+            notes = releaseNotes, tracklist = emptyList()
         ),
         format = try {
             Format.valueOf(format)
@@ -206,21 +181,12 @@ private fun CollectionItemEntity.toDomain(): CollectionItem {
 
 private fun Release.toEntity(format: Format, notes: String?): CollectionItemEntity {
     return CollectionItemEntity(
-        releaseId = id,
-        title = title,
-        artist = artist,
-        year = year,
-        barcode = barcode,
-        coverImageUrl = coverImageUrl,
+        releaseId = id, title = title, artist = artist, year = year,
+        barcode = barcode, coverImageUrl = coverImageUrl,
         imageUrls = imageUrls.joinToString(",").ifBlank { null },
-        label = label,
-        rawFormat = rawFormat,
-        country = country,
-        releaseDate = releaseDate,
-        catalogNumber = catalogNumber,
-        releaseNotes = notes,
-        format = format.name,
-        addedAt = System.currentTimeMillis(),
+        label = label, rawFormat = rawFormat, country = country,
+        releaseDate = releaseDate, catalogNumber = catalogNumber,
+        releaseNotes = notes, format = format.name, addedAt = System.currentTimeMillis(),
         userNotes = notes
     )
 }

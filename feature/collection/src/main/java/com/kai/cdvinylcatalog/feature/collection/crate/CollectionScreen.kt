@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -45,20 +44,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import coil.compose.SubcomposeAsyncImage
-import com.kai.cdvinylcatalog.domain.collection.SortOrder
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.pluralStringResource
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
+import com.kai.cdvinylcatalog.domain.collection.SortOrder
 import com.kai.cdvinylcatalog.feature.collection.R
+import kotlinx.coroutines.flow.MutableStateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionScreen(
     state: CollectionContract.State,
+    pagingItems: LazyPagingItems<CollectionItem>, // <-- добавили
     onIntent: (CollectionContract.Intent) -> Unit,
     onItemClicked: (Long) -> Unit,
     modifier: Modifier = Modifier
@@ -69,7 +76,7 @@ fun CollectionScreen(
         modifier = modifier.fillMaxSize(),
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.collection_title, state.items.size)) },
+                title = { Text(stringResource(R.string.collection_title)) },
                 navigationIcon = {
                     IconButton(onClick = {
                         onIntent(CollectionContract.Intent.OnBackClicked)
@@ -132,11 +139,12 @@ fun CollectionScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
+            // Логика загрузки и пустоты для Paging
             when {
-                state.isLoading -> {
+                pagingItems.loadState.refresh is LoadState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
-                state.isEmpty -> {
+                pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.itemCount == 0 -> {
                     EmptyCollection(modifier = Modifier.align(Alignment.Center))
                 }
                 else -> {
@@ -145,12 +153,27 @@ fun CollectionScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(state.items, key = { it.id }) { item ->
-                            CollectionItemCard(
-                                item = item,
-                                onClick = { onItemClicked(item.id) },
-                                onDelete = { onIntent(CollectionContract.Intent.OnDeleteItem(item)) }
-                            )
+                        // МАГИЯ ПАГИНАЦИИ ЗДЕСЬ:
+                        items(
+                            count = pagingItems.itemCount,
+                            key = { index -> pagingItems[index]?.id ?: index }
+                        ) { index ->
+                            val item = pagingItems[index]
+                            if (item != null) {
+                                CollectionItemCard(
+                                    item = item,
+                                    onClick = { onItemClicked(item.id) }
+                                )
+                            }
+                        }
+
+                        // Можно добавить индикатор подгрузки внизу списка
+                        if (pagingItems.loadState.append is LoadState.Loading) {
+                            item {
+                                Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                                    CircularProgressIndicator()
+                                }
+                            }
                         }
                     }
                 }
@@ -170,8 +193,7 @@ private fun SortOrder.label(): String = when (this) {
 @Composable
 private fun CollectionItemCard(
     item: CollectionItem,
-    onClick: () -> Unit,
-    onDelete: () -> Unit
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -285,16 +307,60 @@ private fun EmptyCollection(modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+// ==========================================
+// ПРЕВЬЮ (PREVIEWS)
+// ==========================================
+
+private val mockRelease1 = Release(
+    id = 1L, title = "Nevermind", artist = "Nirvana", year = 1991,
+    barcode = null, coverImageUrl = null, imageUrls = emptyList(),
+    label = "DGC", rawFormat = "CD", country = "US", releaseDate = null,
+    catalogNumber = null, notes = null, tracklist = emptyList()
+)
+
+private val mockItem1 = CollectionItem(
+    id = 1L, release = mockRelease1, format = Format.CD,
+    addedAt = System.currentTimeMillis(), notes = "Фирменный диск", copyCount = 2
+)
+
+private val mockItem2 = CollectionItem(
+    id = 2L, release = mockRelease1.copy(id = 2, title = "In Utero"),
+    format = Format.CD, addedAt = System.currentTimeMillis(), notes = null, copyCount = 1
+)
+
+@Preview(name = "Light - С данными", showBackground = true)
+@Preview(name = "Dark - С данными", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
 private fun CollectionScreenPreview() {
+    // 1. Создаем фейковые данные
+    val mockItems = listOf(mockItem1, mockItem2)
+
+    // 2. Оборачиваем PagingData в MutableStateFlow и запоминаем
+    val mockPagingItems = remember {
+        MutableStateFlow(PagingData.from(mockItems))
+    }.collectAsLazyPagingItems()
+
     CdVinylCatalogTheme {
         CollectionScreen(
-            state = CollectionContract.State(
-                isLoading = false,
-                items = emptyList()
-            ),
+            state = CollectionContract.State(),
+            pagingItems = mockPagingItems,
+            onIntent = {},
+            onItemClicked = {}
+        )
+    }
+}
+
+@Preview(name = "Light - Пустая коллекция", showBackground = true)
+@Composable
+private fun CollectionScreenEmptyPreview() {
+    val mockPagingItems = remember {
+        MutableStateFlow(PagingData.from(emptyList<CollectionItem>()))
+    }.collectAsLazyPagingItems()
+
+    CdVinylCatalogTheme {
+        CollectionScreen(
+            state = CollectionContract.State(),
+            pagingItems = mockPagingItems,
             onIntent = {},
             onItemClicked = {}
         )

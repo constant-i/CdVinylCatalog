@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.data.database.dao
 
+import androidx.paging.PagingSource
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
@@ -7,6 +8,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.kai.cdvinylcatalog.data.database.entity.CollectionItemEntity
+import com.kai.cdvinylcatalog.data.database.entity.CollectionItemWithCount
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -98,15 +100,48 @@ interface CollectionDao {
     @Query("SELECT * FROM collection_items WHERE id = :id LIMIT 1")
     fun observeById(id: Long): Flow<CollectionItemEntity?>
 
-    @Query("SELECT * FROM collection_items ORDER BY addedAt DESC")
-    fun getAllByAddedDesc(): Flow<List<CollectionItemEntity>>
+    @Query("""
+        SELECT c.*, 
+        CASE 
+            WHEN c.releaseId IS NULL THEN 1 
+            ELSE (SELECT COUNT(*) FROM collection_items sub WHERE sub.releaseId = c.releaseId) 
+        END AS copyCount 
+        FROM collection_items c 
+        ORDER BY c.addedAt DESC
+    """)
+    fun getPagingByAddedDesc(): PagingSource<Int, CollectionItemWithCount>
 
-    @Query("SELECT * FROM collection_items ORDER BY addedAt ASC")
-    fun getAllByAddedAsc(): Flow<List<CollectionItemEntity>>
+    @Query("""
+        SELECT c.*, 
+        CASE 
+            WHEN c.releaseId IS NULL THEN 1 
+            ELSE (SELECT COUNT(*) FROM collection_items sub WHERE sub.releaseId = c.releaseId) 
+        END AS copyCount 
+        FROM collection_items c 
+        ORDER BY c.addedAt ASC
+    """)
+    fun getPagingByAddedAsc(): PagingSource<Int, CollectionItemWithCount>
 
-    @Query("SELECT * FROM collection_items ORDER BY artist COLLATE NOCASE ASC")
-    fun getAllByArtistAsc(): Flow<List<CollectionItemEntity>>
+    @Query("""
+        SELECT c.*, 
+        CASE 
+            WHEN c.releaseId IS NULL THEN 1 
+            ELSE (SELECT COUNT(*) FROM collection_items sub WHERE sub.releaseId = c.releaseId) 
+        END AS copyCount 
+        FROM collection_items c 
+        ORDER BY c.artist COLLATE NOCASE ASC
+    """)
+    fun getPagingByArtistAsc(): PagingSource<Int, CollectionItemWithCount>
 
-    @Query("SELECT * FROM collection_items ORDER BY year DESC")
-    fun getAllByYearDesc(): Flow<List<CollectionItemEntity>>
+    @Query("""
+        SELECT c.*, 
+        CASE 
+            WHEN c.releaseId IS NULL THEN 1 
+            ELSE (SELECT COUNT(*) FROM collection_items sub WHERE sub.releaseId = c.releaseId) 
+        END AS copyCount 
+        FROM collection_items c 
+        ORDER BY c.year DESC
+    """)
+    fun getPagingByYearDesc(): PagingSource<Int, CollectionItemWithCount>
+
 }

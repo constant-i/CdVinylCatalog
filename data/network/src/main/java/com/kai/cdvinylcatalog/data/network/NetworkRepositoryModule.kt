@@ -1,6 +1,6 @@
 package com.kai.cdvinylcatalog.data.network
 
-import com.kai.cdvinylcatalog.domain.repository.ReleaseRepositoryImpl
+import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,5 +13,5 @@ abstract class NetworkRepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindReleaseRepository(impl: DiscogsRepositoryImpl): ReleaseRepositoryImpl
+    abstract fun bindReleaseRepository(impl: DiscogsRepositoryImpl): ReleaseRepository
 }
