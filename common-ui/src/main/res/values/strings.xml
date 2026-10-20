@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- ─── Domain errors (AppError) ─── -->
+    <!-- Domain errors (AppError) -->
     <string name="error_no_connection">Нет подключения к интернету</string>
     <string name="error_server_unavailable">Сервер недоступен, попробуйте позже</string>
     <string name="error_auth_required">Требуется авторизация</string>
@@ -8,7 +8,7 @@
     <string name="error_not_found">Релиз не найден в Discogs</string>
     <string name="error_unknown">Что-то пошло не так</string>
 
-    <!-- ─── UI messages ─── -->
+    <!-- UI messages -->
     <string name="msg_release_not_found">Релиз не найден в Discogs</string>
     <string name="msg_search_empty">Ничего не найдено</string>
     <string name="msg_invalid_barcode">Некорректный штрихкод</string>

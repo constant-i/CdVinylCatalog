@@ -80,7 +80,6 @@ class CollectionItemDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isLoadingDetails = true) }
 
-            // ← ЗАМЕНА onSuccess/onFailure на when(outcome)
             when (val outcome = getReleaseDetails(releaseId)) {
                 is Outcome.Success -> {
                     val discogsRelease = outcome.data
@@ -125,7 +124,6 @@ class CollectionItemDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isDeleting = true) }
 
-            // ← Обработка Outcome
             when (val outcome = repository.removeFromCollection(item.id)) {
                 is Outcome.Success -> {
                     _effect.send(CollectionItemDetailContract.Effect.NavigateBack)

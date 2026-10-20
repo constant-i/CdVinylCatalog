@@ -24,7 +24,7 @@ fun CameraPreview(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
-    // 1. Создаем BarcodeScanner
+    // Только форматы, которые реально встречаются на музыкальных носителях
     val barcodeScanner = remember {
         val options = BarcodeScannerOptions.Builder()
             .setBarcodeFormats(
@@ -37,17 +37,13 @@ fun CameraPreview(
         BarcodeScanning.getClient(options)
     }
 
-    // 2. Создаем и запоминаем CameraController
     val cameraController = remember {
         LifecycleCameraController(context).apply {
-            // Привязываем контроллер к жизненному циклу
             bindToLifecycle(lifecycleOwner)
-            // Выбираем заднюю камеру
             cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
         }
     }
 
-    // 3. Настраиваем анализатор для контроллера
     LaunchedEffect(cameraController, barcodeScanner) {
         cameraController.setImageAnalysisAnalyzer(
             ContextCompat.getMainExecutor(context),
@@ -62,13 +58,11 @@ fun CameraPreview(
         )
     }
 
-    // 4. Отображаем PreviewView и связываем его с контроллером
     AndroidView(
         modifier = modifier.fillMaxSize(),
         factory = { ctx ->
             PreviewView(ctx).apply {
                 scaleType = PreviewView.ScaleType.FILL_CENTER
-                // Ключевая строка: связываем PreviewView с контроллером
                 controller = cameraController
             }
         }

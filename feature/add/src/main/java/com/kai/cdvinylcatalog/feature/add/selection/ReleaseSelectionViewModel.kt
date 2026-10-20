@@ -38,10 +38,8 @@ class ReleaseSelectionViewModel @Inject constructor(
         }
     }
 
-    // Параметры поиска для Paging
     private val searchParams = MutableStateFlow<Pair<String, ReleaseSelectionContract.Source>?>(null)
 
-    // Наш Paging Flow
     val results: StateFlow<PagingData<Release>> = searchParams
         .filterNotNull()
         .flatMapLatest { (query, source) ->
@@ -57,7 +55,6 @@ class ReleaseSelectionViewModel @Inject constructor(
             initialValue = PagingData.empty()
         )
 
-    // Вызывается из Route при старте
     fun initSearch(query: String, source: ReleaseSelectionContract.Source) {
         _state.update { it.copy(source = source) }
         searchParams.value = query to source

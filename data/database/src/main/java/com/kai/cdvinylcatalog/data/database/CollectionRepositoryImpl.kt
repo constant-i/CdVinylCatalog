@@ -24,13 +24,11 @@ class CollectionRepositoryImpl @Inject constructor(
     private val dao: CollectionDao
 ) : CollectionRepository {
 
-    // Оставляем метод, но переводим его на Paging (сортировка по умолчанию)
     override fun observeAll(): Flow<PagingData<CollectionItem>> {
         return getItems(SortOrder.ADDED_DESC)
     }
 
     override fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>> {
-        // 1. Выбираем нужный PagingSource
         val pagingSourceFactory = {
             when (sortOrder) {
                 SortOrder.ADDED_DESC -> dao.getPagingByAddedDesc()
@@ -40,12 +38,12 @@ class CollectionRepositoryImpl @Inject constructor(
             }
         }
 
-        // 2. Создаем Pager и мапим данные
         return Pager(
             config = PagingConfig(
                 pageSize = 20,
                 enablePlaceholders = false,
-                initialLoadSize = 40 // Грузим сразу 2 страницы при старте
+                // Две страницы сразу — чтобы первый экран заполнялся без паузы
+                initialLoadSize = 40
             ),
             pagingSourceFactory = pagingSourceFactory
         ).flow.map { pagingData ->
@@ -152,10 +150,6 @@ class CollectionRepositoryImpl @Inject constructor(
         }
     }
 }
-
-// ==========================================
-// MAPPERS
-// ==========================================
 
 private fun CollectionItemWithCount.toDomain(): CollectionItem {
     return this.item.toDomain().copy(copyCount = this.copyCount)

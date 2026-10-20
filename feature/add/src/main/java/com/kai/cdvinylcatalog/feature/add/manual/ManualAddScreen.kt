@@ -145,13 +145,12 @@ fun ManualAddScreen(
         when {
             result.resultCode == Activity.RESULT_OK -> {
                 val croppedUri = result.data?.let { UCrop.getOutput(it) }
-                // Конвертируем content:// URI в абсолютный путь файла
+                // UCrop отдаёт то file://, то content:// — приводим к абсолютному пути
                 val absolutePath = croppedUri?.let { uri ->
                     if (uri.scheme == "file") {
-                        uri.path  // file:// URI — path уже абсолютный
+                        uri.path
                     } else {
-                        // content:// URI — конвертируем через FileProvider
-                        // Но проще — сохранить копию файла в наше хранилище
+                        // content:// не даёт пути к файлу, копируем его в наше хранилище
                         copyToAppStorage(uri)
                     }
                 }

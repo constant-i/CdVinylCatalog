@@ -10,10 +10,9 @@ import kotlinx.coroutines.flow.Flow
 
 interface CollectionRepository {
 
-    // Изменено: теперь возвращает PagingData
+    /** Вся коллекция без явной сортировки — по умолчанию новые сверху. */
     fun observeAll(): Flow<PagingData<CollectionItem>>
 
-    // Изменено: теперь возвращает PagingData
     fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>>
 
     fun observeItemById(id: Long): Flow<CollectionItem?>

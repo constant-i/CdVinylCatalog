@@ -153,7 +153,6 @@ fun CollectionScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // МАГИЯ ПАГИНАЦИИ ЗДЕСЬ:
                         items(
                             count = pagingItems.itemCount,
                             key = { index -> pagingItems[index]?.id ?: index }
@@ -167,7 +166,6 @@ fun CollectionScreen(
                             }
                         }
 
-                        // Можно добавить индикатор подгрузки внизу списка
                         if (pagingItems.loadState.append is LoadState.Loading) {
                             item {
                                 Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
@@ -203,7 +201,6 @@ private fun CollectionItemCard(
             modifier = Modifier.padding(12.dp),
             verticalAlignment = Alignment.Top
         ) {
-            // Обложка
             Box(
                 modifier = Modifier
                     .size(64.dp)
@@ -235,7 +232,6 @@ private fun CollectionItemCard(
 
             Spacer(Modifier.width(12.dp))
 
-            // Текст
             Column(Modifier.weight(1f)) {
                 Text(
                     text = item.release.title,
@@ -307,10 +303,6 @@ private fun EmptyCollection(modifier: Modifier = Modifier) {
     }
 }
 
-// ==========================================
-// ПРЕВЬЮ (PREVIEWS)
-// ==========================================
-
 private val mockRelease1 = Release(
     id = 1L, title = "Nevermind", artist = "Nirvana", year = 1991,
     barcode = null, coverImageUrl = null, imageUrls = emptyList(),
@@ -332,10 +324,10 @@ private val mockItem2 = CollectionItem(
 @Preview(name = "Dark - С данными", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, locale = "ru")
 @Composable
 private fun CollectionScreenPreview() {
-    // 1. Создаем фейковые данные
     val mockItems = listOf(mockItem1, mockItem2)
 
-    // 2. Оборачиваем PagingData в MutableStateFlow и запоминаем
+    // MutableStateFlow + remember: без этого превью рисует первый кадр,
+    // когда PagingData ещё не успел эмитить данные
     val mockPagingItems = remember {
         MutableStateFlow(PagingData.from(mockItems))
     }.collectAsLazyPagingItems()

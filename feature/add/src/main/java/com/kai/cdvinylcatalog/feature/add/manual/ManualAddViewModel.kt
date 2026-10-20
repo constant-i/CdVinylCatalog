@@ -243,7 +243,6 @@ class ManualAddViewModel @Inject constructor(
 
             when (val mode = s.mode) {
                 is ManualAddContract.Mode.Create -> {
-                    // Вызываем addManualItem (возвращает Outcome<Long>)
                     val outcome = repository.addManualItem(
                         title = s.title.trim(),
                         artist = s.artist.trim(),
@@ -255,7 +254,6 @@ class ManualAddViewModel @Inject constructor(
                         notes = s.notes.ifBlank { null },
                         photoPaths = s.photoPaths
                     )
-                    // Обрабатываем результат тут же
                     when (outcome) {
                         is Outcome.Success -> {
                             update { it.copy(isSaving = false) }
@@ -269,7 +267,6 @@ class ManualAddViewModel @Inject constructor(
                 }
 
                 is ManualAddContract.Mode.Edit -> {
-                    // Вызываем updateItem (возвращает Outcome<Unit>)
                     val outcome = repository.updateItem(
                         id = mode.itemId,
                         title = s.title.trim(),
@@ -283,7 +280,6 @@ class ManualAddViewModel @Inject constructor(
                         photoPaths = s.photoPaths,
                         preserveDiscogsImages = s.discogsImages
                     )
-                    // Обрабатываем результат
                     when (outcome) {
                         is Outcome.Success -> {
                             update { it.copy(isSaving = false) }

@@ -81,7 +81,7 @@
     <string name="common_back">Назад</string>
     <string name="common_retry">Повторить</string>
 
-    <!-- Selection: состояния загрузки -->
+    <!-- Selection load states -->
     <string name="selection_load_error">Не удалось загрузить результаты</string>
     <string name="selection_append_error">Ошибка загрузки. Нажмите, чтобы повторить.</string>
 
