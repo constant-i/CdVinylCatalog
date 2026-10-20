@@ -328,8 +328,8 @@ private val mockItem2 = CollectionItem(
     format = Format.CD, addedAt = System.currentTimeMillis(), notes = null, copyCount = 1
 )
 
-@Preview(name = "Light - С данными", showBackground = true)
-@Preview(name = "Dark - С данными", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Light - С данными", showBackground = true, locale = "ru")
+@Preview(name = "Dark - С данными", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, locale = "ru")
 @Composable
 private fun CollectionScreenPreview() {
     // 1. Создаем фейковые данные
@@ -350,7 +350,7 @@ private fun CollectionScreenPreview() {
     }
 }
 
-@Preview(name = "Light - Пустая коллекция", showBackground = true)
+@Preview(name = "Light - Пустая коллекция", showBackground = true, locale = "ru")
 @Composable
 private fun CollectionScreenEmptyPreview() {
     val mockPagingItems = remember {
