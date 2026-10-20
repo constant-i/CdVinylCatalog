@@ -44,7 +44,7 @@ class ScanViewModelTest {
     }
 
     @Test
-    fun `ignores repeated scans inside debounce window`() = runTest {
+    fun `ignores repeated scans of the same barcode inside debounce window`() = runTest {
         viewModel.effect.test {
             viewModel.onIntent(ScanContract.Intent.OnBarcodeScanned(BARCODE))
             viewModel.onIntent(ScanContract.Intent.OnBarcodeScanned(BARCODE))
@@ -55,7 +55,20 @@ class ScanViewModelTest {
         }
     }
 
+    @Test
+    fun `accepts a different barcode without waiting for the debounce window`() = runTest {
+        viewModel.effect.test {
+            viewModel.onIntent(ScanContract.Intent.OnBarcodeScanned(BARCODE))
+            viewModel.onIntent(ScanContract.Intent.OnBarcodeScanned(OTHER_BARCODE))
+
+            assertEquals(ScanContract.Effect.NavigateToSelection(BARCODE), awaitItem())
+            assertEquals(ScanContract.Effect.NavigateToSelection(OTHER_BARCODE), awaitItem())
+            expectNoEvents()
+        }
+    }
+
     private companion object {
         const val BARCODE = "602547378781"
+        const val OTHER_BARCODE = "5099750153821"
     }
 }

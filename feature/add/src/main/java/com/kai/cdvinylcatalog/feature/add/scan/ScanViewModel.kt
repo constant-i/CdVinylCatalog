@@ -14,6 +14,7 @@ class ScanViewModel @Inject constructor() : ViewModel() {
     private val _effect = Channel<ScanContract.Effect>()
     val effect = _effect.receiveAsFlow()
 
+    private var lastBarcode: String? = null
     private var lastScanTime: Long = 0L
 
     fun onIntent(intent: ScanContract.Intent) {
@@ -22,9 +23,19 @@ class ScanViewModel @Inject constructor() : ViewModel() {
         }
     }
 
+    /**
+     * Камера отдаёт один и тот же штрихкод десятки раз в секунду, пока он
+     * в кадре, поэтому повтор того же значения в пределах [DEBOUNCE_MS]
+     * игнорируется. Другой штрихкод — это другой диск, его пропускаем сразу.
+     */
     private fun onBarcodeScanned(barcode: String) {
         val currentTime = System.currentTimeMillis()
-        if (currentTime - lastScanTime < DEBOUNCE_MS) return
+        val isSameBarcode = barcode == lastBarcode
+        val isWithinDebounce = (currentTime - lastScanTime) < DEBOUNCE_MS
+
+        if (isSameBarcode && isWithinDebounce) return
+
+        lastBarcode = barcode
         lastScanTime = currentTime
 
         viewModelScope.launch {
