@@ -1,17 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Scan Screen -->
-    <string name="scan_hint">Наведите камеру на штрихкод</string>
-    <string name="scan_simulate">Симулировать сканирование</string>
-    <string name="scan_add_to_collection">Добавить в коллекцию</string>
-    <string name="scan_scan_again">Сканировать ещё</string>
-    <string name="scan_already_in_collection">Этот диск уже в коллекции!</string>
-    <string name="scan_ok">Понятно</string>
-    <string name="scan_year_format">Год: %1$d</string>
-    <string name="scan_format_format">Формат: %1$s</string>
     <string name="scan_title">Сканирование</string>
     <string name="scan_permission_denied">Нет доступа к камере. Разрешите в настройках.</string>
-    <string name="scan_camera_error">Ошибка камеры</string>
 
     <!-- Search Screen -->
     <string name="search_title">Ручной поиск</string>
@@ -41,8 +32,8 @@
     <string name="details_label_catalog_number">Catalog#</string>
 
     <!-- Release Selection -->
-    <string name="selection_title_scan">Найдено изданий (%1$d)</string>
-    <string name="selection_title_search">Результаты поиска (%1$d)</string>
+    <string name="selection_title_scan">Найдено изданий</string>
+    <string name="selection_title_search">Результаты поиска</string>
     <string name="selection_empty">Ничего не найдено</string>
     <string name="selection_already_in_collection">Уже в коллекции</string>
     <string name="selection_label_format">Формат</string>
@@ -88,5 +79,10 @@
     <string name="common_add">Добавить</string>
     <string name="common_cancel">Отмена</string>
     <string name="common_back">Назад</string>
+    <string name="common_retry">Повторить</string>
+
+    <!-- Selection: состояния загрузки -->
+    <string name="selection_load_error">Не удалось загрузить результаты</string>
+    <string name="selection_append_error">Ошибка загрузки. Нажмите, чтобы повторить.</string>
 
 </resources>

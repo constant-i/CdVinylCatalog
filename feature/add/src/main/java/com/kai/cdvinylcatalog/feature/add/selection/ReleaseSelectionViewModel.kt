@@ -2,61 +2,75 @@ package com.kai.cdvinylcatalog.feature.add.selection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.kai.cdvinylcatalog.domain.catalog.Release
-import com.kai.cdvinylcatalog.domain.result.Outcome
-import com.kai.cdvinylcatalog.feature.add.domain.CheckCollectionUseCase
+import com.kai.cdvinylcatalog.feature.add.domain.ObserveCollectionReleaseIdsUseCase
+import com.kai.cdvinylcatalog.feature.add.domain.SearchByTextUseCase
+import com.kai.cdvinylcatalog.feature.add.domain.SearchReleaseUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class ReleaseSelectionViewModel @Inject constructor(
-    private val checkCollection: CheckCollectionUseCase
+    private val searchByText: SearchByTextUseCase,
+    private val searchByBarcode: SearchReleaseUseCase,
+    private val observeCollectionReleaseIds: ObserveCollectionReleaseIdsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReleaseSelectionContract.State())
-    val state: StateFlow<ReleaseSelectionContract.State> = _state.asStateFlow()
+    val state = _state.asStateFlow()
 
     private val _effect = Channel<ReleaseSelectionContract.Effect>()
     val effect = _effect.receiveAsFlow()
 
-    fun setResults(releases: List<Release>, source: ReleaseSelectionContract.Source) {
-        _state.update { it.copy(results = releases, source = source) }
+    init {
+        // Один реактивный запрос вместо проверки каждого элемента списка
         viewModelScope.launch {
-            val inCollection = releases
-                .filter { release ->
-                    // Разворачиваем Outcome для каждого релиза
-                    val outcome = checkCollection(release.id)
-                    outcome is Outcome.Success && outcome.data
-                }
-                .map { it.id }
-                .toSet()
-            _state.update { it.copy(inCollectionIds = inCollection) }
+            observeCollectionReleaseIds().collect { ids ->
+                _state.update { it.copy(inCollectionIds = ids) }
+            }
         }
+    }
+
+    // Параметры поиска для Paging
+    private val searchParams = MutableStateFlow<Pair<String, ReleaseSelectionContract.Source>?>(null)
+
+    // Наш Paging Flow
+    val results: StateFlow<PagingData<Release>> = searchParams
+        .filterNotNull()
+        .flatMapLatest { (query, source) ->
+            when (source) {
+                ReleaseSelectionContract.Source.SCAN -> searchByBarcode(query)
+                ReleaseSelectionContract.Source.SEARCH -> searchByText(query)
+            }
+        }
+        .cachedIn(viewModelScope)
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = PagingData.empty()
+        )
+
+    // Вызывается из Route при старте
+    fun initSearch(query: String, source: ReleaseSelectionContract.Source) {
+        _state.update { it.copy(source = source) }
+        searchParams.value = query to source
     }
 
     fun onIntent(intent: ReleaseSelectionContract.Intent) {
         when (intent) {
-            ReleaseSelectionContract.Intent.OnBackClicked -> onBack()
-            is ReleaseSelectionContract.Intent.OnResultClicked -> onResultClicked(intent.release)
-        }
-    }
-
-    private fun onBack() {
-        viewModelScope.launch {
-            _effect.send(ReleaseSelectionContract.Effect.NavigateBack)
-        }
-    }
-
-    private fun onResultClicked(release: Release) {
-        viewModelScope.launch {
-            _effect.send(ReleaseSelectionContract.Effect.NavigateToDetails(release.id))
+            ReleaseSelectionContract.Intent.OnBackClicked -> {
+                viewModelScope.launch { _effect.send(ReleaseSelectionContract.Effect.NavigateBack) }
+            }
+            is ReleaseSelectionContract.Intent.OnResultClicked -> {
+                viewModelScope.launch { _effect.send(ReleaseSelectionContract.Effect.NavigateToDetails(intent.release.id)) }
+            }
         }
     }
 }

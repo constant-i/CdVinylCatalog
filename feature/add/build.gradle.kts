@@ -73,6 +73,11 @@ dependencies {
     // uCrop
     implementation(libs.ucrop)
 
+    // Paging
+    implementation(libs.androidx.paging.common)
+    implementation(libs.androidx.paging.runtime)
+    implementation(libs.androidx.paging.compose)
+
     // Testing
     testImplementation(libs.bundles.testing)
 }

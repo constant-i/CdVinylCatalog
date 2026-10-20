@@ -39,6 +39,19 @@ interface CollectionDao {
     suspend fun getAllByReleaseId(releaseId: Long): List<CollectionItemEntity>
 
     /**
+     * Отдаёт ID релизов Discogs, которые уже есть в коллекции.
+     *
+     * Используется, чтобы помечать результаты поиска в Discogs бейджем
+     * «уже в коллекции». Один реактивный запрос на весь список вместо
+     * проверки каждого элемента по отдельности.
+     *
+     * Записи, добавленные вручную (`releaseId IS NULL`), в выборку не попадают:
+     * у них нет связи с релизом Discogs.
+     */
+    @Query("SELECT releaseId FROM collection_items WHERE releaseId IS NOT NULL")
+    fun observeCollectionReleaseIds(): Flow<List<Long>>
+
+    /**
      * Возвращает запись коллекции по её **локальному** ID.
      *
      * Обрати внимание: это ID записи в таблице `collection_items`,

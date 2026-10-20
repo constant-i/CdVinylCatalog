@@ -1,44 +1,28 @@
 package com.kai.cdvinylcatalog.data.network
 
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import com.kai.cdvinylcatalog.data.network.dto.toDomain
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
-import com.kai.cdvinylcatalog.domain.result.AppError
 import com.kai.cdvinylcatalog.domain.result.Outcome
-import com.kai.cdvinylcatalog.data.network.dto.toDomain
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
-import retrofit2.HttpException
-import java.net.SocketTimeoutException
-import java.net.UnknownHostException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Реализация ReleaseRepository для работы с Discogs API.
- *
- * Возвращает Outcome<T> с доменным AppError — никакие технические
- * детали (HTTP-коды, исключения) не утекают наружу.
- */
 @Singleton
 class DiscogsRepositoryImpl @Inject constructor(
     private val api: DiscogsApi
 ) : ReleaseRepository {
 
-    override suspend fun searchByBarcode(barcode: String): Outcome<List<Release>> =
-        safeApiCall {
-            api.searchByBarcode(
-                barcode = barcode,
-                token = NetworkConstants.DISCOGS_TOKEN
-            ).results.map { it.toDomain() }
-        }
+    override fun searchByBarcode(barcode: String): Flow<PagingData<Release>> =
+        pager { DiscogsSearchPagingSource(api, barcode = barcode.trim()) }
 
-    override suspend fun searchByText(query: String): Outcome<List<Release>> =
-        safeApiCall {
-            api.searchByText(
-                query = query.trim(),
-                token = NetworkConstants.DISCOGS_TOKEN
-            ).results.map { it.toDomain() }
-        }
+    override fun searchByText(query: String): Flow<PagingData<Release>> =
+        pager { DiscogsSearchPagingSource(api, query = query.trim()) }
 
     override suspend fun getReleaseDetails(releaseId: Long): Outcome<Release> =
         safeApiCall {
@@ -49,30 +33,30 @@ class DiscogsRepositoryImpl @Inject constructor(
         }
 
     /**
-     * Общий безопасный вызов API.
-     * Маппит исключения в доменный AppError.
+     * Единая конфигурация Paging для всех сетевых поисков.
      */
+    private fun pager(pagingSourceFactory: () -> DiscogsSearchPagingSource): Flow<PagingData<Release>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = PAGE_SIZE,
+                initialLoadSize = PAGE_SIZE,
+                prefetchDistance = PAGE_SIZE / 2,
+                enablePlaceholders = false
+            ),
+            pagingSourceFactory = pagingSourceFactory
+        ).flow
+
     private suspend inline fun <T> safeApiCall(
         crossinline block: suspend () -> T
     ): Outcome<T> = withContext(Dispatchers.IO) {
         try {
             Outcome.Success(block())
-        } catch (e: UnknownHostException) {
-            Outcome.Failure(AppError.NoConnection)
-        } catch (e: SocketTimeoutException) {
-            Outcome.Failure(AppError.ServerUnavailable)
-        } catch (e: HttpException) {
-            Outcome.Failure(mapHttpException(e))
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(mapExceptionToAppError(e))
         }
     }
 
-    private fun mapHttpException(e: HttpException): AppError = when (e.code()) {
-        401, 403 -> AppError.AuthenticationRequired
-        404 -> AppError.ResourceNotFound
-        429 -> AppError.RateLimitExceeded
-        in 500..599 -> AppError.ServerUnavailable
-        else -> AppError.Unknown
+    private companion object {
+        const val PAGE_SIZE = 50
     }
 }

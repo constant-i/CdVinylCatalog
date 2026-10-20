@@ -1,19 +1,14 @@
 package com.kai.cdvinylcatalog.feature.add.scan
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,89 +20,78 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
-import com.kai.cdvinylcatalog.common.ui.asText
-import com.kai.cdvinylcatalog.domain.result.AppError
 import com.kai.cdvinylcatalog.feature.add.R
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScanScreen(
-    state: ScanContract.State,
     onIntent: (ScanContract.Intent) -> Unit,
     onNavigateBack: () -> Unit,
     onNavigateToCollection: () -> Unit,
     onNavigateToSearch: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
+    CameraPermissionHandler(
+        onPermissionGranted = {
+            ScanContent(
+                onNavigateBack = onNavigateBack,
+                onNavigateToCollection = onNavigateToCollection,
+                onNavigateToSearch = onNavigateToSearch,
+                modifier = modifier,
+            ) {
+                CameraPreview(
+                    onBarcodeDetected = { barcode ->
+                        onIntent(ScanContract.Intent.OnBarcodeScanned(barcode))
+                    }
+                )
+                ScannerOverlay(modifier = Modifier.fillMaxSize())
+            }
+        },
+        onPermissionDenied = {
+            ScanContent(
+                onNavigateBack = onNavigateBack,
+                onNavigateToCollection = onNavigateToCollection,
+                onNavigateToSearch = onNavigateToSearch,
+                modifier = modifier,
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.scan_permission_denied),
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+        }
+    )
+}
+
+/**
+ * Статичная часть экрана сканера: фон, топ-бар и слот под содержимое.
+ *
+ * Содержимое вынесено в слот [content], потому что на устройстве это живая
+ * камера (`PreviewView` внутри `AndroidView`), а в [ScanScreenPreview]
+ * её нечем отрисовать.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ScanContent(
+    onNavigateBack: () -> Unit,
+    onNavigateToCollection: () -> Unit,
+    onNavigateToSearch: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable BoxScope.() -> Unit,
+) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
-        when {
-            state.isLoading -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color.White)
-                }
-            }
-
-            state.error != null -> {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = state.error.asText(context),
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = {
-                            onIntent(ScanContract.Intent.OnErrorDismissed)
-                        }) {
-                            Text(stringResource(R.string.scan_ok))
-                        }
-                    }
-                }
-            }
-
-            else -> {
-                CameraPermissionHandler(
-                    onPermissionGranted = {
-                        Box(modifier = Modifier.fillMaxSize()) {
-                            CameraPreview(
-                                onBarcodeDetected = { barcode ->
-                                    onIntent(ScanContract.Intent.OnBarcodeScanned(barcode))
-                                }
-                            )
-                            ScannerOverlay(modifier = Modifier.fillMaxSize())
-                        }
-                    },
-                    onPermissionDenied = {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.scan_permission_denied),
-                                color = Color.White,
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                    }
-                )
-            }
-        }
+        content()
 
         TopAppBar(
             modifier = Modifier
@@ -127,14 +111,14 @@ fun ScanScreen(
                 IconButton(onClick = onNavigateToSearch) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        stringResource(R.string.cd_search),
+                        contentDescription = stringResource(R.string.cd_search),
                         tint = Color.White
                     )
                 }
                 IconButton(onClick = onNavigateToCollection) {
                     Icon(
                         imageVector = Icons.Default.LibraryMusic,
-                        stringResource(R.string.cd_collection),
+                        contentDescription = stringResource(R.string.cd_collection),
                         tint = Color.White
                     )
                 }
@@ -146,21 +130,24 @@ fun ScanScreen(
     }
 }
 
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+/**
+ * Экран сканера принудительно тёмный, поэтому превью одно,
+ * а не пара Light/Dark, как на остальных экранах.
+ */
+@Preview(name = "Scanner", showBackground = false, widthDp = 360, heightDp = 720)
 @Composable
 private fun ScanScreenPreview() {
-    CdVinylCatalogTheme {
-        ScanScreen(
-            state = ScanContract.State(
-                isLoading = false,
-                scannedBarcode = null,
-                error = AppError.Unknown
-            ),
-            onIntent = {},
-            onNavigateBack = {},
-            onNavigateToCollection = {},
-            onNavigateToSearch = {}
+    ScanContent(
+        onNavigateBack = {},
+        onNavigateToCollection = {},
+        onNavigateToSearch = {},
+    ) {
+        // Заглушка вместо камеры: в превью CameraX недоступен
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color(0xFF2B2B2B))
         )
+        ScannerOverlay(modifier = Modifier.fillMaxSize())
     }
 }

@@ -83,6 +83,9 @@ class CollectionRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun observeCollectionReleaseIds(): Flow<Set<Long>> =
+        dao.observeCollectionReleaseIds().map { it.toSet() }
+
     override suspend fun addToCollection(release: Release, format: Format, notes: String?): Outcome<Long> {
         return try {
             val entity = release.toEntity(format = format, notes = notes)

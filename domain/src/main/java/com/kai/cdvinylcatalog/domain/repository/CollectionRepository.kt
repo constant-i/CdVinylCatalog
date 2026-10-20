@@ -23,6 +23,14 @@ interface CollectionRepository {
 
     suspend fun isInCollection(releaseId: Long): Outcome<Boolean>
 
+    /**
+     * Реактивный набор ID релизов Discogs, которые уже есть в коллекции.
+     *
+     * Нужен экрану результатов поиска, чтобы одним запросом пометить
+     * «уже в коллекции» весь постранично загруженный список.
+     */
+    fun observeCollectionReleaseIds(): Flow<Set<Long>>
+
     suspend fun addToCollection(
         release: Release,
         format: Format,

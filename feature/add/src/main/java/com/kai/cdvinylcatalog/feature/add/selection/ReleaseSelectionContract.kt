@@ -2,22 +2,14 @@ package com.kai.cdvinylcatalog.feature.add.selection
 
 import com.kai.cdvinylcatalog.domain.catalog.Release
 
-
 object ReleaseSelectionContract {
-
     data class State(
-        val results: List<Release> = emptyList(),
-        val source: Source = Source.SEARCH,  // откуда пришли
-        val inCollectionIds: Set<Long> = emptySet()
-    ) {
-        val isEmpty: Boolean
-            get() = results.isEmpty()
-    }
+        val source: Source = Source.SEARCH,
+        /** ID релизов Discogs, которые уже есть в коллекции пользователя */
+        val inCollectionIds: Set<Long> = emptySet(),
+    )
 
-    enum class Source {
-        SCAN,    // из сканера
-        SEARCH   // из ручного поиска
-    }
+    enum class Source { SCAN, SEARCH }
 
     sealed class Intent {
         data object OnBackClicked : Intent()

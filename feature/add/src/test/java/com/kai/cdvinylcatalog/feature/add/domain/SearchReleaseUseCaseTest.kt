@@ -1,18 +1,29 @@
 package com.kai.cdvinylcatalog.feature.add.domain
 
-import com.kai.cdvinylcatalog.core.model.Release
-import com.kai.cdvinylcatalog.core.network.DiscogsRepository
-import io.mockk.coEvery
-import io.mockk.coVerify
+import androidx.paging.PagingData
+import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
+import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertTrue
+import io.mockk.verify
+import kotlinx.coroutines.flow.flowOf
+import org.junit.Assert.assertSame
 import org.junit.Before
 import org.junit.Test
 
+/**
+ * Сценарий использования: поиск релиза в Discogs по штрихкоду.
+ *
+ * Начиная с Paging 3 UseCase не выполняет сетевой вызов сам — он возвращает
+ * `Flow<PagingData<Release>>`, который лениво запускает `PagingSource`.
+ * Поэтому проверяем контракт делегирования: обрезку пробелов и проброс потока.
+ *
+ * Валидация штрихкода живёт на уровне UI (кнопка недоступна для пустого ввода),
+ * а не в UseCase — это тоже зафиксировано тестом.
+ */
 class SearchReleaseUseCaseTest {
 
-    private lateinit var repository: DiscogsRepository
+    private lateinit var repository: ReleaseRepository
     private lateinit var useCase: SearchReleaseUseCase
 
     @Before
@@ -22,46 +33,56 @@ class SearchReleaseUseCaseTest {
     }
 
     @Test
-    fun `returns failure when barcode is blank`() = runTest {
-        val result = useCase("")
-        assertTrue(result.isFailure)
-        coVerify(exactly = 0) { repository.searchByBarcode(any()) }
+    fun `returns paging flow produced by repository`() {
+        val expected = flowOf(PagingData.from(listOf(createRelease())))
+        every { repository.searchByBarcode(BARCODE) } returns expected
+
+        val actual = useCase(BARCODE)
+
+        assertSame(expected, actual)
+        verify(exactly = 1) { repository.searchByBarcode(BARCODE) }
     }
 
     @Test
-    fun `returns failure when barcode is too short`() = runTest {
-        val result = useCase("123")
-        assertTrue(result.isFailure)
-        coVerify(exactly = 0) { repository.searchByBarcode(any()) }
+    fun `trims surrounding whitespace before calling repository`() {
+        val expected = flowOf(PagingData.empty<Release>())
+        every { repository.searchByBarcode(BARCODE) } returns expected
+
+        val actual = useCase("  $BARCODE  ")
+
+        assertSame(expected, actual)
+        verify(exactly = 1) { repository.searchByBarcode(BARCODE) }
     }
 
     @Test
-    fun `calls repository with trimmed barcode`() = runTest {
-        val barcode = "  602547378781  "
-        val expected = Result.success(emptyList<Release>())
-        coEvery { repository.searchByBarcode("602547378781") } returns expected
+    fun `does not validate input - blank barcode is delegated as is`() {
+        val expected = flowOf(PagingData.empty<Release>())
+        every { repository.searchByBarcode("") } returns expected
 
-        val result = useCase(barcode)
+        val actual = useCase("")
 
-        assertTrue(result.isSuccess)
-        coVerify(exactly = 1) { repository.searchByBarcode("602547378781") }
-    }
-
-    @Test
-    fun `returns repository result on success`() = runTest {
-        val releases = listOf(createRelease())
-        coEvery { repository.searchByBarcode(any()) } returns Result.success(releases)
-
-        val result = useCase("602547378781")
-
-        assertTrue(result.isSuccess)
-        assertTrue(result.getOrNull()?.size == 1)
+        assertSame(expected, actual)
+        verify(exactly = 1) { repository.searchByBarcode("") }
     }
 
     private fun createRelease() = Release(
-        id = 1, title = "Encore", artist = "Sarah Brightman",
-        year = 2007, barcode = null, coverImageUrl = null, label = null,
-        rawFormat = null, country = null, releaseDate = null,
-        catalogNumber = null, notes = null
+        id = 1L,
+        title = "Encore",
+        artist = "Sarah Brightman",
+        year = 2007,
+        barcode = null,
+        coverImageUrl = null,
+        imageUrls = emptyList(),
+        label = null,
+        rawFormat = null,
+        country = null,
+        releaseDate = null,
+        catalogNumber = null,
+        notes = null,
+        tracklist = emptyList()
     )
+
+    private companion object {
+        const val BARCODE = "602547378781"
+    }
 }

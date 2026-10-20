@@ -1,19 +1,14 @@
 package com.kai.cdvinylcatalog.feature.add.domain
 
+import androidx.paging.PagingData
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
-import com.kai.cdvinylcatalog.domain.result.Outcome
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-/**
- * Поиск релизов в Discogs по штрихкоду.
- *
- * Валидация штрихкода — на уровне UI (кнопка disabled).
- * UseCase предполагает валидный вход.
- */
 class SearchReleaseUseCase @Inject constructor(
     private val repository: ReleaseRepository
 ) {
-    suspend operator fun invoke(barcode: String): Outcome<List<Release>> =
+    operator fun invoke(barcode: String): Flow<PagingData<Release>> =
         repository.searchByBarcode(barcode.trim())
 }
