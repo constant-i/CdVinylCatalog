@@ -33,9 +33,10 @@ android {
 }
 
 dependencies {
+    // Слои, на которые фича имеет право ссылаться напрямую.
+    // Реализации репозиториев (:data:*) сюда не входят: фича видит только
+    // интерфейсы из :domain и получает реализации через DI.
     implementation(project(":common-ui"))
-    implementation(project(":data:network"))
-    implementation(project(":data:database"))
     implementation(project(":domain"))
 
     // Compose
@@ -64,9 +65,8 @@ dependencies {
     // Coil
     implementation(libs.coil.compose)
 
-    // Paging
-    implementation(libs.androidx.paging.common)
-    implementation(libs.androidx.paging.runtime)
+    // Paging: фича только потребляет PagingData (common) и рисует LazyPagingItems (compose).
+    // Pager/PagingConfig/PagingSource живут в :data:network и :data:database.
     implementation(libs.androidx.paging.compose)
 
     // Testing

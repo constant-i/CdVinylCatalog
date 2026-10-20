@@ -40,8 +40,9 @@ android {
 }
 
 dependencies {
-    // Наш домен (для UiMessage -> AppError)
-    implementation(project(":domain"))
+    // api, а не implementation: AppError фигурирует в публичном API
+    // (UiMessage.Error, AppError.asText) и нужен потребителям :common-ui.
+    api(project(":domain"))
 
     // Compose
     implementation(platform(libs.androidx.compose.bom))

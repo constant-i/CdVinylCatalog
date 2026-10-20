@@ -13,7 +13,9 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.androidx.paging.common)
+    // api, а не implementation: Flow и PagingData участвуют в публичных
+    // сигнатурах интерфейсов репозиториев, поэтому нужны потребителям :domain.
+    api(libs.kotlinx.coroutines.core)
+    api(libs.androidx.paging.common)
     testImplementation(libs.junit)
 }
