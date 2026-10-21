@@ -270,6 +270,28 @@ class ManualAddViewModelTest {
     }
 
     @Test
+    fun `successful crop deletes the multi-megabyte source file`() = runTest {
+        every { photoStorage.createDestination() } returnsMany
+            listOf(CAMERA_DESTINATION, CROP_DESTINATION)
+        every { photoStorage.isUsable(CAMERA_DESTINATION.path) } returns true
+        every { photoStorage.shareableUri(CAMERA_DESTINATION.path) } returns
+            CAMERA_DESTINATION.shareableUri
+
+        val viewModel = viewModel()
+
+        viewModel.onIntent(ManualAddContract.Intent.OnCameraClicked)
+        viewModel.onIntent(ManualAddContract.Intent.OnCameraResult(success = true))
+        viewModel.onIntent(ManualAddContract.Intent.OnCropFinished)
+
+        // Исходный снимок остаётся на диске, если его не удалить, — утечка в мегабайты
+        verify(exactly = 1) { photoStorage.delete(CAMERA_DESTINATION.path) }
+        assertEquals(
+            listOf(CROP_DESTINATION.path),
+            viewModel.state.value.photoPaths
+        )
+    }
+
+    @Test
     fun `removing photo deletes its file`() {
         val viewModel = createViewModel()
 

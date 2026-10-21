@@ -242,7 +242,12 @@ class ManualAddViewModel @Inject constructor(
      */
     private fun launchCrop(sourcePath: String) {
         val destination = photoStorage.createDestination()
-        update { it.copy(pendingCropDestination = destination.path) }
+        update {
+            it.copy(
+                pendingCropPath = sourcePath,
+                pendingCropDestination = destination.path
+            )
+        }
         viewModelScope.launch {
             _effect.send(
                 ManualAddContract.Effect.LaunchCrop(
@@ -255,6 +260,12 @@ class ManualAddViewModel @Inject constructor(
 
     private fun onCropFinished() {
         val croppedPath = _state.value.pendingCropDestination
+        val sourcePath = _state.value.pendingCropPath
+
+        // Исходник после успешного кропа больше не нужен: он весит несколько МБ
+        if (sourcePath != null && sourcePath != croppedPath) {
+            photoStorage.delete(sourcePath)
+        }
 
         update {
             it.copy(
@@ -270,8 +281,9 @@ class ManualAddViewModel @Inject constructor(
     }
 
     private fun onCropCancelled() {
-        // Файл под результат кропа больше не нужен
+        // Файл под результат кропа и исходник больше не нужны
         _state.value.pendingCropDestination?.let { photoStorage.delete(it) }
+        _state.value.pendingCropPath?.let { photoStorage.delete(it) }
         update { it.copy(pendingCropPath = null, pendingCropDestination = null) }
     }
 
