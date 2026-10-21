@@ -25,10 +25,6 @@ class CollectionRepositoryImpl @Inject constructor(
     private val dao: CollectionDao
 ) : CollectionRepository {
 
-    override fun observeAll(): Flow<PagingData<CollectionItem>> {
-        return getItems(SortOrder.ADDED_DESC)
-    }
-
     override fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>> {
         val pagingSourceFactory = {
             when (sortOrder) {
@@ -69,10 +65,21 @@ class CollectionRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getOtherCopies(releaseId: Long, currentItemId: Long): List<CollectionItem> {
-        return dao.getAllByReleaseId(releaseId)
-            .filter { it.id != currentItemId }
-            .map { it.toDomain() }
+    override suspend fun getOtherCopies(
+        releaseId: Long,
+        currentItemId: Long
+    ): Outcome<List<CollectionItem>> {
+        return try {
+            Outcome.Success(
+                dao.getAllByReleaseId(releaseId)
+                    .filter { it.id != currentItemId }
+                    .map { it.toDomain() }
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
+        }
     }
 
     override suspend fun isInCollection(releaseId: Long): Outcome<Boolean> {

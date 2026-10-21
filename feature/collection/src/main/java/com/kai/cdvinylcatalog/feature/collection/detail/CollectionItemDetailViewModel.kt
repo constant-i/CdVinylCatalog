@@ -71,8 +71,16 @@ class CollectionItemDetailViewModel @Inject constructor(
 
     private fun loadOtherCopies(releaseId: Long, currentItemId: Long) {
         viewModelScope.launch {
-            val copies = repository.getOtherCopies(releaseId, currentItemId)
-            _state.update { it.copy(otherCopies = copies) }
+            when (val outcome = repository.getOtherCopies(releaseId, currentItemId)) {
+                is Outcome.Success -> {
+                    _state.update { it.copy(otherCopies = outcome.data) }
+                }
+                is Outcome.Failure -> {
+                    // Список копий — второстепенная информация: не затираем экран
+                    // ошибкой, просто оставляем секцию пустой
+                    _state.update { it.copy(otherCopies = emptyList()) }
+                }
+            }
         }
     }
 

@@ -10,15 +10,15 @@ import kotlinx.coroutines.flow.Flow
 
 interface CollectionRepository {
 
-    /** Вся коллекция без явной сортировки — по умолчанию новые сверху. */
-    fun observeAll(): Flow<PagingData<CollectionItem>>
-
     fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>>
 
     fun observeItemById(id: Long): Flow<CollectionItem?>
     suspend fun getItemById(id: Long): Outcome<CollectionItem?>
 
-    suspend fun getOtherCopies(releaseId: Long, currentItemId: Long): List<CollectionItem>
+    suspend fun getOtherCopies(
+        releaseId: Long,
+        currentItemId: Long
+    ): Outcome<List<CollectionItem>>
 
     suspend fun isInCollection(releaseId: Long): Outcome<Boolean>
 
