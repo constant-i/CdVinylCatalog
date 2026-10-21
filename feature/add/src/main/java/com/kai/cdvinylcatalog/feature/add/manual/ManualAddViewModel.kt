@@ -25,6 +25,9 @@ class ManualAddViewModel @Inject constructor(
 
     private val editItemId: Long? = savedStateHandle.get<Long>("itemId")?.takeIf { it > 0 }
 
+    /** Последний записанный в Bundle State — чтобы писать только изменения. */
+    private var lastPersistedState: ManualAddContract.State? = null
+
     private val _state = MutableStateFlow(restoreState())
     val state: StateFlow<ManualAddContract.State> = _state.asStateFlow()
 
@@ -76,20 +79,35 @@ class ManualAddViewModel @Inject constructor(
 
     /**
      * Сохранить State в SavedStateHandle.
+     *
+     * Пишем только изменившиеся ключи: State обновляется на каждый введённый
+     * символ, и записывать все 12 ключей на каждое нажатие слишком дорого для
+     * Bundle (а для списков — ещё и лишние joinToString).
      */
     private fun persistState(state: ManualAddContract.State) {
-        savedStateHandle[KEY_TITLE] = state.title
-        savedStateHandle[KEY_ARTIST] = state.artist
-        savedStateHandle[KEY_YEAR] = state.year
-        savedStateHandle[KEY_FORMAT] = state.format.name
-        savedStateHandle[KEY_LABEL] = state.label
-        savedStateHandle[KEY_COUNTRY] = state.country
-        savedStateHandle[KEY_BARCODE] = state.barcode
-        savedStateHandle[KEY_NOTES] = state.notes
-        savedStateHandle[KEY_PHOTO_PATHS] = state.photoPaths.joinToString(SEPARATOR)
-        savedStateHandle[KEY_DISCOGS_IMAGES] = state.discogsImages.joinToString(SEPARATOR)
-        savedStateHandle[KEY_PENDING_PHOTO_PATH] = state.pendingPhotoPath
-        savedStateHandle[KEY_PENDING_CROP_PATH] = state.pendingCropPath
+        val previous = lastPersistedState
+        lastPersistedState = state
+
+        if (previous?.title != state.title) savedStateHandle[KEY_TITLE] = state.title
+        if (previous?.artist != state.artist) savedStateHandle[KEY_ARTIST] = state.artist
+        if (previous?.year != state.year) savedStateHandle[KEY_YEAR] = state.year
+        if (previous?.format != state.format) savedStateHandle[KEY_FORMAT] = state.format.name
+        if (previous?.label != state.label) savedStateHandle[KEY_LABEL] = state.label
+        if (previous?.country != state.country) savedStateHandle[KEY_COUNTRY] = state.country
+        if (previous?.barcode != state.barcode) savedStateHandle[KEY_BARCODE] = state.barcode
+        if (previous?.notes != state.notes) savedStateHandle[KEY_NOTES] = state.notes
+        if (previous?.photoPaths != state.photoPaths) {
+            savedStateHandle[KEY_PHOTO_PATHS] = state.photoPaths.joinToString(SEPARATOR)
+        }
+        if (previous?.discogsImages != state.discogsImages) {
+            savedStateHandle[KEY_DISCOGS_IMAGES] = state.discogsImages.joinToString(SEPARATOR)
+        }
+        if (previous?.pendingPhotoPath != state.pendingPhotoPath) {
+            savedStateHandle[KEY_PENDING_PHOTO_PATH] = state.pendingPhotoPath
+        }
+        if (previous?.pendingCropPath != state.pendingCropPath) {
+            savedStateHandle[KEY_PENDING_CROP_PATH] = state.pendingCropPath
+        }
     }
 
     /**
