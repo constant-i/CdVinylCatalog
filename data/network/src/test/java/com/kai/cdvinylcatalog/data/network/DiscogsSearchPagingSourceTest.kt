@@ -8,10 +8,13 @@ import com.kai.cdvinylcatalog.data.network.dto.SearchResponseDto
 import com.kai.cdvinylcatalog.data.network.dto.SearchResultDto
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.result.AppErrorException
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Test
 import java.io.IOException
 
@@ -100,6 +103,20 @@ class DiscogsSearchPagingSourceTest {
         assertTrue((result as LoadResult.Error).throwable is AppErrorException)
     }
 
+    /**
+     * Отмена — не ошибка загрузки. Если её проглотить и отдать `LoadResult.Error`,
+     * Paging нарисует «Ошибка загрузки» там, где пользователь просто ушёл с экрана.
+     */
+    @Test
+    fun `propagates cancellation instead of reporting a load error`() {
+        val api = CancellingDiscogsApi()
+        val source = DiscogsSearchPagingSource(api, query = "Nightwish")
+
+        assertThrows(CancellationException::class.java) {
+            runBlocking { source.load(refresh(loadSize = 50)) }
+        }
+    }
+
     private fun refresh(loadSize: Int): LoadParams<Int> =
         LoadParams.Refresh(key = null, loadSize = loadSize, placeholdersEnabled = false)
 
@@ -161,6 +178,30 @@ class DiscogsSearchPagingSourceTest {
                 }
             )
         }
+    }
+
+    private class CancellingDiscogsApi : DiscogsApi {
+
+        override suspend fun searchByBarcode(
+            barcode: String,
+            type: String,
+            page: Int,
+            perPage: Int,
+            token: String
+        ): SearchResponseDto = throw CancellationException("screen closed")
+
+        override suspend fun searchByText(
+            query: String,
+            type: String,
+            page: Int,
+            perPage: Int,
+            token: String
+        ): SearchResponseDto = throw CancellationException("screen closed")
+
+        override suspend fun getReleaseDetails(
+            releaseId: Long,
+            token: String
+        ): ReleaseDetailsDto = error("not used")
     }
 
     private class FailingDiscogsApi : DiscogsApi {

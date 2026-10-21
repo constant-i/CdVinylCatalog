@@ -7,6 +7,7 @@ import com.kai.cdvinylcatalog.data.network.dto.toDomain
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.repository.ReleaseRepository
 import com.kai.cdvinylcatalog.domain.result.Outcome
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -51,6 +52,8 @@ class DiscogsRepositoryImpl @Inject constructor(
     ): Outcome<T> = withContext(Dispatchers.IO) {
         try {
             Outcome.Success(block())
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Outcome.Failure(mapExceptionToAppError(e))
         }

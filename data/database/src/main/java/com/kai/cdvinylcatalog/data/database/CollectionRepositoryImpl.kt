@@ -14,6 +14,7 @@ import com.kai.cdvinylcatalog.domain.collection.SortOrder
 import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
 import com.kai.cdvinylcatalog.domain.result.AppError
 import com.kai.cdvinylcatalog.domain.result.Outcome
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -61,6 +62,8 @@ class CollectionRepositoryImpl @Inject constructor(
         return try {
             val entity = dao.getById(id)
             Outcome.Success(entity?.toDomain())
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Outcome.Failure(AppError.Unknown)
         }
@@ -76,6 +79,8 @@ class CollectionRepositoryImpl @Inject constructor(
         return try {
             val exists = dao.getByReleaseId(releaseId) != null
             Outcome.Success(exists)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Outcome.Failure(AppError.Unknown)
         }
@@ -89,6 +94,8 @@ class CollectionRepositoryImpl @Inject constructor(
             val entity = release.toEntity(format = format, notes = notes)
             val id = dao.insert(entity)
             Outcome.Success(id)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Outcome.Failure(AppError.Unknown)
         }
@@ -111,6 +118,8 @@ class CollectionRepositoryImpl @Inject constructor(
             )
             val id = dao.insert(entity)
             Outcome.Success(id)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Outcome.Failure(AppError.Unknown)
         }
@@ -136,6 +145,8 @@ class CollectionRepositoryImpl @Inject constructor(
                 )
             )
             Outcome.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Outcome.Failure(AppError.Unknown)
         }
@@ -145,6 +156,8 @@ class CollectionRepositoryImpl @Inject constructor(
         return try {
             dao.deleteById(id)
             Outcome.Success(Unit)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Outcome.Failure(AppError.Unknown)
         }

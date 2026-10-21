@@ -6,6 +6,7 @@ import com.kai.cdvinylcatalog.data.network.dto.SearchResponseDto
 import com.kai.cdvinylcatalog.data.network.dto.toDomain
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.result.AppErrorException
+import kotlinx.coroutines.CancellationException
 
 /**
  * Постраничная загрузка результатов поиска из Discogs.
@@ -64,6 +65,9 @@ class DiscogsSearchPagingSource(
 
             // Защита от зацикливания: отдаём то, что набрали
             LoadResult.Page(items, prevKey, nextKey = if (items.isEmpty()) null else page + 1)
+        } catch (e: CancellationException) {
+            // Отмена — не ошибка загрузки: пробрасываем, чтобы Paging не показывал «Ошибка»
+            throw e
         } catch (e: Exception) {
             LoadResult.Error(AppErrorException(mapExceptionToAppError(e)))
         }
