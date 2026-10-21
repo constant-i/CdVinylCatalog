@@ -1,12 +1,6 @@
 package com.kai.cdvinylcatalog.feature.add.manual
 
-import android.app.Activity
 import android.content.res.Configuration
-import android.graphics.Bitmap
-import android.net.Uri
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -47,175 +41,39 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import coil.compose.AsyncImage
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.feature.add.R
-import com.yalantis.ucrop.UCrop
-import com.yalantis.ucrop.model.AspectRatio
 import java.io.File
-import java.util.UUID
 
+/**
+ * Форма добавления диска вручную.
+ *
+ * Экран ничего не знает о файлах, `FileProvider` и `ContentResolver`: все
+ * операции с хранилищем выполняет ViewModel через доменный `PhotoStorage`,
+ * а запуск камеры, галереи и кропа вынесен в [ManualAddRoute].
+ */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun ManualAddScreen(
     state: ManualAddContract.State,
     onIntent: (ManualAddContract.Intent) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenCamera: () -> Unit = {},
+    onOpenGallery: () -> Unit = {},
 ) {
     val keyboard = LocalSoftwareKeyboardController.current
     val focus = LocalFocusManager.current
-
-    val context = LocalContext.current
-
-    val aspectRatioFree = stringResource(R.string.add_manual_aspect_ratio_free)
-    val aspectRatio1_1 = stringResource(R.string.add_manual_aspect_ratio_1_1)
-    val aspectRatio4_3 = stringResource(R.string.add_manual_aspect_ratio_4_3)
-    val aspectRatio16_9 = stringResource(R.string.add_manual_aspect_ratio_16_9)
-
-    fun createPhotoFile(): File {
-        val dir = File(context.filesDir, PHOTOS_SUB_DIR).apply { mkdirs() }
-        return File(dir, "${UUID.randomUUID()}.$PHOTO_EXTENSION")
-    }
-
-    fun getUriForFile(file: File): Uri {
-        return FileProvider.getUriForFile(
-            context,
-            "${context.packageName}$FILE_PROVIDER_SUFFIX",
-            file
-        )
-    }
-
-    fun copyToAppStorage(sourceUri: Uri): String? {
-        return try {
-            val dir = File(context.filesDir, PHOTOS_SUB_DIR).apply { mkdirs() }
-            val destFile = File(dir, "${UUID.randomUUID()}.$PHOTO_EXTENSION")
-            context.contentResolver.openInputStream(sourceUri)?.use { input ->
-                destFile.outputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-            destFile.absolutePath
-        } catch (e: Exception) {
-            null
-        }
-    }
-
-    val cameraLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.TakePicture()
-    ) { success ->
-        if (success) {
-            state.pendingPhotoPath?.let { path ->
-                onIntent(ManualAddContract.Intent.OnStartCrop(path))
-            }
-        } else {
-            onIntent(ManualAddContract.Intent.OnPendingPhotoCleared)
-        }
-    }
-
-    val galleryLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri ->
-        uri?.let {
-            copyToAppStorage(it)?.let { path ->
-                onIntent(ManualAddContract.Intent.OnPhotoAdded(path))
-            }
-        }
-    }
-
-    val uCropLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        when {
-            result.resultCode == Activity.RESULT_OK -> {
-                val croppedUri = result.data?.let { UCrop.getOutput(it) }
-                // UCrop отдаёт то file://, то content:// — приводим к абсолютному пути
-                val absolutePath = croppedUri?.let { uri ->
-                    if (uri.scheme == "file") {
-                        uri.path
-                    } else {
-                        // content:// не даёт пути к файлу, копируем его в наше хранилище
-                        copyToAppStorage(uri)
-                    }
-                }
-                absolutePath?.let { path ->
-                    onIntent(ManualAddContract.Intent.OnCropFinished(path))
-                }
-            }
-            result.resultCode == UCrop.RESULT_ERROR -> {
-                val error = result.data?.let { UCrop.getError(it) }
-                onIntent(ManualAddContract.Intent.OnCropCancelled)
-            }
-            else -> {
-                onIntent(ManualAddContract.Intent.OnCropCancelled)
-            }
-        }
-    }
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                onIntent(ManualAddContract.Intent.OnCheckPendingPhoto)
-            }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        onIntent(ManualAddContract.Intent.OnCheckPendingPhoto)
-    }
-
-    LaunchedEffect(state.pendingCropPath) {
-        val path = state.pendingCropPath ?: return@LaunchedEffect
-        val sourceFile = File(path)
-        if (!sourceFile.exists()) return@LaunchedEffect
-
-        val sourceUri = getUriForFile(sourceFile)
-        val destFile = createPhotoFile()
-        val destUri = getUriForFile(destFile)
-
-        val options = UCrop.Options().apply {
-            setAspectRatioOptions(
-                0,
-                AspectRatio(aspectRatioFree, 0f, 0f),
-                AspectRatio(aspectRatio1_1, 1f, 1f),
-                AspectRatio(aspectRatio4_3, 4f, 3f),
-                AspectRatio(aspectRatio16_9, 16f, 9f)
-            )
-            setCompressionFormat(Bitmap.CompressFormat.JPEG)
-            setCompressionQuality(90)
-            setHideBottomControls(false)
-            setFreeStyleCropEnabled(true)
-        }
-
-        val intent = UCrop.of(sourceUri, destUri)
-            .withOptions(options)
-            .withMaxResultSize(1080, 1080)
-            .getIntent(context)
-
-        uCropLauncher.launch(intent)
-    }
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
@@ -230,12 +88,13 @@ fun ManualAddScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        onIntent(ManualAddContract.Intent.OnBackClicked)
-                    }) {
+                    IconButton(
+                        onClick = { onIntent(ManualAddContract.Intent.OnBackClicked) }
+                    ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back))
+                            contentDescription = stringResource(R.string.cd_back)
+                        )
                     }
                 }
             )
@@ -287,33 +146,10 @@ fun ManualAddScreen(
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(Modifier.height(4.dp))
-            FlowRow(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Format.entries
-                    .filter { it != Format.UNKNOWN }
-                    .forEach { format ->
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.selectable(
-                                selected = state.format == format,
-                                onClick = {
-                                    onIntent(ManualAddContract.Intent.OnFormatChanged(format))
-                                }
-                            )
-                        ) {
-                            RadioButton(
-                                selected = state.format == format,
-                                onClick = {
-                                    onIntent(ManualAddContract.Intent.OnFormatChanged(format))
-                                }
-                            )
-                            Text(format.name)
-                        }
-                    }
-            }
+            FormatSelector(
+                selected = state.format,
+                onSelect = { onIntent(ManualAddContract.Intent.OnFormatChanged(it)) }
+            )
             Spacer(Modifier.height(12.dp))
 
             OutlinedTextField(
@@ -353,89 +189,12 @@ fun ManualAddScreen(
             )
             Spacer(Modifier.height(16.dp))
 
-            Text(
-                text = stringResource(
-                    R.string.add_manual_photos_count, state.photoPaths.size, ManualAddContract.State.MAX_PHOTOS
-                ),
-                style = MaterialTheme.typography.titleMedium
+            PhotosSection(
+                state = state,
+                onIntent = onIntent,
+                onOpenCamera = onOpenCamera,
+                onOpenGallery = onOpenGallery
             )
-            Spacer(Modifier.height(8.dp))
-
-            if (state.photoPaths.isNotEmpty()) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    items(state.photoPaths) { path ->
-                        Box(
-                            modifier = Modifier
-                                .size(96.dp)
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.surfaceVariant)
-                        ) {
-                            AsyncImage(
-                                model = File(path),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                            IconButton(
-                                onClick = {
-                                    onIntent(ManualAddContract.Intent.OnPhotoRemoved(path))
-                                },
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .size(24.dp)
-                                    .background(
-                                        MaterialTheme.colorScheme.error,
-                                        CircleShape
-                                    )
-                            ) {
-                                Icon(
-                                    Icons.Default.Close,
-                                    contentDescription = stringResource(R.string.cd_delete),
-                                    tint = MaterialTheme.colorScheme.onError,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                OutlinedButton(
-                    onClick = {
-                        val photoFile = createPhotoFile()
-                        val uri = getUriForFile(photoFile)
-                        onIntent(ManualAddContract.Intent.OnCameraLaunched(photoFile.absolutePath))
-                        cameraLauncher.launch(uri)
-                    },
-                    enabled = state.canAddMorePhotos,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = null)
-                    Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.add_manual_button_camera))
-                }
-                OutlinedButton(
-                    onClick = {
-                        galleryLauncher.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    },
-                    enabled = state.canAddMorePhotos,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.PhotoLibrary, contentDescription = null)
-                    Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.add_manual_button_gallery))
-                }
-            }
 
             Spacer(Modifier.height(24.dp))
 
@@ -466,6 +225,128 @@ fun ManualAddScreen(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun FormatSelector(
+    selected: Format,
+    onSelect: (Format) -> Unit
+) {
+    FlowRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        Format.entries
+            .filter { it != Format.UNKNOWN }
+            .forEach { format ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.selectable(
+                        selected = selected == format,
+                        onClick = { onSelect(format) }
+                    )
+                ) {
+                    RadioButton(
+                        selected = selected == format,
+                        onClick = { onSelect(format) }
+                    )
+                    Text(format.name)
+                }
+            }
+    }
+}
+
+@Composable
+private fun PhotosSection(
+    state: ManualAddContract.State,
+    onIntent: (ManualAddContract.Intent) -> Unit,
+    onOpenCamera: () -> Unit,
+    onOpenGallery: () -> Unit
+) {
+    Text(
+        text = stringResource(
+            R.string.add_manual_photos_count,
+            state.photoPaths.size,
+            ManualAddContract.State.MAX_PHOTOS
+        ),
+        style = MaterialTheme.typography.titleMedium
+    )
+    Spacer(Modifier.height(8.dp))
+
+    if (state.photoPaths.isNotEmpty()) {
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(state.photoPaths) { path ->
+                PhotoThumbnail(
+                    path = path,
+                    onRemove = { onIntent(ManualAddContract.Intent.OnPhotoRemoved(path)) }
+                )
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+    }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        OutlinedButton(
+            onClick = onOpenCamera,
+            enabled = state.canAddMorePhotos,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(Icons.Default.PhotoCamera, contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text(stringResource(R.string.add_manual_button_camera))
+        }
+        OutlinedButton(
+            onClick = onOpenGallery,
+            enabled = state.canAddMorePhotos,
+            modifier = Modifier.weight(1f)
+        ) {
+            Icon(Icons.Default.PhotoLibrary, contentDescription = null)
+            Spacer(Modifier.width(4.dp))
+            Text(stringResource(R.string.add_manual_button_gallery))
+        }
+    }
+}
+
+@Composable
+private fun PhotoThumbnail(
+    path: String,
+    onRemove: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(96.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        AsyncImage(
+            model = File(path),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
+        )
+        IconButton(
+            onClick = onRemove,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(24.dp)
+                .background(MaterialTheme.colorScheme.error, CircleShape)
+        ) {
+            Icon(
+                Icons.Default.Close,
+                contentDescription = stringResource(R.string.cd_delete),
+                tint = MaterialTheme.colorScheme.onError,
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
 @Preview(name = "Light", showBackground = true)
 @Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
 @Composable
@@ -482,7 +363,3 @@ private fun ManualAddScreenPreview() {
         )
     }
 }
-
-private const val PHOTOS_SUB_DIR = "photos"
-private const val PHOTO_EXTENSION = "jpg"
-private const val FILE_PROVIDER_SUFFIX = ".fileprovider"

@@ -48,6 +48,7 @@ dependencies {
     implementation(project(":domain"))
     implementation(project(":data:network"))
     implementation(project(":data:database"))
+    implementation(project(":data:files"))
     implementation(project(":common-ui"))
     implementation(project(":feature:add"))
     implementation(project(":feature:collection"))

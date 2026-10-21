@@ -22,6 +22,8 @@ object ManualAddContract {
         val discogsImages: List<String> = emptyList(),
         val pendingPhotoPath: String? = null,
         val pendingCropPath: String? = null,
+        /** Файл, подготовленный под результат кропа. */
+        val pendingCropDestination: String? = null,
     ) {
         val canAddMorePhotos: Boolean
             get() = photoPaths.size < MAX_PHOTOS
@@ -53,13 +55,20 @@ object ManualAddContract {
         data class OnBarcodeChanged(val value: String) : Intent()
         data class OnNotesChanged(val value: String) : Intent()
         data object OnSaveClicked : Intent()
-        data class OnPhotoAdded(val path: String) : Intent()
-        data class OnPhotoRemoved(val path: String) : Intent()
-        data class OnCameraLaunched(val pendingPath: String) : Intent()
+
+        /** Пользователь нажал «Камера». ViewModel готовит файл и отвечает [Effect.LaunchCamera]. */
+        data object OnCameraClicked : Intent()
+
+        /** Результат съёмки: `true`, если камера записала файл. */
+        data class OnCameraResult(val success: Boolean) : Intent()
+
+        /** Результат системного пикера: строка `content://` выбранного изображения. */
+        data class OnPhotoPicked(val uri: String) : Intent()
+
         data object OnCheckPendingPhoto : Intent()
         data object OnPendingPhotoCleared : Intent()
-        data class OnStartCrop(val imagePath: String) : Intent()
-        data class OnCropFinished(val croppedPath: String) : Intent()
+        data class OnPhotoRemoved(val path: String) : Intent()
+        data object OnCropFinished : Intent()
         data object OnCropCancelled : Intent()
     }
 
@@ -67,5 +76,11 @@ object ManualAddContract {
         data object NavigateBack : Effect()
         data class NavigateToDetails(val itemId: Long) : Effect()
         data class ShowToast(val message: UiMessage) : Effect()
+
+        /** Запустить системную камеру; снимок будет записан в [shareableUri]. */
+        data class LaunchCamera(val shareableUri: String) : Effect()
+
+        /** Запустить UCrop: прочитать [sourceUri] и записать результат в [destinationUri]. */
+        data class LaunchCrop(val sourceUri: String, val destinationUri: String) : Effect()
     }
 }

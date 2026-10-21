@@ -13,6 +13,7 @@
     <string name="msg_search_empty">Ничего не найдено</string>
     <string name="msg_invalid_barcode">Некорректный штрихкод</string>
     <string name="msg_item_not_found">Запись не найдена</string>
+    <string name="msg_photo_import_failed">Не удалось прочитать выбранное фото</string>
     <string name="msg_required_fields">Заполните обязательные поля</string>
     <string name="msg_added">Добавлено: %1$s</string>
     <string name="msg_save_failed">Не удалось сохранить</string>

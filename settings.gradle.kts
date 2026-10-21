@@ -27,6 +27,7 @@ rootProject.name = "CdVinylCatalog"
 include(":app")
 include(":data:network")
 include(":data:database")
+include(":data:files")
 include(":common-ui")
 include(":feature:add")
 include(":feature:collection")

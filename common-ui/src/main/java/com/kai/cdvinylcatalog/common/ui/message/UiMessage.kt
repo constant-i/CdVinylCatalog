@@ -22,6 +22,7 @@ sealed interface UiMessage {
     data object SearchEmpty : UiMessage
     data object InvalidBarcode : UiMessage
     data object ItemNotFound : UiMessage
+    data object PhotoImportFailed : UiMessage
 
     // ─── UI-нотификации ───
     data object RequiredFieldsEmpty : UiMessage

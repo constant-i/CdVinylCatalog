@@ -18,6 +18,7 @@ fun UiMessage.asText(context: Context): String = when (this) {
     UiMessage.SearchEmpty -> context.getString(R.string.msg_search_empty)
     UiMessage.InvalidBarcode -> context.getString(R.string.msg_invalid_barcode)
     UiMessage.ItemNotFound -> context.getString(R.string.msg_item_not_found)
+    UiMessage.PhotoImportFailed -> context.getString(R.string.msg_photo_import_failed)
 
     // UI-нотификации
     UiMessage.RequiredFieldsEmpty -> context.getString(R.string.msg_required_fields)

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.media.PhotoStorage
 import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +21,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ManualAddViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repository: CollectionRepository
+    private val repository: CollectionRepository,
+    private val photoStorage: PhotoStorage,
 ) : ViewModel() {
 
     private val editItemId: Long? = savedStateHandle.get<Long>("itemId")?.takeIf { it > 0 }
@@ -73,7 +75,8 @@ class ManualAddViewModel @Inject constructor(
                 ?.filter { it.isNotBlank() }
                 ?: emptyList(),
             pendingPhotoPath = savedStateHandle.get<String>(KEY_PENDING_PHOTO_PATH),
-            pendingCropPath = savedStateHandle.get<String>(KEY_PENDING_CROP_PATH)
+            pendingCropPath = savedStateHandle.get<String>(KEY_PENDING_CROP_PATH),
+            pendingCropDestination = savedStateHandle.get<String>(KEY_PENDING_CROP_DESTINATION),
         )
     }
 
@@ -107,6 +110,9 @@ class ManualAddViewModel @Inject constructor(
         }
         if (previous?.pendingCropPath != state.pendingCropPath) {
             savedStateHandle[KEY_PENDING_CROP_PATH] = state.pendingCropPath
+        }
+        if (previous?.pendingCropDestination != state.pendingCropDestination) {
+            savedStateHandle[KEY_PENDING_CROP_DESTINATION] = state.pendingCropDestination
         }
     }
 
@@ -166,76 +172,131 @@ class ManualAddViewModel @Inject constructor(
             is ManualAddContract.Intent.OnBarcodeChanged -> update { it.copy(barcode = intent.value) }
             is ManualAddContract.Intent.OnNotesChanged -> update { it.copy(notes = intent.value) }
             ManualAddContract.Intent.OnSaveClicked -> onSave()
-            is ManualAddContract.Intent.OnPhotoAdded -> onPhotoAdded(intent.path)
-            is ManualAddContract.Intent.OnPhotoRemoved -> onPhotoRemoved(intent.path)
-            is ManualAddContract.Intent.OnCameraLaunched -> onCameraLaunched(intent.pendingPath)
+            ManualAddContract.Intent.OnCameraClicked -> onCameraClicked()
+            is ManualAddContract.Intent.OnCameraResult -> onCameraResult(intent.success)
+            is ManualAddContract.Intent.OnPhotoPicked -> onPhotoPicked(intent.uri)
             ManualAddContract.Intent.OnCheckPendingPhoto -> onCheckPendingPhoto()
             ManualAddContract.Intent.OnPendingPhotoCleared -> onPendingPhotoCleared()
-            is ManualAddContract.Intent.OnStartCrop -> onStartCrop(intent.imagePath)
-            is ManualAddContract.Intent.OnCropFinished -> onCropFinished(intent.croppedPath)
+            is ManualAddContract.Intent.OnPhotoRemoved -> onPhotoRemoved(intent.path)
+            ManualAddContract.Intent.OnCropFinished -> onCropFinished()
             ManualAddContract.Intent.OnCropCancelled -> onCropCancelled()
-
         }
     }
 
-    private fun onStartCrop(imagePath: String) {
-        update {
-            it.copy(
-                pendingPhotoPath = null,
-                pendingCropPath = imagePath
+    /**
+     * Готовит файл под снимок и просит экран запустить камеру.
+     */
+    private fun onCameraClicked() {
+        if (!_state.value.canAddMorePhotos) return
+
+        val destination = photoStorage.createDestination()
+        update { it.copy(pendingPhotoPath = destination.path) }
+        viewModelScope.launch {
+            _effect.send(ManualAddContract.Effect.LaunchCamera(destination.shareableUri))
+        }
+    }
+
+    /**
+     * Камера вернула управление. При отказе удаляем пустышку,
+     * при успехе — отправляем файл в кроп.
+     */
+    private fun onCameraResult(success: Boolean) {
+        val pendingPath = _state.value.pendingPhotoPath
+
+        if (!success || pendingPath == null) {
+            pendingPath?.let { photoStorage.delete(it) }
+            update { it.copy(pendingPhotoPath = null) }
+            return
+        }
+
+        if (!photoStorage.isUsable(pendingPath)) {
+            // Камера отдала RESULT_OK, но файл пустой или не создан
+            photoStorage.delete(pendingPath)
+            update { it.copy(pendingPhotoPath = null) }
+            return
+        }
+
+        update { it.copy(pendingPhotoPath = null) }
+        launchCrop(pendingPath)
+    }
+
+    private fun onPhotoPicked(uri: String) {
+        if (!_state.value.canAddMorePhotos) return
+
+        viewModelScope.launch {
+            val imported = photoStorage.import(uri)
+            if (imported == null) {
+                _effect.send(
+                    ManualAddContract.Effect.ShowToast(UiMessage.PhotoImportFailed)
+                )
+                return@launch
+            }
+            update { it.copy(pendingCropPath = imported.path) }
+            launchCrop(imported.path)
+        }
+    }
+
+    /**
+     * Просит экран открыть UCrop для файла [sourcePath].
+     * Файл назначения создаётся заранее — UCrop пишет результат именно в него.
+     */
+    private fun launchCrop(sourcePath: String) {
+        val destination = photoStorage.createDestination()
+        update { it.copy(pendingCropDestination = destination.path) }
+        viewModelScope.launch {
+            _effect.send(
+                ManualAddContract.Effect.LaunchCrop(
+                    sourceUri = photoStorage.shareableUri(sourcePath),
+                    destinationUri = destination.shareableUri
+                )
             )
         }
     }
 
-    private fun onCropFinished(croppedPath: String) {
+    private fun onCropFinished() {
+        val croppedPath = _state.value.pendingCropDestination
+
         update {
             it.copy(
-                photoPaths = it.photoPaths + croppedPath,
-                pendingCropPath = null
+                photoPaths = if (croppedPath == null) {
+                    it.photoPaths
+                } else {
+                    it.photoPaths + croppedPath
+                },
+                pendingCropPath = null,
+                pendingCropDestination = null
             )
         }
     }
 
     private fun onCropCancelled() {
-        update { it.copy(pendingCropPath = null) }
-    }
-
-    private fun onCameraLaunched(pendingPath: String) {
-        update { it.copy(pendingPhotoPath = pendingPath) }
+        // Файл под результат кропа больше не нужен
+        _state.value.pendingCropDestination?.let { photoStorage.delete(it) }
+        update { it.copy(pendingCropPath = null, pendingCropDestination = null) }
     }
 
     private fun onCheckPendingPhoto() {
         val pendingPath = _state.value.pendingPhotoPath ?: return
-        val file = java.io.File(pendingPath)
 
-        if (file.exists() && file.length() > 0) {
-            // Файл успешно сохранён камерой — запускаем обрезку
-            update {
-                it.copy(
-                    pendingPhotoPath = null,
-                    pendingCropPath = pendingPath
-                )
-            }
+        if (photoStorage.isUsable(pendingPath)) {
+            update { it.copy(pendingPhotoPath = null) }
+            launchCrop(pendingPath)
         } else {
-            // Файл не сохранился — сбрасываем
+            photoStorage.delete(pendingPath)
             update { it.copy(pendingPhotoPath = null) }
         }
     }
 
     private fun onPendingPhotoCleared() {
+        _state.value.pendingPhotoPath?.let { photoStorage.delete(it) }
         update { it.copy(pendingPhotoPath = null) }
     }
-    private fun onPhotoAdded(path: String) {
-        update {
-            if (it.photoPaths.size >= ManualAddContract.State.MAX_PHOTOS) {
-                it
-            } else {
-                it.copy(photoPaths = it.photoPaths + path)
-            }
-        }
-    }
 
+    /**
+     * Убирает фото из формы и удаляет его файл — иначе он останется сиротой.
+     */
     private fun onPhotoRemoved(path: String) {
+        photoStorage.delete(path)
         update { it.copy(photoPaths = it.photoPaths - path) }
     }
 
@@ -326,6 +387,7 @@ class ManualAddViewModel @Inject constructor(
         private const val KEY_PHOTO_PATHS = "photo_paths"
         private const val KEY_PENDING_PHOTO_PATH = "pending_photo_path"
         private const val KEY_PENDING_CROP_PATH = "pending_crop_path"
+        private const val KEY_PENDING_CROP_DESTINATION = "pending_crop_destination"
         private const val KEY_DISCOGS_IMAGES = "discogs_images"
         private const val SEPARATOR = "|"
     }
