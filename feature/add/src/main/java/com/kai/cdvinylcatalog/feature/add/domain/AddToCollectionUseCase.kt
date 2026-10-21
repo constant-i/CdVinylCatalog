@@ -2,9 +2,8 @@ package com.kai.cdvinylcatalog.feature.add.domain
 
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
-import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
 import com.kai.cdvinylcatalog.domain.result.Outcome
-
 import javax.inject.Inject
 
 /**
@@ -16,7 +15,7 @@ import javax.inject.Inject
  * @return ID созданной или обновлённой записи
  */
 class AddToCollectionUseCase @Inject constructor(
-    private val repository: CollectionRepository
+    private val repository: CollectionWriter
 ) {
     suspend operator fun invoke(
         release: Release,

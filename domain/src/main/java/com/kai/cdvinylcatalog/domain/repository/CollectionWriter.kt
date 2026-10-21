@@ -1,41 +1,25 @@
 package com.kai.cdvinylcatalog.domain.repository
 
-import androidx.paging.PagingData
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
-import com.kai.cdvinylcatalog.domain.collection.CollectionItem
-import com.kai.cdvinylcatalog.domain.collection.SortOrder
 import com.kai.cdvinylcatalog.domain.result.Outcome
-import kotlinx.coroutines.flow.Flow
 
-interface CollectionRepository {
+/**
+ * Изменение коллекции пользователя.
+ *
+ * Отдельный порт, чтобы экраны только для чтения физически не могли
+ * удалить или перезаписать запись.
+ */
+interface CollectionWriter {
 
-    fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>>
-
-    fun observeItemById(id: Long): Flow<CollectionItem?>
-    suspend fun getItemById(id: Long): Outcome<CollectionItem?>
-
-    suspend fun getOtherCopies(
-        releaseId: Long,
-        currentItemId: Long
-    ): Outcome<List<CollectionItem>>
-
-    suspend fun isInCollection(releaseId: Long): Outcome<Boolean>
-
-    /**
-     * Реактивный набор ID релизов Discogs, которые уже есть в коллекции.
-     *
-     * Нужен экрану результатов поиска, чтобы одним запросом пометить
-     * «уже в коллекции» весь постранично загруженный список.
-     */
-    fun observeCollectionReleaseIds(): Flow<Set<Long>>
-
+    /** Добавляет релиз из Discogs. */
     suspend fun addToCollection(
         release: Release,
         format: Format,
         notes: String? = null
     ): Outcome<Long>
 
+    /** Добавляет диск, которого нет в Discogs. */
     suspend fun addManualItem(
         title: String,
         artist: String,
@@ -48,6 +32,7 @@ interface CollectionRepository {
         photoPaths: List<String> = emptyList()
     ): Outcome<Long>
 
+    /** Обновляет существующую запись. */
     suspend fun updateItem(
         id: Long,
         title: String,
@@ -62,5 +47,6 @@ interface CollectionRepository {
         preserveDiscogsImages: List<String> = emptyList()
     ): Outcome<Unit>
 
+    /** Удаляет запись по её локальному ID. */
     suspend fun removeFromCollection(id: Long): Outcome<Unit>
 }

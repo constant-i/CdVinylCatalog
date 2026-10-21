@@ -6,7 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.media.PhotoStorage
-import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.repository.CollectionReader
+import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ManualAddViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val repository: CollectionRepository,
+    private val reader: CollectionReader,
+    private val writer: CollectionWriter,
     private val photoStorage: PhotoStorage,
 ) : ViewModel() {
 
@@ -129,7 +131,7 @@ class ManualAddViewModel @Inject constructor(
 
     private fun loadExistingItem(id: Long) {
         viewModelScope.launch {
-            when (val outcome = repository.getItemById(id)) {
+            when (val outcome = reader.getItemById(id)) {
                 is Outcome.Success -> {
                     val item = outcome.data
                     if (item != null) {
@@ -334,7 +336,7 @@ class ManualAddViewModel @Inject constructor(
 
             when (val mode = s.mode) {
                 is ManualAddContract.Mode.Create -> {
-                    val outcome = repository.addManualItem(
+                    val outcome = writer.addManualItem(
                         title = s.title.trim(),
                         artist = s.artist.trim(),
                         year = yearInt,
@@ -358,7 +360,7 @@ class ManualAddViewModel @Inject constructor(
                 }
 
                 is ManualAddContract.Mode.Edit -> {
-                    val outcome = repository.updateItem(
+                    val outcome = writer.updateItem(
                         id = mode.itemId,
                         title = s.title.trim(),
                         artist = s.artist.trim(),

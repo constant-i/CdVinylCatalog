@@ -6,7 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
 import com.kai.cdvinylcatalog.domain.collection.SortOrder
-import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.repository.CollectionReader
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -24,7 +24,7 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
-    private val repository: CollectionRepository
+    private val repository: CollectionReader
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(CollectionContract.State())

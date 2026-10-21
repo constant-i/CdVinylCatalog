@@ -5,7 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.mergeWith
-import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.repository.CollectionReader
+import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.feature.collection.domain.GetReleaseDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +22,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CollectionItemDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val repository: CollectionRepository,
+    private val reader: CollectionReader,
+    private val writer: CollectionWriter,
     private val getReleaseDetails: GetReleaseDetailsUseCase
 ) : ViewModel() {
 
@@ -40,7 +42,7 @@ class CollectionItemDetailViewModel @Inject constructor(
 
     private fun observeItem() {
         viewModelScope.launch {
-            repository.observeItemById(itemId)
+            reader.observeItemById(itemId)
                 .collect { item ->
                     if (item == null) {
                         if (_state.value.isDeleting) return@collect
@@ -71,7 +73,7 @@ class CollectionItemDetailViewModel @Inject constructor(
 
     private fun loadOtherCopies(releaseId: Long, currentItemId: Long) {
         viewModelScope.launch {
-            when (val outcome = repository.getOtherCopies(releaseId, currentItemId)) {
+            when (val outcome = reader.getOtherCopies(releaseId, currentItemId)) {
                 is Outcome.Success -> {
                     _state.update { it.copy(otherCopies = outcome.data) }
                 }
@@ -132,7 +134,7 @@ class CollectionItemDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isDeleting = true) }
 
-            when (val outcome = repository.removeFromCollection(item.id)) {
+            when (val outcome = writer.removeFromCollection(item.id)) {
                 is Outcome.Success -> {
                     _effect.send(CollectionItemDetailContract.Effect.NavigateBack)
                 }

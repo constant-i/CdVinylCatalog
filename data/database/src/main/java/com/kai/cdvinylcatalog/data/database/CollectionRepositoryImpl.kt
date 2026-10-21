@@ -11,7 +11,9 @@ import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
 import com.kai.cdvinylcatalog.domain.collection.SortOrder
-import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.repository.CollectionMembership
+import com.kai.cdvinylcatalog.domain.repository.CollectionReader
+import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
 import com.kai.cdvinylcatalog.domain.result.AppError
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import kotlinx.coroutines.CancellationException
@@ -23,7 +25,7 @@ import javax.inject.Singleton
 @Singleton
 class CollectionRepositoryImpl @Inject constructor(
     private val dao: CollectionDao
-) : CollectionRepository {
+) : CollectionReader, CollectionMembership, CollectionWriter {
 
     override fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>> {
         val pagingSourceFactory = {

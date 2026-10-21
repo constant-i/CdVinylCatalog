@@ -4,7 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.kai.cdvinylcatalog.domain.media.PhotoDestination
 import com.kai.cdvinylcatalog.domain.media.PhotoStorage
-import com.kai.cdvinylcatalog.domain.repository.CollectionRepository
+import com.kai.cdvinylcatalog.domain.repository.CollectionReader
+import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -300,8 +301,12 @@ class ManualAddViewModelTest {
         verify(exactly = 1) { photoStorage.delete(CAMERA_DESTINATION.path) }
     }
 
-    private fun createViewModel() =
-        ManualAddViewModel(savedStateHandle, mockk<CollectionRepository>(relaxed = true), photoStorage)
+    private fun createViewModel() = ManualAddViewModel(
+        savedStateHandle = savedStateHandle,
+        reader = mockk<CollectionReader>(relaxed = true),
+        writer = mockk<CollectionWriter>(relaxed = true),
+        photoStorage = photoStorage
+    )
 
     private fun viewModel() = createViewModel()
 
