@@ -8,7 +8,7 @@ import com.kai.cdvinylcatalog.domain.catalog.mergeWith
 import com.kai.cdvinylcatalog.domain.repository.CollectionReader
 import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
 import com.kai.cdvinylcatalog.domain.result.Outcome
-import com.kai.cdvinylcatalog.feature.collection.domain.GetReleaseDetailsUseCase
+import com.kai.cdvinylcatalog.domain.usecase.catalog.GetReleaseDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

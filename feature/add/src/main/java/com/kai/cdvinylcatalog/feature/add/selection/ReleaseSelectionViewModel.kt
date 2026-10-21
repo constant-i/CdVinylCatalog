@@ -5,9 +5,9 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.kai.cdvinylcatalog.domain.catalog.Release
-import com.kai.cdvinylcatalog.feature.add.domain.ObserveCollectionReleaseIdsUseCase
-import com.kai.cdvinylcatalog.feature.add.domain.SearchByTextUseCase
-import com.kai.cdvinylcatalog.feature.add.domain.SearchReleaseUseCase
+import com.kai.cdvinylcatalog.domain.usecase.catalog.SearchByTextUseCase
+import com.kai.cdvinylcatalog.domain.usecase.catalog.SearchReleaseUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.ObserveCollectionReleaseIdsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel

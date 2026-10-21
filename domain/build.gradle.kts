@@ -17,5 +17,7 @@ dependencies {
     // сигнатурах интерфейсов репозиториев, поэтому нужны потребителям :domain.
     api(libs.kotlinx.coroutines.core)
     api(libs.androidx.paging.common)
+    // Use cases помечены @Inject; аннотация участвует в их публичном API
+    api(libs.javax.inject)
     testImplementation(libs.junit)
 }

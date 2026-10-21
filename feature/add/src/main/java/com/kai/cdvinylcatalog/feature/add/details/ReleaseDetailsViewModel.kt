@@ -8,9 +8,9 @@ import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.parseFormat
 import com.kai.cdvinylcatalog.domain.result.Outcome
-import com.kai.cdvinylcatalog.feature.add.domain.AddToCollectionUseCase
-import com.kai.cdvinylcatalog.feature.add.domain.CheckCollectionUseCase
-import com.kai.cdvinylcatalog.feature.add.domain.GetReleaseDetailsUseCase
+import com.kai.cdvinylcatalog.domain.usecase.catalog.GetReleaseDetailsUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.AddToCollectionUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.CheckCollectionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow

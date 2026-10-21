@@ -28,6 +28,9 @@ room = "2.6.1"
 # CameraX
 cameraX = "1.4.2"
 
+# DI annotations (javax.inject used by :domain use cases)
+javaxInject = "1"
+
 # ML Kit (barcode scanning)
 mlkitBarcode = "17.2.0"
 
@@ -97,6 +100,7 @@ mlkit-barcode = { group = "com.google.mlkit", name = "barcode-scanning", version
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+javax-inject = { group = "javax.inject", name = "javax.inject", version.ref = "javaxInject" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxJunit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }

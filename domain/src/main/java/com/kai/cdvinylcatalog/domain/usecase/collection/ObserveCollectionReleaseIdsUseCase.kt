@@ -1,4 +1,4 @@
-package com.kai.cdvinylcatalog.feature.add.domain
+package com.kai.cdvinylcatalog.domain.usecase.collection
 
 import com.kai.cdvinylcatalog.domain.repository.CollectionMembership
 import kotlinx.coroutines.flow.Flow
@@ -11,7 +11,7 @@ import javax.inject.Inject
  * не выполняя запрос к базе на каждую карточку.
  */
 class ObserveCollectionReleaseIdsUseCase @Inject constructor(
-    private val repository: CollectionMembership
+    private val membership: CollectionMembership
 ) {
-    operator fun invoke(): Flow<Set<Long>> = repository.observeCollectionReleaseIds()
+    operator fun invoke(): Flow<Set<Long>> = membership.observeCollectionReleaseIds()
 }

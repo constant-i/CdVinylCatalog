@@ -6,9 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.media.PhotoStorage
-import com.kai.cdvinylcatalog.domain.repository.CollectionReader
-import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
 import com.kai.cdvinylcatalog.domain.result.Outcome
+import com.kai.cdvinylcatalog.domain.usecase.collection.AddManualItemUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.CollectionItemCommand
+import com.kai.cdvinylcatalog.domain.usecase.collection.GetCollectionItemUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.UpdateCollectionItemCommand
+import com.kai.cdvinylcatalog.domain.usecase.collection.UpdateCollectionItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,8 +25,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ManualAddViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val reader: CollectionReader,
-    private val writer: CollectionWriter,
+    private val getItem: GetCollectionItemUseCase,
+    private val addManualItem: AddManualItemUseCase,
+    private val updateItem: UpdateCollectionItemUseCase,
     private val photoStorage: PhotoStorage,
 ) : ViewModel() {
 
@@ -131,7 +135,7 @@ class ManualAddViewModel @Inject constructor(
 
     private fun loadExistingItem(id: Long) {
         viewModelScope.launch {
-            when (val outcome = reader.getItemById(id)) {
+            when (val outcome = getItem(id)) {
                 is Outcome.Success -> {
                     val item = outcome.data
                     if (item != null) {
@@ -334,19 +338,21 @@ class ManualAddViewModel @Inject constructor(
         viewModelScope.launch {
             update { it.copy(isSaving = true, error = null) }
 
+            val fields = CollectionItemCommand(
+                title = s.title.trim(),
+                artist = s.artist.trim(),
+                year = yearInt,
+                format = s.format,
+                label = s.label.ifBlank { null },
+                country = s.country.ifBlank { null },
+                barcode = s.barcode.ifBlank { null },
+                notes = s.notes.ifBlank { null },
+                photoPaths = s.photoPaths
+            )
+
             when (val mode = s.mode) {
                 is ManualAddContract.Mode.Create -> {
-                    val outcome = writer.addManualItem(
-                        title = s.title.trim(),
-                        artist = s.artist.trim(),
-                        year = yearInt,
-                        format = s.format,
-                        label = s.label.ifBlank { null },
-                        country = s.country.ifBlank { null },
-                        barcode = s.barcode.ifBlank { null },
-                        notes = s.notes.ifBlank { null },
-                        photoPaths = s.photoPaths
-                    )
+                    val outcome = addManualItem(fields)
                     when (outcome) {
                         is Outcome.Success -> {
                             update { it.copy(isSaving = false) }
@@ -360,18 +366,12 @@ class ManualAddViewModel @Inject constructor(
                 }
 
                 is ManualAddContract.Mode.Edit -> {
-                    val outcome = writer.updateItem(
-                        id = mode.itemId,
-                        title = s.title.trim(),
-                        artist = s.artist.trim(),
-                        year = yearInt,
-                        format = s.format,
-                        label = s.label.ifBlank { null },
-                        country = s.country.ifBlank { null },
-                        barcode = s.barcode.ifBlank { null },
-                        notes = s.notes.ifBlank { null },
-                        photoPaths = s.photoPaths,
-                        preserveDiscogsImages = s.discogsImages
+                    val outcome = updateItem(
+                        UpdateCollectionItemCommand(
+                            id = mode.itemId,
+                            fields = fields,
+                            preserveDiscogsImages = s.discogsImages
+                        )
                     )
                     when (outcome) {
                         is Outcome.Success -> {

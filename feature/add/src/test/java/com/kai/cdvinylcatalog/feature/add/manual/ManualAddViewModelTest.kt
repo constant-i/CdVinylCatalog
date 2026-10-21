@@ -4,8 +4,9 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.kai.cdvinylcatalog.domain.media.PhotoDestination
 import com.kai.cdvinylcatalog.domain.media.PhotoStorage
-import com.kai.cdvinylcatalog.domain.repository.CollectionReader
-import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
+import com.kai.cdvinylcatalog.domain.usecase.collection.AddManualItemUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.GetCollectionItemUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.UpdateCollectionItemUseCase
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -303,8 +304,9 @@ class ManualAddViewModelTest {
 
     private fun createViewModel() = ManualAddViewModel(
         savedStateHandle = savedStateHandle,
-        reader = mockk<CollectionReader>(relaxed = true),
-        writer = mockk<CollectionWriter>(relaxed = true),
+        getItem = mockk<GetCollectionItemUseCase>(relaxed = true),
+        addManualItem = mockk<AddManualItemUseCase>(relaxed = true),
+        updateItem = mockk<UpdateCollectionItemUseCase>(relaxed = true),
         photoStorage = photoStorage
     )
 
