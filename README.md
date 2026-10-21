@@ -46,7 +46,7 @@
 
 ```text
 :app                    — точка входа, DI, навигация
-:domain                 — доменные модели, AppError/Outcome, интерфейсы репозиториев
+:domain                 — Entities, порты репозиториев, Use Cases, AppError/Outcome
 :data:network           — Retrofit, Discogs API, DTO, PagingSource, мапперы
 :data:database          — Room, DAO, Entity, мапперы
 :common-ui              — тема, общие Compose-компоненты, UiMessage, маппинг AppError в текст
@@ -57,15 +57,29 @@
 ### Правила зависимостей
 
 - Фичи зависят от `:domain` и `:common-ui`, но **не знают друг о друге**.
-- `:domain` — чистый Kotlin-модуль (`java-library`), зависит только
-  от корутин и `paging-common`; никакого Android SDK.
+- `:domain` — чистый Kotlin-модуль (`java-library`), зависит от корутин,
+  `paging-common` и `javax.inject`; никакого Android SDK.
 - Реализации репозиториев живут в `:data:*`, интерфейсы — в `:domain`.
 - Presentation-слой не знает о Retrofit, Room и сетевых исключениях.
 - Если тип участвует в **публичном** API модуля (`Flow`, `PagingData`,
-  `AppError`), зависимость объявляется через `api(...)`, а не `implementation`,
-  иначе потребитель не увидит эти типы при компиляции.
+  `AppError`, `@Inject`), зависимость объявляется через `api(...)`, а не
+  `implementation`, иначе потребитель не увидит эти типы при компиляции.
 - Фичи не объявляют `:data:*` вообще — только `:domain` и `:common-ui`.
   Единственное место, где известны реализации, — `:app` (composition root).
+
+### Что лежит в `:domain`
+
+```text
+:domain
+├── catalog/       Entities: Release, Track, Format
+├── collection/    Entities: CollectionItem, SortOrder
+├── media/         PhotoDestination + порт PhotoStorage
+├── result/        Outcome, AppError, AppErrorException
+├── repository/    Порты: CollectionReader/Writer/Membership, ReleaseRepository
+└── usecase/       Use Cases — единственное место для бизнес-логики
+    ├── catalog/
+    └── collection/
+```
 
 
 ```mermaid

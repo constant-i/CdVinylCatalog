@@ -1,8 +1,5 @@
-package com.kai.cdvinylcatalog.core.model
+package com.kai.cdvinylcatalog.domain.catalog
 
-import com.kai.cdvinylcatalog.domain.catalog.Release
-import com.kai.cdvinylcatalog.domain.catalog.Track
-import com.kai.cdvinylcatalog.domain.catalog.mergeWith
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
