@@ -6,24 +6,26 @@ import javax.inject.Inject
 
 /**
  * Обновляет существующую запись коллекции.
+ *
+ * Нормализация ввода — здесь, а не в UI: это часть доменных правил.
  */
 class UpdateCollectionItemUseCase @Inject constructor(
     private val writer: CollectionWriter
 ) {
-    suspend operator fun invoke(command: UpdateCollectionItemCommand): Outcome<Unit> =
-        with(command.fields) {
+    suspend operator fun invoke(update: CollectionItemUpdate): Outcome<Unit> =
+        with(update.draft) {
             writer.updateItem(
-                id = command.id,
-                title = title,
-                artist = artist,
-                year = year,
+                id = update.id,
+                title = title.trim(),
+                artist = artist.trim(),
+                year = yearValue,
                 format = format,
-                label = label,
-                country = country,
-                barcode = barcode,
-                notes = notes,
+                label = label?.trim()?.ifBlank { null },
+                country = country?.trim()?.ifBlank { null },
+                barcode = barcode?.trim()?.ifBlank { null },
+                notes = notes?.trim()?.ifBlank { null },
                 photoPaths = photoPaths,
-                preserveDiscogsImages = command.preserveDiscogsImages
+                preserveDiscogsImages = update.preserveDiscogsImages
             )
         }
 }

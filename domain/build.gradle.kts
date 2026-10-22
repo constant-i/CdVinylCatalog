@@ -20,4 +20,6 @@ dependencies {
     // Use cases помечены @Inject; аннотация участвует в их публичном API
     api(libs.javax.inject)
     testImplementation(libs.junit)
+    // suspend-тесты use case'ов
+    testImplementation(libs.kotlinx.coroutines.test)
 }

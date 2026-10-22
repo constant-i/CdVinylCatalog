@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
 import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.usecase.collection.DraftCollectionItem
 import com.kai.cdvinylcatalog.feature.add.R
 import java.io.File
 
@@ -205,7 +206,7 @@ fun ManualAddScreen(
                     onIntent(ManualAddContract.Intent.OnSaveClicked)
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = state.isValid && !state.isSaving
+                enabled = state.draft.isValid && !state.isSaving
             ) {
                 if (state.isSaving) {
                     CircularProgressIndicator(
@@ -267,7 +268,7 @@ private fun PhotosSection(
         text = stringResource(
             R.string.add_manual_photos_count,
             state.photoPaths.size,
-            ManualAddContract.State.MAX_PHOTOS
+            DraftCollectionItem.MAX_PHOTOS
         ),
         style = MaterialTheme.typography.titleMedium
     )
@@ -294,7 +295,7 @@ private fun PhotosSection(
     ) {
         OutlinedButton(
             onClick = onOpenCamera,
-            enabled = state.canAddMorePhotos,
+            enabled = state.draft.canAddMorePhotos,
             modifier = Modifier.weight(1f)
         ) {
             Icon(Icons.Default.PhotoCamera, contentDescription = null)
@@ -303,7 +304,7 @@ private fun PhotosSection(
         }
         OutlinedButton(
             onClick = onOpenGallery,
-            enabled = state.canAddMorePhotos,
+            enabled = state.draft.canAddMorePhotos,
             modifier = Modifier.weight(1f)
         ) {
             Icon(Icons.Default.PhotoLibrary, contentDescription = null)

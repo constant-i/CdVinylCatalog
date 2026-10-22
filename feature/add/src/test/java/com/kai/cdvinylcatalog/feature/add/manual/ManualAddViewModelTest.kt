@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.kai.cdvinylcatalog.domain.media.PhotoDestination
 import com.kai.cdvinylcatalog.domain.media.PhotoStorage
 import com.kai.cdvinylcatalog.domain.usecase.collection.AddManualItemUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.DraftCollectionItem
 import com.kai.cdvinylcatalog.domain.usecase.collection.GetCollectionItemUseCase
 import com.kai.cdvinylcatalog.domain.usecase.collection.UpdateCollectionItemUseCase
 import io.mockk.coEvery
@@ -207,17 +208,17 @@ class ManualAddViewModelTest {
         val viewModel = viewModel()
 
         // Набираем максимум фото штатным путём: камера → кроп → добавление
-        repeat(ManualAddContract.State.MAX_PHOTOS) {
+        repeat(DraftCollectionItem.MAX_PHOTOS) {
             viewModel.onIntent(ManualAddContract.Intent.OnCameraClicked)
             viewModel.onIntent(ManualAddContract.Intent.OnCameraResult(success = true))
             viewModel.onIntent(ManualAddContract.Intent.OnCropFinished)
         }
         assertEquals(
-            ManualAddContract.State.MAX_PHOTOS,
+            DraftCollectionItem.MAX_PHOTOS,
             viewModel.state.value.photoPaths.size
         )
 
-        val callsBefore = 2 * ManualAddContract.State.MAX_PHOTOS
+        val callsBefore = 2 * DraftCollectionItem.MAX_PHOTOS
         viewModel.effect.test {
             viewModel.onIntent(ManualAddContract.Intent.OnCameraClicked)
             expectNoEvents()
@@ -225,7 +226,7 @@ class ManualAddViewModelTest {
         // Два файла на цикл: под снимок и под результат кропа
         verify(exactly = callsBefore) { photoStorage.createDestination() }
         assertEquals(
-            ManualAddContract.State.MAX_PHOTOS,
+            DraftCollectionItem.MAX_PHOTOS,
             viewModel.state.value.photoPaths.size
         )
     }

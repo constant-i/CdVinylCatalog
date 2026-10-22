@@ -3,6 +3,7 @@ package com.kai.cdvinylcatalog.feature.add.manual
 import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.result.AppError
+import com.kai.cdvinylcatalog.domain.usecase.collection.DraftCollectionItem
 
 object ManualAddContract {
 
@@ -25,18 +26,25 @@ object ManualAddContract {
         /** Файл, подготовленный под результат кропа. */
         val pendingCropDestination: String? = null,
     ) {
-        val canAddMorePhotos: Boolean
-            get() = photoPaths.size < MAX_PHOTOS
-
-        val isValid: Boolean
-            get() = title.isNotBlank() && artist.isNotBlank()
+        /**
+         * Черновик для сохранения. Собирается из полей формы;
+         * правила валидации живут в нём, а не здесь.
+         */
+        val draft: DraftCollectionItem
+            get() = DraftCollectionItem(
+                title = title,
+                artist = artist,
+                year = year,
+                format = format,
+                label = label.ifBlank { null },
+                country = country.ifBlank { null },
+                barcode = barcode.ifBlank { null },
+                notes = notes.ifBlank { null },
+                photoPaths = photoPaths
+            )
 
         val isEditMode: Boolean
             get() = mode is Mode.Edit
-
-        companion object {
-            const val MAX_PHOTOS = 5
-        }
     }
 
     sealed class Mode {

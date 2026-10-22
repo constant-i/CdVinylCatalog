@@ -7,21 +7,24 @@ import javax.inject.Inject
 /**
  * Добавляет диск, которого нет в Discogs.
  *
+ * Нормализация ввода (обрезка пробелов, разбор года) — здесь, а не в UI:
+ * это часть доменных правил.
+ *
  * @return ID созданной записи
  */
 class AddManualItemUseCase @Inject constructor(
     private val writer: CollectionWriter
 ) {
-    suspend operator fun invoke(command: CollectionItemCommand): Outcome<Long> =
+    suspend operator fun invoke(draft: DraftCollectionItem): Outcome<Long> =
         writer.addManualItem(
-            title = command.title,
-            artist = command.artist,
-            year = command.year,
-            format = command.format,
-            label = command.label,
-            country = command.country,
-            barcode = command.barcode,
-            notes = command.notes,
-            photoPaths = command.photoPaths
+            title = draft.title.trim(),
+            artist = draft.artist.trim(),
+            year = draft.yearValue,
+            format = draft.format,
+            label = draft.label?.trim()?.ifBlank { null },
+            country = draft.country?.trim()?.ifBlank { null },
+            barcode = draft.barcode?.trim()?.ifBlank { null },
+            notes = draft.notes?.trim()?.ifBlank { null },
+            photoPaths = draft.photoPaths
         )
 }

@@ -8,9 +8,8 @@ import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.media.PhotoStorage
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.domain.usecase.collection.AddManualItemUseCase
-import com.kai.cdvinylcatalog.domain.usecase.collection.CollectionItemCommand
+import com.kai.cdvinylcatalog.domain.usecase.collection.CollectionItemUpdate
 import com.kai.cdvinylcatalog.domain.usecase.collection.GetCollectionItemUseCase
-import com.kai.cdvinylcatalog.domain.usecase.collection.UpdateCollectionItemCommand
 import com.kai.cdvinylcatalog.domain.usecase.collection.UpdateCollectionItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
@@ -193,7 +192,7 @@ class ManualAddViewModel @Inject constructor(
      * Готовит файл под снимок и просит экран запустить камеру.
      */
     private fun onCameraClicked() {
-        if (!_state.value.canAddMorePhotos) return
+        if (!_state.value.draft.canAddMorePhotos) return
 
         val destination = photoStorage.createDestination()
         update { it.copy(pendingPhotoPath = destination.path) }
@@ -227,7 +226,7 @@ class ManualAddViewModel @Inject constructor(
     }
 
     private fun onPhotoPicked(uri: String) {
-        if (!_state.value.canAddMorePhotos) return
+        if (!_state.value.draft.canAddMorePhotos) return
 
         viewModelScope.launch {
             val imported = photoStorage.import(uri)
@@ -325,34 +324,22 @@ class ManualAddViewModel @Inject constructor(
     }
 
     private fun onSave() {
-        val s = _state.value
-        if (!s.isValid) {
+        val state = _state.value
+        val draft = state.draft
+
+        if (!draft.isValid) {
             viewModelScope.launch {
                 _effect.send(ManualAddContract.Effect.ShowToast(UiMessage.RequiredFieldsEmpty))
             }
             return
         }
 
-        val yearInt = s.year.trim().toIntOrNull()?.takeIf { it > 0 }
-
         viewModelScope.launch {
             update { it.copy(isSaving = true, error = null) }
 
-            val fields = CollectionItemCommand(
-                title = s.title.trim(),
-                artist = s.artist.trim(),
-                year = yearInt,
-                format = s.format,
-                label = s.label.ifBlank { null },
-                country = s.country.ifBlank { null },
-                barcode = s.barcode.ifBlank { null },
-                notes = s.notes.ifBlank { null },
-                photoPaths = s.photoPaths
-            )
-
-            when (val mode = s.mode) {
+            when (val mode = state.mode) {
                 is ManualAddContract.Mode.Create -> {
-                    val outcome = addManualItem(fields)
+                    val outcome = addManualItem(draft)
                     when (outcome) {
                         is Outcome.Success -> {
                             update { it.copy(isSaving = false) }
@@ -367,10 +354,10 @@ class ManualAddViewModel @Inject constructor(
 
                 is ManualAddContract.Mode.Edit -> {
                     val outcome = updateItem(
-                        UpdateCollectionItemCommand(
+                        CollectionItemUpdate(
                             id = mode.itemId,
-                            fields = fields,
-                            preserveDiscogsImages = s.discogsImages
+                            draft = draft,
+                            preserveDiscogsImages = state.discogsImages
                         )
                     )
                     when (outcome) {
