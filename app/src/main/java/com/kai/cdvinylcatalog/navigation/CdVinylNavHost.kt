@@ -156,6 +156,9 @@ fun CdVinylNavHost(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToDetails = { releaseId ->
                         navController.navigate(Routes.releaseDetails(releaseId))
+                    },
+                    onNavigateToLocalItem = { itemId ->
+                        navController.navigate(Routes.collectionItem(itemId))
                     }
                 )
             }

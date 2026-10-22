@@ -39,6 +39,21 @@ interface CollectionDao {
     suspend fun getAllByReleaseId(releaseId: Long): List<CollectionItemEntity>
 
     /**
+     * Ищет записи по штрихкоду.
+     *
+     * Возвращает **список**, потому что один штрихкод может соответствовать
+     * нескольким изданиям: разные прессинги, переиздания, ремастеры.
+     *
+     * Штрихкод в базе хранится нормализованным (только цифры), поэтому
+     * параметр тоже должен быть нормализован до вызова.
+     *
+     * @param barcode штрихкод из одних цифр
+     * @return найденные записи, может быть пустым
+     */
+    @Query("SELECT * FROM collection_items WHERE barcode = :barcode ORDER BY addedAt ASC")
+    suspend fun getByBarcode(barcode: String): List<CollectionItemEntity>
+
+    /**
      * Отдаёт ID релизов Discogs, которые уже есть в коллекции.
      *
      * Используется, чтобы помечать результаты поиска в Discogs бейджем

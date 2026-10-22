@@ -2,6 +2,7 @@ package com.kai.cdvinylcatalog.data.network.dto
 
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.Track
+import com.kai.cdvinylcatalog.domain.catalog.normalizeBarcode
 
 /**
  * Маппер DTO → Domain модель.
@@ -25,16 +26,6 @@ fun SearchResultDto.toDomain(): Release {
         tracklist = emptyList()
     )
 }
-
-/**
- * Discogs печатает штрихкод с пробелами и дефисами («5 051099 709942»),
- * а сканер отдаёт непрерывные цифры. Приводим к одному виду, иначе
- * поиск по штрихкоду в локальной базе не найдёт совпадения.
- *
- * @return только цифры или `null`, если цифр нет
- */
-internal fun normalizeBarcode(raw: String): String? =
-    raw.filter { it.isDigit() }.takeIf { it.isNotEmpty() }
 
 private const val BARCODE_TYPE = "Barcode"
 

@@ -85,4 +85,23 @@
     <string name="selection_load_error">Не удалось загрузить результаты</string>
     <string name="selection_append_error">Ошибка загрузки. Нажмите, чтобы повторить.</string>
 
+    <!-- Selection: офлайн-режим -->
+    <string name="selection_offline_title">Нет подключения к интернету</string>
+    <string name="selection_offline_not_found">Диска с таким штрихкодом в коллекции нет</string>
+
+    <!--
+        Один штрихкод может соответствовать нескольким изданиям.
+        Для одного диска числа нет — отдельная строка, потому что форма
+        «one» в русском выбирается и для 21, 31 и т.д.
+    -->
+    <string name="selection_offline_found_one">В коллекции есть диск с таким штрихкодом:</string>
+    <plurals name="selection_offline_found">
+        <item quantity="one">В коллекции %1$d диск с таким штрихкодом:</item>
+        <item quantity="few">В коллекции %1$d диска с таким штрихкодом:</item>
+        <item quantity="many">В коллекции %1$d дисков с таким штрихкодом:</item>
+        <item quantity="other">В коллекции %1$d диска с таким штрихкодом:</item>
+    </plurals>
+
+    <string name="selection_offline_format">Формат: %1$s</string>
+
 </resources>

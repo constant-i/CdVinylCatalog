@@ -9,6 +9,7 @@ import com.kai.cdvinylcatalog.data.database.entity.CollectionItemEntity
 import com.kai.cdvinylcatalog.data.database.entity.CollectionItemWithCount
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.catalog.normalizeBarcode
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
 import com.kai.cdvinylcatalog.domain.collection.SortOrder
 import com.kai.cdvinylcatalog.domain.repository.CollectionMembership
@@ -84,6 +85,22 @@ class CollectionRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun findByBarcode(barcode: String): Outcome<List<CollectionItem>> {
+        // Штрихкод может прийти с пробелами из Discogs или от пользователя
+        val normalized = normalizeBarcode(barcode)
+            ?: return Outcome.Success(emptyList())
+
+        return try {
+            Outcome.Success(
+                dao.getByBarcode(normalized).map { it.toDomain() }
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Outcome.Failure(AppError.Unknown)
+        }
+    }
+
     override suspend fun isInCollection(releaseId: Long): Outcome<Boolean> {
         return try {
             val exists = dao.getByReleaseId(releaseId) != null
@@ -118,7 +135,8 @@ class CollectionRepositoryImpl @Inject constructor(
         return try {
             val entity = CollectionItemEntity(
                 releaseId = null, title = title, artist = artist, year = year,
-                barcode = barcode, coverImageUrl = photoPaths.firstOrNull(),
+                barcode = barcode?.let(::normalizeBarcode),
+                coverImageUrl = photoPaths.firstOrNull(),
                 imageUrls = photoPaths.joinToString(",").ifBlank { null },
                 label = label, rawFormat = format.name, country = country,
                 releaseDate = null, catalogNumber = null, releaseNotes = null,
@@ -147,7 +165,8 @@ class CollectionRepositoryImpl @Inject constructor(
                 existing.copy(
                     title = title, artist = artist, year = year,
                     format = format.name, rawFormat = format.name,
-                    label = label, country = country, barcode = barcode,
+                    label = label, country = country,
+                    barcode = barcode?.let(::normalizeBarcode),
                     userNotes = notes,
                     coverImageUrl = photoPaths.firstOrNull() ?: preserveDiscogsImages.firstOrNull() ?: existing.coverImageUrl,
                     imageUrls = if (allImages.isNotEmpty()) allImages.joinToString(",") else existing.imageUrls
@@ -201,7 +220,8 @@ private fun CollectionItemEntity.toDomain(): CollectionItem {
 private fun Release.toEntity(format: Format, notes: String?): CollectionItemEntity {
     return CollectionItemEntity(
         releaseId = id, title = title, artist = artist, year = year,
-        barcode = barcode, coverImageUrl = coverImageUrl,
+        barcode = barcode?.let(::normalizeBarcode),
+        coverImageUrl = coverImageUrl,
         imageUrls = imageUrls.joinToString(",").ifBlank { null },
         label = label, rawFormat = rawFormat, country = country,
         releaseDate = releaseDate, catalogNumber = catalogNumber,

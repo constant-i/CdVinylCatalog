@@ -5,8 +5,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.domain.usecase.catalog.SearchByTextUseCase
 import com.kai.cdvinylcatalog.domain.usecase.catalog.SearchReleaseUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.FindItemsByBarcodeUseCase
 import com.kai.cdvinylcatalog.domain.usecase.collection.ObserveCollectionReleaseIdsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,6 +23,7 @@ class ReleaseSelectionViewModel @Inject constructor(
     private val searchByText: SearchByTextUseCase,
     private val searchByBarcode: SearchReleaseUseCase,
     private val observeCollectionReleaseIds: ObserveCollectionReleaseIdsUseCase,
+    private val findItemsByBarcode: FindItemsByBarcodeUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ReleaseSelectionContract.State())
@@ -68,6 +71,53 @@ class ReleaseSelectionViewModel @Inject constructor(
             is ReleaseSelectionContract.Intent.OnResultClicked -> {
                 viewModelScope.launch { _effect.send(ReleaseSelectionContract.Effect.NavigateToDetails(intent.release.id)) }
             }
+            ReleaseSelectionContract.Intent.OnOfflineFallback -> onOfflineFallback()
+            ReleaseSelectionContract.Intent.OnRetryOnline -> onRetryOnline()
+            is ReleaseSelectionContract.Intent.OnLocalItemClicked -> {
+                viewModelScope.launch {
+                    _effect.send(
+                        ReleaseSelectionContract.Effect.NavigateToLocalItem(intent.itemId)
+                    )
+                }
+            }
         }
+    }
+
+    /**
+     * Сети нет — ищем в локальной базе по штрихкоду.
+     *
+     * Работает только для сканирования: ручной поиск по названию локально
+     * выполнить нельзя без полнотекстового индекса.
+     */
+    private fun onOfflineFallback() {
+        val (barcode, source) = searchParams.value ?: return
+        if (source != ReleaseSelectionContract.Source.SCAN) return
+        if (_state.value.isOffline || _state.value.isLookingUpOffline) return
+
+        // Флаг ставим синхронно: два интента подряд должны увидеть его
+        // до того, как запустится корутина
+        _state.update { it.copy(isLookingUpOffline = true) }
+
+        viewModelScope.launch {
+            val matches = when (val outcome = findItemsByBarcode(barcode)) {
+                is Outcome.Success -> outcome.data
+                is Outcome.Failure -> emptyList()
+            }
+
+            _state.update {
+                it.copy(offlineMatches = matches, isLookingUpOffline = false)
+            }
+        }
+    }
+
+    /**
+     * Связь могла вернуться — сбрасываем офлайн-состояние и перезапускаем поиск.
+     */
+    private fun onRetryOnline() {
+        val params = searchParams.value ?: return
+        _state.update { it.copy(offlineMatches = null) }
+        // Повторная установка тех же параметров не эмитит — пересоздаём поток
+        searchParams.value = null
+        searchParams.value = params
     }
 }

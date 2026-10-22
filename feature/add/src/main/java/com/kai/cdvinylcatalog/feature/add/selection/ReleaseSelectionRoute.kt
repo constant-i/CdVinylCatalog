@@ -14,8 +14,9 @@ fun ReleaseSelectionRoute(
     source: ReleaseSelectionContract.Source,
     onNavigateBack: () -> Unit,
     onNavigateToDetails: (Long) -> Unit,
+    onNavigateToLocalItem: (Long) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: ReleaseSelectionViewModel = hiltViewModel()
+    viewModel: ReleaseSelectionViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pagingItems = viewModel.results.collectAsLazyPagingItems()
@@ -29,6 +30,7 @@ fun ReleaseSelectionRoute(
             when (effect) {
                 ReleaseSelectionContract.Effect.NavigateBack -> onNavigateBack()
                 is ReleaseSelectionContract.Effect.NavigateToDetails -> onNavigateToDetails(effect.releaseId)
+                is ReleaseSelectionContract.Effect.NavigateToLocalItem -> onNavigateToLocalItem(effect.itemId)
             }
         }
     }

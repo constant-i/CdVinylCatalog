@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -33,12 +35,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,13 +53,17 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.MutableStateFlow
+import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
 import com.kai.cdvinylcatalog.common.ui.asText
+import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
+import com.kai.cdvinylcatalog.domain.collection.CollectionItem
 import com.kai.cdvinylcatalog.domain.result.AppError
 import com.kai.cdvinylcatalog.domain.result.AppErrorException
 import com.kai.cdvinylcatalog.feature.add.R
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +79,20 @@ fun ReleaseSelectionScreen(
             stringResource(R.string.selection_title_scan)
         ReleaseSelectionContract.Source.SEARCH ->
             stringResource(R.string.selection_title_search)
+    }
+
+    val refreshError = (pagingItems.loadState.refresh as? LoadState.Error)
+        ?.error
+        ?.asAppError()
+
+    // Сети нет — вместо ошибки отвечаем по локальной базе.
+    // Только для сканирования: текстовый поиск локально выполнить нельзя.
+    LaunchedEffect(refreshError, state.source) {
+        if (refreshError == AppError.NoConnection &&
+            state.source == ReleaseSelectionContract.Source.SCAN
+        ) {
+            onIntent(ReleaseSelectionContract.Intent.OnOfflineFallback)
+        }
     }
 
     Scaffold(
@@ -99,6 +121,21 @@ fun ReleaseSelectionScreen(
                 .padding(padding)
         ) {
             when {
+                state.isLookingUpOffline -> {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                }
+
+                state.offlineMatches != null -> {
+                    OfflineResult(
+                        matches = state.offlineMatches,
+                        onOpenItem = { itemId ->
+                            onIntent(ReleaseSelectionContract.Intent.OnLocalItemClicked(itemId))
+                        },
+                        onRetry = { onIntent(ReleaseSelectionContract.Intent.OnRetryOnline) },
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+
                 pagingItems.loadState.refresh is LoadState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
@@ -184,6 +221,139 @@ fun ReleaseSelectionScreen(
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Ответ без сети: что удалось найти в локальной коллекции по штрихкоду.
+ *
+ * Формулировка важна: один штрихкод может соответствовать нескольким изданиям,
+ * поэтому говорим «диск с таким штрихкодом», а не «этот релиз».
+ */
+@Composable
+private fun OfflineResult(
+    matches: List<CollectionItem>,
+    onOpenItem: (Long) -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .verticalScroll(rememberScrollState())
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = stringResource(R.string.selection_offline_title),
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(Modifier.height(8.dp))
+
+        if (matches.isEmpty()) {
+            Text(
+                text = stringResource(R.string.selection_offline_not_found),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        } else {
+            Text(
+                text = offlineFoundText(matches.size),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(Modifier.height(12.dp))
+
+            matches.forEach { item ->
+                LocalItemCard(item = item, onClick = { onOpenItem(item.id) })
+                Spacer(Modifier.height(8.dp))
+            }
+        }
+
+        Spacer(Modifier.height(16.dp))
+        Button(onClick = onRetry) {
+            Text(stringResource(R.string.common_retry))
+        }
+    }
+}
+
+/**
+ * Заголовок со количеством найденных копий.
+ *
+ * Для ровно одного диска — отдельная строка без числа: форма `one`
+ * в русском выбирается и для 21, 31 и т.д., а «21 диск» в этом
+ * предложении читалось бы странно.
+ */
+@Composable
+private fun offlineFoundText(count: Int): String =
+    if (count == 1) {
+        stringResource(R.string.selection_offline_found_one)
+    } else {
+        pluralStringResource(R.plurals.selection_offline_found, count, count)
+    }
+
+/**
+ * Компактная карточка записи из локальной коллекции.
+ *
+ * Фото показываются из файла: пользователь мог добавить свой буклет,
+ * это поможет узнать диск.
+ */
+@Composable
+private fun LocalItemCard(
+    item: CollectionItem,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val cover = item.release.coverImageUrl
+            if (!cover.isNullOrBlank()) {
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    AsyncImage(
+                        model = if (cover.startsWith("http")) cover else File(cover),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Spacer(Modifier.width(12.dp))
+            }
+
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = item.release.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = item.release.artist,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stringResource(
+                        R.string.selection_offline_format,
+                        item.format.name
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }
@@ -352,6 +522,90 @@ private fun ReleaseSelectionScreenPreview() {
     CdVinylCatalogTheme {
         ReleaseSelectionScreen(
             state = ReleaseSelectionContract.State(),
+            pagingItems = pagingItems,
+            onIntent = {}
+        )
+    }
+}
+
+@Preview(name = "Офлайн — найдено", showBackground = true, locale = "ru")
+@Composable
+private fun ReleaseSelectionOfflineFoundPreview() {
+    val pagingItems = remember {
+        MutableStateFlow(PagingData.empty<Release>())
+    }.collectAsLazyPagingItems()
+
+    CdVinylCatalogTheme {
+        ReleaseSelectionScreen(
+            state = ReleaseSelectionContract.State(
+                source = ReleaseSelectionContract.Source.SCAN,
+                offlineMatches = listOf(previewLocalItem())
+            ),
+            pagingItems = pagingItems,
+            onIntent = {}
+        )
+    }
+}
+
+@Preview(name = "Офлайн — несколько копий", showBackground = true, locale = "ru")
+@Composable
+private fun ReleaseSelectionOfflineManyPreview() {
+    val pagingItems = remember {
+        MutableStateFlow(PagingData.empty<Release>())
+    }.collectAsLazyPagingItems()
+
+    CdVinylCatalogTheme {
+        ReleaseSelectionScreen(
+            state = ReleaseSelectionContract.State(
+                source = ReleaseSelectionContract.Source.SCAN,
+                offlineMatches = listOf(
+                    previewLocalItem(id = 1L),
+                    previewLocalItem(id = 2L, format = Format.VINYL)
+                )
+            ),
+            pagingItems = pagingItems,
+            onIntent = {}
+        )
+    }
+}
+
+private fun previewLocalItem(
+    id: Long = 1L,
+    format: Format = Format.CD
+) = CollectionItem(
+    id = id,
+    release = Release(
+        id = 0L,
+        title = "Once",
+        artist = "Nightwish",
+        year = 2004,
+        barcode = "727361129125",
+        coverImageUrl = null,
+        label = "Nuclear Blast",
+        rawFormat = "CD",
+        country = "Europe",
+        releaseDate = null,
+        catalogNumber = null,
+        notes = null
+    ),
+    format = format,
+    addedAt = 0L,
+    notes = null
+)
+
+@Preview(name = "Офлайн — не найдено", showBackground = true, locale = "ru")
+@Composable
+private fun ReleaseSelectionOfflineEmptyPreview() {
+    val pagingItems = remember {
+        MutableStateFlow(PagingData.empty<Release>())
+    }.collectAsLazyPagingItems()
+
+    CdVinylCatalogTheme {
+        ReleaseSelectionScreen(
+            state = ReleaseSelectionContract.State(
+                source = ReleaseSelectionContract.Source.SCAN,
+                offlineMatches = emptyList()
+            ),
             pagingItems = pagingItems,
             onIntent = {}
         )
