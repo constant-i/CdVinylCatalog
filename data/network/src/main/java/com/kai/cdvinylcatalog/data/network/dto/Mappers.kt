@@ -13,7 +13,7 @@ fun SearchResultDto.toDomain(): Release {
         title = parseTitle(title).second,
         artist = parseTitle(title).first,
         year = year?.toIntOrNull()?.takeIf { it > 0 },
-        barcode = barcode?.firstOrNull(),
+        barcode = barcode?.firstOrNull()?.let(::normalizeBarcode),
         coverImageUrl = coverImage,
         imageUrls = listOfNotNull(coverImage),
         label = label?.firstOrNull(),
@@ -25,6 +25,18 @@ fun SearchResultDto.toDomain(): Release {
         tracklist = emptyList()
     )
 }
+
+/**
+ * Discogs печатает штрихкод с пробелами и дефисами («5 051099 709942»),
+ * а сканер отдаёт непрерывные цифры. Приводим к одному виду, иначе
+ * поиск по штрихкоду в локальной базе не найдёт совпадения.
+ *
+ * @return только цифры или `null`, если цифр нет
+ */
+internal fun normalizeBarcode(raw: String): String? =
+    raw.filter { it.isDigit() }.takeIf { it.isNotEmpty() }
+
+private const val BARCODE_TYPE = "Barcode"
 
 /**
  * Discogs возвращает title в формате "Artist - Album".
@@ -46,7 +58,10 @@ fun ReleaseDetailsDto.toDomain(): Release {
         title = parseTitle(title).second,
         artist = artists?.joinToString(", ") { it.name } ?: parseTitle(title).first,
         year = year?.takeIf { it > 0 },
-        barcode = null,
+        barcode = identifiers
+            ?.firstOrNull { it.type.equals(BARCODE_TYPE, ignoreCase = true) }
+            ?.value
+            ?.let(::normalizeBarcode),
         coverImageUrl = images?.firstOrNull { it.type == "primary" }?.uri
             ?: allImages.firstOrNull(),
         imageUrls = allImages,
