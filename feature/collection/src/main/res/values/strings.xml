@@ -4,9 +4,6 @@
     <string name="collection_title">Моя коллекция</string>
     <string name="collection_empty">Коллекция пуста</string>
     <string name="collection_empty_hint">Отсканируйте первый диск</string>
-    <string name="collection_label_year">Год: %1$d</string>
-    <string name="collection_label_format">Формат: %1$s</string>
-    <string name="collection_label_note">Заметка: %1$s</string>
 
     <!-- Content descriptions -->
     <string name="cd_back">Назад</string>

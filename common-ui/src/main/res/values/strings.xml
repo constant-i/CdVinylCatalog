@@ -21,4 +21,10 @@
     <!-- Content descriptions -->
     <string name="cd_no_cover">Нет обложки</string>
     <string name="cd_load_error">Ошибка загрузки</string>
+
+    <!-- Общие метки диска -->
+    <string name="disc_label_format">Формат</string>
+    <string name="disc_label_year">Год</string>
+    <string name="disc_label_label">Лейбл</string>
+    <string name="disc_label_country">Страна</string>
 </resources>

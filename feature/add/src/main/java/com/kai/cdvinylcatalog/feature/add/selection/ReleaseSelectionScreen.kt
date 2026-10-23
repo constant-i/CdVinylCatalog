@@ -1,8 +1,6 @@
 package com.kai.cdvinylcatalog.feature.add.selection
 
 import android.content.res.Configuration
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,14 +15,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -57,6 +52,7 @@ import coil.compose.AsyncImage
 import coil.compose.SubcomposeAsyncImage
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
 import com.kai.cdvinylcatalog.common.ui.asText
+import com.kai.cdvinylcatalog.common.ui.component.DiscCard
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
@@ -305,58 +301,18 @@ private fun LocalItemCard(
     item: CollectionItem,
     onClick: () -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            val cover = item.release.coverImageUrl
-            if (!cover.isNullOrBlank()) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    AsyncImage(
-                        model = if (cover.startsWith("http")) cover else File(cover),
-                        contentDescription = null,
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                Spacer(Modifier.width(12.dp))
-            }
+    val cover = item.release.coverImageUrl
 
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = item.release.title,
-                    style = MaterialTheme.typography.titleSmall,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = item.release.artist,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Text(
-                    text = stringResource(
-                        R.string.selection_offline_format,
-                        item.format.name
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
+    DiscCard(
+        title = item.release.title,
+        artist = item.release.artist,
+        onClick = onClick,
+        // Файл или URL — Coil понимает оба варианта
+        cover = cover?.let { if (it.startsWith("http")) it else File(it) },
+        coverSize = 56.dp,
+        format = item.format.name,
+        note = item.notes
+    )
 }
 
 /**
@@ -372,110 +328,40 @@ private fun ReleaseCard(
     isInCollection: Boolean,
     onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                SubcomposeAsyncImage(
-                    model = release.coverImageUrl,
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop,
-                    loading = {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(Modifier.size(24.dp))
-                        }
-                    },
-                    error = {
-                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Icon(
-                                Icons.Default.MusicNote,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                )
-            }
-
-            Spacer(Modifier.width(8.dp))
-
-            Column(Modifier.weight(1f)) {
-                Text(
-                    text = release.artist,
-                    style = MaterialTheme.typography.titleSmall
-                )
-                Text(
-                    text = release.title,
-                    style = MaterialTheme.typography.titleMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                InfoRow(
-                    label = stringResource(R.string.selection_label_format),
-                    value = release.rawFormat
-                )
-                InfoRow(
-                    label = stringResource(R.string.selection_label_year),
-                    value = release.year?.toString()
-                )
-                InfoRow(
-                    label = stringResource(R.string.selection_label_label),
-                    value = release.label
-                )
-                InfoRow(
-                    label = stringResource(R.string.selection_label_country),
-                    value = release.country
-                )
-                if (isInCollection) {
-                    Spacer(Modifier.height(6.dp))
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Default.CheckCircle,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(
-                            text = stringResource(R.string.selection_already_in_collection),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
-        }
+    val badge: (@Composable () -> Unit)? = if (isInCollection) {
+        { InCollectionBadge() }
+    } else {
+        null
     }
+
+    DiscCard(
+        title = release.title,
+        artist = release.artist,
+        onClick = onClick,
+        cover = release.coverImageUrl,
+        coverSize = 80.dp,
+        format = release.rawFormat,
+        year = release.year?.toString(),
+        label = release.label,
+        country = release.country,
+        badge = badge,
+    )
 }
 
 @Composable
-private fun InfoRow(
-    label: String,
-    value: String?,
-    maxLines: Int = 3
-) {
-    if (value.isNullOrBlank()) return
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = "$label: ",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+private fun InCollectionBadge() {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = MaterialTheme.colorScheme.primary
         )
+        Spacer(Modifier.width(4.dp))
         Text(
-            text = value,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            maxLines = maxLines,
-            overflow = TextOverflow.Ellipsis
+            text = stringResource(R.string.selection_already_in_collection),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }

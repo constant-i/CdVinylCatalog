@@ -36,10 +36,6 @@
     <string name="selection_title_search">Результаты поиска</string>
     <string name="selection_empty">Ничего не найдено</string>
     <string name="selection_already_in_collection">Уже в коллекции</string>
-    <string name="selection_label_format">Формат</string>
-    <string name="selection_label_year">Год</string>
-    <string name="selection_label_label">Лейбл</string>
-    <string name="selection_label_country">Страна</string>
 
     <!-- Content descriptions -->
     <string name="cd_load_error">Ошибка загрузки</string>
@@ -100,7 +96,5 @@
         <item quantity="many">В коллекции %1$d дисков с таким штрихкодом:</item>
         <item quantity="other">В коллекции %1$d диска с таким штрихкодом:</item>
     </plurals>
-
-    <string name="selection_offline_format">Формат: %1$s</string>
 
 </resources>
