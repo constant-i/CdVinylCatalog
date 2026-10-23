@@ -49,6 +49,7 @@
 :domain                 — Entities, порты репозиториев, Use Cases, AppError/Outcome
 :data:network           — Retrofit, Discogs API, DTO, PagingSource, мапперы
 :data:database          — Room, DAO, Entity, мапперы
+:data:files             — реализация PhotoStorage: файлы фотографий, FileProvider
 :common-ui              — тема, общие Compose-компоненты, UiMessage, маппинг AppError в текст
 :feature:add            — сканирование, поиск, результаты, детали релиза, добавление вручную
 :feature:collection     — коллекция: список с сортировкой и экран деталей
@@ -81,6 +82,42 @@
     └── collection/
 ```
 
+### Что лежит в `:common-ui`
+
+```text
+:common-ui
+├── Theme.kt / Type.kt / Color.kt   Тема Material 3, динамические цвета
+├── OrientationHandler.kt           Ориентация: портрет на телефоне, свободная на планшете
+├── AppErrorExt.kt                  AppError → строка (asText)
+├── message/                        UiMessage и маппинг AppError
+└── component/
+    ├── DiscCard.kt                 Карточка диска для всех списков
+    ├── CoverGallery.kt             Галерея обложек с перелистыванием
+    ├── CoverPlaceholder.kt         Заглушка, когда обложки нет
+    ├── ReleaseInfo.kt              Обложки + заголовок + метаданные + треклист
+    ├── ReleaseHeader.kt            Название и исполнитель
+    ├── ReleaseMetadata.kt          Год, формат, лейбл, страна, каталог, заметка
+    ├── MetadataRow.kt              Одна строка «лейбл — значение»
+    ├── TracklistSection.kt         Секция треклиста в карточке
+    ├── TrackRow.kt                 Один трек: позиция, название, длительность
+    └── CdTopBar.kt                 Топ-бар: заголовок, «назад», действия
+```
+
+Общие экраны собираются из блоков, а не копируются:
+
+- `ReleaseInfo` — общая часть обоих экранов деталей (релиз из Discogs
+  и запись коллекции). Своё каждый экран добавляет хвостовым слотом:
+  кнопки и заметку — `:feature:add`, «другие копии» — `:feature:collection`.
+- `CdTopBar` заменяет `TopAppBar` с `navigationIcon` и `ArrowBack` на всех
+  экранах; `onBack = null` — экран без кнопки «назад».
+
+В блоках экранов деталей стиль фиксирован, а не параметризуется: в `ReleaseInfo`
+нет `titleStyle` или `inCards`. Настройка — сам набор переданных полей
+(передано — рисуется, `null` — пропускается), без флагов вида
+`showLabel`/`showCountry`. Иначе два экрана одного назначения снова
+разъезжаются по стилю. Размер обложки в `DiscCard` — осознанное исключение:
+в поиске нужна крупнее, в коллекции компактнее.
+
 
 ```mermaid
 graph TD
@@ -94,6 +131,7 @@ graph TD
 
     Net[":data:network"]
     Db[":data:database"]
+    Files[":data:files"]
 
     Api["Discogs API"]
     Room["Room"]
@@ -108,9 +146,11 @@ graph TD
 
     Net --> Domain
     Db --> Domain
+    Files --> Domain
 
     App --> Net
     App --> Db
+    App --> Files
 
     Net --> Api
     Db --> Room
@@ -234,6 +274,7 @@ Presentation-слой оперирует только `AppError` и строко
 - [x] Тесты `PagingSource` для сети (включая дедупликацию)
 - [x] Чистка зависимостей: фичи больше не тянут `:data:*`,
       `:domain` и `:common-ui` отдают свои публичные API через `api(...)`
+- [x] Общие блоки экранов деталей (`ReleaseInfo`) и общий топ-бар (`CdTopBar`) в `:common-ui`
 - [ ] Адаптивность: планшеты и ландшафт
 - [ ] Экспорт коллекции
 

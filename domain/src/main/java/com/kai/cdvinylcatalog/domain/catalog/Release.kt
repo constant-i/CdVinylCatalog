@@ -47,3 +47,18 @@ fun Release.mergeWith(discogs: Release?): Release {
         tracklist = discogs.tracklist.ifEmpty { tracklist }
     )
 }
+
+/**
+ * Приводит штрихкод к сравнимому виду: только цифры.
+ *
+ * Разные источники печатают штрихкод по-разному:
+ * - Discogs отдаёт `7 27361 12912 5`
+ * - сканер отдаёт `727361129125`
+ * - пользователь может ввести с пробелами или дефисами
+ *
+ * Без нормализации сверка по штрихкоду не найдёт совпадения.
+ *
+ * @return только цифры или `null`, если цифр нет вовсе
+ */
+fun normalizeBarcode(raw: String): String? =
+    raw.filter { it.isDigit() }.takeIf { it.isNotEmpty() }
