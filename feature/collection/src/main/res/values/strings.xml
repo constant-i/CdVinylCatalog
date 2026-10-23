@@ -15,7 +15,6 @@
     <string name="cd_sort">Сортировка</string>
     <string name="cd_edit">Редактировать</string>
     <string name="cd_delete">Удалить</string>
-    <string name="cd_no_cover">Нет обложки</string>
     <string name="cd_load_error">Ошибка загрузки</string>
 
     <!-- Sort order -->

@@ -51,5 +51,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
 
+    // CoverGallery грузит обложки
+    implementation(libs.coil.compose)
+
     testImplementation(libs.junit)
 }

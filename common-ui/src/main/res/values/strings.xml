@@ -17,4 +17,8 @@
     <string name="msg_required_fields">Заполните обязательные поля</string>
     <string name="msg_added">Добавлено: %1$s</string>
     <string name="msg_save_failed">Не удалось сохранить</string>
+
+    <!-- Content descriptions -->
+    <string name="cd_no_cover">Нет обложки</string>
+    <string name="cd_load_error">Ошибка загрузки</string>
 </resources>

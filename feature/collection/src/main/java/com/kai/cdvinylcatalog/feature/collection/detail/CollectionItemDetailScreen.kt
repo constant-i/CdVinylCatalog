@@ -39,6 +39,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.common.ui.component.CoverGallery
+import com.kai.cdvinylcatalog.common.ui.component.MetadataRow
+import com.kai.cdvinylcatalog.common.ui.component.TrackRow
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.Track
@@ -117,7 +120,7 @@ fun CollectionItemDetailScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            CollectionItemImageGallery(
+            CoverGallery(
                 images = state.displayImages,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -229,38 +232,6 @@ private fun OtherCopyCard(
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp)
             )
-        }
-    }
-}
-
-@Composable
-private fun MetadataRow(label: String, value: String?) {
-    if (value.isNullOrBlank()) return
-    Row(modifier = Modifier.padding(vertical = 4.dp)) {
-        Text(text = "$label: ", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.width(100.dp))
-        Text(text = value, style = MaterialTheme.typography.bodyMedium)
-    }
-}
-
-@Composable
-private fun TrackRow(track: Track) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    ) {
-        Text(
-            text = track.position,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.width(40.dp)
-        )
-        Text(
-            text = track.title,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(1f)
-        )
-        track.duration?.let {
-            Text(text = it, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

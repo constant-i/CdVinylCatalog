@@ -1,4 +1,4 @@
-package com.kai.cdvinylcatalog.feature.add.details
+package com.kai.cdvinylcatalog.common.ui.component
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BrokenImage
-import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,30 +32,35 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.SubcomposeAsyncImage
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
-import com.kai.cdvinylcatalog.feature.add.R
+import com.kai.cdvinylcatalog.common.ui.R
 
 /**
- * Галерея обложек с перелистыванием и точками-индикаторами.
+ * Галерея обложек с перелистыванием.
  *
- * Если изображений нет — показывает заглушку с нотой.
+ * Одна на два экрана: детали релиза из Discogs и детали записи коллекции.
+ * Если изображений нет — показывает заглушку. Индикатор страниц появляется,
+ * только когда картинок больше одной.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-internal fun CoverImageGallery(images: List<String>) {
+fun CoverGallery(
+    images: List<String>,
+    modifier: Modifier = Modifier,
+) {
     if (images.isEmpty()) {
-        EmptyCover()
+        CoverPlaceholder(modifier = modifier)
         return
     }
 
     val pagerState = rememberPagerState(pageCount = { images.size })
 
-    Column {
+    Column(modifier = modifier) {
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(1f)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(RoundedCornerShape(12.dp)),
         ) { page ->
             CoverImage(url = images[page])
         }
@@ -65,7 +69,7 @@ internal fun CoverImageGallery(images: List<String>) {
             Spacer(modifier = Modifier.height(8.dp))
             PageIndicator(
                 pageCount = images.size,
-                currentPage = pagerState.currentPage
+                currentPage = pagerState.currentPage,
             )
         }
     }
@@ -81,7 +85,7 @@ private fun CoverImage(url: String) {
         loading = {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
@@ -89,43 +93,24 @@ private fun CoverImage(url: String) {
         error = {
             Box(
                 modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Default.BrokenImage,
                     contentDescription = stringResource(R.string.cd_load_error),
                     modifier = Modifier.size(48.dp),
-                    tint = MaterialTheme.colorScheme.error
+                    tint = MaterialTheme.colorScheme.error,
                 )
             }
-        }
+        },
     )
-}
-
-@Composable
-private fun EmptyCover() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.MusicNote,
-            contentDescription = stringResource(R.string.cd_no_cover),
-            modifier = Modifier.size(64.dp),
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
 }
 
 @Composable
 private fun PageIndicator(pageCount: Int, currentPage: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
+        horizontalArrangement = Arrangement.Center,
     ) {
         repeat(pageCount) { index ->
             Box(
@@ -139,16 +124,16 @@ private fun PageIndicator(pageCount: Int, currentPage: Int) {
                         } else {
                             MaterialTheme.colorScheme.outline
                         }
-                    )
+                    ),
             )
         }
     }
 }
 
-@Preview(name = "Нет обложки", showBackground = true)
+@Preview(name = "Нет обложки", showBackground = true, widthDp = 200)
 @Composable
-private fun CoverImageGalleryEmptyPreview() {
+private fun CoverGalleryEmptyPreview() {
     CdVinylCatalogTheme {
-        CoverImageGallery(images = emptyList())
+        CoverGallery(images = emptyList())
     }
 }

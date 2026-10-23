@@ -26,6 +26,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.common.ui.component.CoverGallery
+import com.kai.cdvinylcatalog.common.ui.component.MetadataRow
+import com.kai.cdvinylcatalog.common.ui.component.TrackRow
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.Track
 import com.kai.cdvinylcatalog.feature.add.R
@@ -53,7 +56,7 @@ internal fun ReleaseContent(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        CoverImageGallery(images = release.galleryImages())
+        CoverGallery(images = release.galleryImages())
         Spacer(modifier = Modifier.height(16.dp))
 
         ReleaseHeader(release = release)

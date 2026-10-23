@@ -42,7 +42,6 @@
     <string name="selection_label_country">Страна</string>
 
     <!-- Content descriptions -->
-    <string name="cd_no_cover">Нет обложки</string>
     <string name="cd_load_error">Ошибка загрузки</string>
     <string name="cd_back">Назад</string>
     <string name="cd_search">Поиск</string>
