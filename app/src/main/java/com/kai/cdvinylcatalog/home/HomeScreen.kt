@@ -21,12 +21,10 @@ import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -39,12 +37,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.R
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.common.ui.component.CdTopBar
 
 /**
  * Главный экран приложения.
  * Показывает четыре действия: сканирование, поиск, ручное добавление, коллекция.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToScan: () -> Unit,
@@ -56,9 +54,7 @@ fun HomeScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.home_title)) }
-            )
+            CdTopBar(title = stringResource(R.string.home_title))
         }
     ) { padding ->
         Column(
@@ -108,6 +104,16 @@ fun HomeScreen(
  * Карточка действия на главном экране.
  * При нажатии — пружинная анимация масштаба.
  *
+ * Цвета берутся парой контейнер/на-контейнере ([CardDefaults.cardColors]):
+ * `primaryContainer`/`onPrimaryContainer` для основного действия и
+ * `surfaceVariant`/`onSurfaceVariant` для остальных. `contentColor` дальше
+ * подхватывают `Icon` и `Text` через `LocalContentColor`, поэтому явные `tint`
+ * и `color` не нужны.
+ *
+ * Иерархия заголовка и подписи — только типографикой (`titleMedium` против
+ * `bodySmall`). Полупрозрачность не используем: третьего уровня приглушения
+ * в схеме нет, а на динамических цветах `alpha` не гарантирует контраст.
+ *
  * @param isPrimary выделить ли карточку как основное действие
  */
 @Composable
@@ -132,21 +138,22 @@ private fun HomeActionCard(
         label = "cardScale"
     )
 
+    val colorScheme = MaterialTheme.colorScheme
+
     Card(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .scale(scale),
         interactionSource = interactionSource,
-        colors = if (isPrimary) {
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer
-            )
-        } else {
-            CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        }
+        colors = CardDefaults.cardColors(
+            containerColor =
+                if (isPrimary) colorScheme.primaryContainer
+                else colorScheme.surfaceVariant,
+            contentColor =
+                if (isPrimary) colorScheme.onPrimaryContainer
+                else colorScheme.onSurfaceVariant
+        )
     ) {
         Column(
             modifier = Modifier
@@ -156,32 +163,17 @@ private fun HomeActionCard(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = if (isPrimary) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
+                modifier = Modifier.size(32.dp)
             )
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleMedium,
-                color = if (isPrimary) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
+                style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isPrimary) {
-                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                }
+                style = MaterialTheme.typography.bodySmall
             )
         }
     }
