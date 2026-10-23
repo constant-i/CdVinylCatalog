@@ -11,7 +11,6 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -26,9 +25,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
-import com.kai.cdvinylcatalog.common.ui.component.CoverGallery
-import com.kai.cdvinylcatalog.common.ui.component.MetadataRow
-import com.kai.cdvinylcatalog.common.ui.component.TrackRow
+import com.kai.cdvinylcatalog.common.ui.component.ReleaseInfo
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.Track
 import com.kai.cdvinylcatalog.feature.add.R
@@ -36,8 +33,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
- * Содержимое экрана деталей релиза: обложки, метаданные, треклист,
- * заметка и кнопки действий.
+ * Содержимое экрана деталей релиза.
+ *
+ * Общая часть — обложки, заголовок, метаданные и треклист — приходит из
+ * [ReleaseInfo] (`:common-ui`). Своё, специфичное для этого экрана, добавляется
+ * хвостовым слотом: статус коллекции, поле заметки и кнопки действий.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -56,96 +56,35 @@ internal fun ReleaseContent(
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
-        CoverGallery(images = release.galleryImages())
-        Spacer(modifier = Modifier.height(16.dp))
+        ReleaseInfo(
+            release = release
+        ) {
+            Spacer(modifier = Modifier.height(16.dp))
 
-        ReleaseHeader(release = release)
-        Spacer(modifier = Modifier.height(16.dp))
+            CollectionStatus(state = state)
 
-        MetadataCard(release = release)
-        TracklistCard(tracks = release.tracklist)
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        CollectionStatus(state = state)
-
-        NotesField(
-            notes = state.userNotes,
-            onNotesChanged = { onIntent(ReleaseDetailsContract.Intent.OnNotesChanged(it)) },
-            bringIntoViewRequester = bringIntoViewRequester,
-            coroutineScope = coroutineScope
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ActionButtons(
-            isInCollection = state.isInCollection,
-            onAdd = {
-                onKeyboardDismiss()
-                onIntent(ReleaseDetailsContract.Intent.OnAddClicked)
-            },
-            onBack = {
-                onKeyboardDismiss()
-                onIntent(ReleaseDetailsContract.Intent.OnBackClicked)
-            }
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-    }
-}
-
-/**
- * Обложки для галереи: сначала все изображения, иначе хотя бы главная.
- */
-private fun Release.galleryImages(): List<String> =
-    imageUrls.ifEmpty { listOfNotNull(coverImageUrl) }
-
-@Composable
-private fun ReleaseHeader(release: Release) {
-    Text(
-        text = release.title,
-        style = MaterialTheme.typography.headlineSmall,
-        modifier = Modifier.fillMaxWidth()
-    )
-    Text(
-        text = release.artist,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.fillMaxWidth()
-    )
-}
-
-@Composable
-private fun MetadataCard(release: Release) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            MetadataRow(stringResource(R.string.details_label_year), release.year?.toString())
-            MetadataRow(stringResource(R.string.details_label_format), release.rawFormat)
-            MetadataRow(stringResource(R.string.details_label_label), release.label)
-            MetadataRow(stringResource(R.string.details_label_country), release.country)
-            MetadataRow(
-                stringResource(R.string.details_label_catalog_number),
-                release.catalogNumber
+            NotesField(
+                notes = state.userNotes,
+                onNotesChanged = { onIntent(ReleaseDetailsContract.Intent.OnNotesChanged(it)) },
+                bringIntoViewRequester = bringIntoViewRequester,
+                coroutineScope = coroutineScope
             )
-        }
-    }
-}
 
-@Composable
-private fun TracklistCard(tracks: List<Track>) {
-    if (tracks.isEmpty()) return
+            Spacer(modifier = Modifier.height(16.dp))
 
-    Spacer(modifier = Modifier.height(16.dp))
-    Text(
-        text = stringResource(R.string.details_tracklist),
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.fillMaxWidth()
-    )
-    Spacer(modifier = Modifier.height(8.dp))
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(12.dp)) {
-            tracks.forEach { track ->
-                TrackRow(track)
-            }
+            ActionButtons(
+                isInCollection = state.isInCollection,
+                onAdd = {
+                    onKeyboardDismiss()
+                    onIntent(ReleaseDetailsContract.Intent.OnAddClicked)
+                },
+                onBack = {
+                    onKeyboardDismiss()
+                    onIntent(ReleaseDetailsContract.Intent.OnBackClicked)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

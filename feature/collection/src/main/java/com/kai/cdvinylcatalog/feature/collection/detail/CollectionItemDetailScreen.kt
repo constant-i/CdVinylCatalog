@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -30,7 +29,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,9 +37,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
-import com.kai.cdvinylcatalog.common.ui.component.CoverGallery
-import com.kai.cdvinylcatalog.common.ui.component.MetadataRow
-import com.kai.cdvinylcatalog.common.ui.component.TrackRow
+import com.kai.cdvinylcatalog.common.ui.component.CdTopBar
+import com.kai.cdvinylcatalog.common.ui.component.ReleaseInfo
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.Track
@@ -59,24 +56,9 @@ fun CollectionItemDetailScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = state.displayRelease?.title ?: stringResource(R.string.detail_title_default),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { onIntent(CollectionItemDetailContract.Intent.OnBackClicked) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back)
-                        )
-                    }
-                },
+            CdTopBar(
+                title = state.displayRelease?.title ?: stringResource(R.string.detail_title_default),
+                onBack = { onIntent(CollectionItemDetailContract.Intent.OnBackClicked) },
                 actions = {
                     IconButton(
                         onClick = { onIntent(CollectionItemDetailContract.Intent.OnEditClicked) }
@@ -120,62 +102,29 @@ fun CollectionItemDetailScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            CoverGallery(
+            ReleaseInfo(
+                release = release,
                 images = state.displayImages,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Название и исполнитель
-            Text(text = release.title, style = MaterialTheme.typography.headlineMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = release.artist, style = MaterialTheme.typography.titleMedium)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Метаданные
-            MetadataRow(stringResource(R.string.detail_label_year), release.year?.toString())
-            MetadataRow(stringResource(R.string.detail_label_format), release.rawFormat)
-            MetadataRow(stringResource(R.string.detail_label_label), release.label)
-            MetadataRow(stringResource(R.string.detail_label_country), release.country)
-            MetadataRow(stringResource(R.string.detail_label_catalog), release.catalogNumber)
-            item.notes?.let {
-                MetadataRow(stringResource(R.string.detail_label_note), it)
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Треклист
-            if (state.isLoadingDetails) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                )
-            } else if (state.tracklist.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.detail_tracklist),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                state.tracklist.forEach { track ->
-                    TrackRow(track)
-                }
-            }
-            // Секция "Другие копии"
-            if (state.otherCopies.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = stringResource(R.string.detail_other_copies, state.otherCopies.size),
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                state.otherCopies.forEach { copy ->
-                    OtherCopyCard(
-                        copy = copy,
-                        onClick = {
-                            onIntent(CollectionItemDetailContract.Intent.OnOtherCopyClicked(copy.id))
-                        }
+                tracklist = state.tracklist,
+                isTracklistLoading = state.isLoadingDetails,
+                note = item.notes
+            ) {
+                // Секция "Другие копии"
+                if (state.otherCopies.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Text(
+                        text = stringResource(R.string.detail_other_copies, state.otherCopies.size),
+                        style = MaterialTheme.typography.titleLarge
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    state.otherCopies.forEach { copy ->
+                        OtherCopyCard(
+                            copy = copy,
+                            onClick = {
+                                onIntent(CollectionItemDetailContract.Intent.OnOtherCopyClicked(copy.id))
+                            }
+                        )
+                    }
                 }
             }
         }

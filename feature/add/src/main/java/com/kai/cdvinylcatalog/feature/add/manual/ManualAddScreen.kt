@@ -24,13 +24,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -39,7 +37,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +49,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
+import com.kai.cdvinylcatalog.common.ui.component.CdTopBar
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.usecase.collection.DraftCollectionItem
 import com.kai.cdvinylcatalog.feature.add.R
@@ -64,7 +62,7 @@ import java.io.File
  * операции с хранилищем выполняет ViewModel через доменный `PhotoStorage`,
  * а запуск камеры, галереи и кропа вынесен в [ManualAddRoute].
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ManualAddScreen(
     state: ManualAddContract.State,
@@ -79,25 +77,12 @@ fun ManualAddScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        if (state.isEditMode)
-                            stringResource(R.string.add_manual_title_edit)
-                        else
-                            stringResource(R.string.add_manual_title_add)
-                    )
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { onIntent(ManualAddContract.Intent.OnBackClicked) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back)
-                        )
-                    }
-                }
+            CdTopBar(
+                title = if (state.isEditMode)
+                    stringResource(R.string.add_manual_title_edit)
+                else
+                    stringResource(R.string.add_manual_title_add),
+                onBack = { onIntent(ManualAddContract.Intent.OnBackClicked) }
             )
         }
     ) { padding ->

@@ -6,7 +6,6 @@
     <string name="collection_empty_hint">Отсканируйте первый диск</string>
 
     <!-- Content descriptions -->
-    <string name="cd_back">Назад</string>
     <string name="cd_scan">Сканировать</string>
     <string name="cd_search">Поиск</string>
     <string name="cd_sort">Сортировка</string>
@@ -30,16 +29,6 @@
 
     <!-- Collection Item Detail -->
     <string name="detail_title_default">Детали</string>
-    <string name="detail_tracklist">Треклист</string>
     <string name="detail_other_copies">Другие копии (%1$d)</string>
     <string name="detail_no_note">Без заметки</string>
-
-    <!-- Metadata labels -->
-    <string name="detail_label_year">Год</string>
-    <string name="detail_label_format">Формат</string>
-    <string name="detail_label_label">Лейбл</string>
-    <string name="detail_label_country">Страна</string>
-    <string name="detail_label_catalog">Catalog#</string>
-    <string name="detail_label_copies">Копий</string>
-    <string name="detail_label_note">Заметка</string>
 </resources>

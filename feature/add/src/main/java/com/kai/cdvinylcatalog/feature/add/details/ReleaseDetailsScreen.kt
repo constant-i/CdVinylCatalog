@@ -7,16 +7,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
 import com.kai.cdvinylcatalog.common.ui.asText
+import com.kai.cdvinylcatalog.common.ui.component.CdTopBar
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.feature.add.R
 
@@ -36,10 +31,10 @@ import com.kai.cdvinylcatalog.feature.add.R
  * Экран деталей релиза из Discogs.
  *
  * Здесь только каркас: топ-бар, состояния загрузки и ошибки, диалоги.
- * Содержимое вынесено в [ReleaseContent], обложки — в [CoverImageGallery],
+ * Содержимое вынесено в [ReleaseContent], топ-бар — в [CdTopBar],
  * диалоги — в [FormatPickerDialog] и [AddAnotherCopyDialog].
  */
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ReleaseDetailsScreen(
     state: ReleaseDetailsContract.State,
@@ -55,20 +50,9 @@ fun ReleaseDetailsScreen(
     Scaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(state.release?.title ?: stringResource(R.string.details_title_default))
-                },
-                navigationIcon = {
-                    IconButton(
-                        onClick = { onIntent(ReleaseDetailsContract.Intent.OnBackClicked) }
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back)
-                        )
-                    }
-                }
+            CdTopBar(
+                title = state.release?.title ?: stringResource(R.string.details_title_default),
+                onBack = { onIntent(ReleaseDetailsContract.Intent.OnBackClicked) }
             )
         }
     ) { padding ->

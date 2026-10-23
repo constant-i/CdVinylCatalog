@@ -19,6 +19,7 @@
     <string name="msg_save_failed">Не удалось сохранить</string>
 
     <!-- Content descriptions -->
+    <string name="cd_back">Назад</string>
     <string name="cd_no_cover">Нет обложки</string>
     <string name="cd_load_error">Ошибка загрузки</string>
 
@@ -27,4 +28,7 @@
     <string name="disc_label_year">Год</string>
     <string name="disc_label_label">Лейбл</string>
     <string name="disc_label_country">Страна</string>
+    <string name="disc_label_catalog">Catalog#</string>
+    <string name="disc_label_note">Заметка</string>
+    <string name="disc_tracklist">Треклист</string>
 </resources>

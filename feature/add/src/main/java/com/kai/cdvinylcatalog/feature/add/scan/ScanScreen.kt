@@ -6,22 +6,19 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.LibraryMusic
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import com.kai.cdvinylcatalog.common.ui.component.CdTopBar
 import com.kai.cdvinylcatalog.feature.add.R
 
 @Composable
@@ -77,7 +74,6 @@ fun ScanScreen(
  * камера (`PreviewView` внутри `AndroidView`), а в [ScanScreenPreview]
  * её нечем отрисовать.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ScanContent(
     onNavigateBack: () -> Unit,
@@ -93,39 +89,28 @@ private fun ScanContent(
     ) {
         content()
 
-        TopAppBar(
+        CdTopBar(
+            title = stringResource(R.string.scan_title),
             modifier = Modifier
                 .align(Alignment.TopCenter)
                 .statusBarsPadding(),
-            title = { Text(stringResource(R.string.scan_title), color = Color.White) },
-            navigationIcon = {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                        tint = Color.White
-                    )
-                }
-            },
+            onBack = onNavigateBack,
+            containerColor = Color.Transparent,
+            contentColor = Color.White,
             actions = {
                 IconButton(onClick = onNavigateToSearch) {
                     Icon(
                         imageVector = Icons.Default.Search,
-                        contentDescription = stringResource(R.string.cd_search),
-                        tint = Color.White
+                        contentDescription = stringResource(R.string.cd_search)
                     )
                 }
                 IconButton(onClick = onNavigateToCollection) {
                     Icon(
                         imageVector = Icons.Default.LibraryMusic,
-                        contentDescription = stringResource(R.string.cd_collection),
-                        tint = Color.White
+                        contentDescription = stringResource(R.string.cd_collection)
                     )
                 }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent
-            )
+            }
         )
     }
 }
