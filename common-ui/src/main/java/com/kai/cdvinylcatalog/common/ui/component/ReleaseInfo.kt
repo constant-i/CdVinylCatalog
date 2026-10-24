@@ -126,8 +126,19 @@ private val previewReleaseInfo = Release(
     catalogNumber = "NB 1291-2",
     notes = null,
     tracklist = listOf(
-        Track(position = "1", title = "Dark Chest Of Wonders", duration = "4:28"),
-        Track(position = "2", title = "Wish I Had An Angel", duration = "4:03"),
-        Track(position = "3", title = "Nemo", duration = "4:36"),
+        Track(
+            position = "1",
+            title = "Dark Chest Of Wonders",
+            duration = "4:28"
+        ),
+        Track(
+            position = "2",
+            title = "Wish I Had An Angel",
+            duration = "4:03"
+        ),
+        Track(position = "3",
+            title = "Nemo",
+            duration = "4:36"
+        ),
     ),
 )

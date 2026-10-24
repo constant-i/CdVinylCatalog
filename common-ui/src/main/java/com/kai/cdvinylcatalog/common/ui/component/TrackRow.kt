@@ -51,10 +51,27 @@ fun TrackRow(
 private fun TrackRowPreview() {
     CdVinylCatalogTheme {
         Column(modifier = Modifier.padding(16.dp)) {
-            TrackRow(Track(position = "1", title = "Dark Chest Of Wonders", duration = "4:28"))
-            TrackRow(Track(position = "2", title = "Wish I Had An Angel", duration = "4:03"))
-            // Без длительности правая часть просто не рисуется
-            TrackRow(Track(position = "3", title = "Nemo", duration = null))
+            TrackRow(
+                Track(
+                    position = "1",
+                    title = "Dark Chest Of Wonders",
+                    duration = "4:28"
+                )
+            )
+            TrackRow(
+                Track(
+                    position = "2",
+                    title = "Wish I Had An Angel",
+                    duration = "4:03"
+                )
+            )
+            TrackRow(
+                Track(
+                    position = "3",
+                    title = "Nemo",
+                    duration = null
+                )
+            )
         }
     }
 }

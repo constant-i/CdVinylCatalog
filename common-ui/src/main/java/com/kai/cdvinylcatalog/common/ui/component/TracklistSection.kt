@@ -56,7 +56,19 @@ private fun TracklistSectionPreview() {
 }
 
 private val previewTracks = listOf(
-    Track(position = "1", title = "Dark Chest Of Wonders", duration = "4:28"),
-    Track(position = "2", title = "Wish I Had An Angel", duration = "4:03"),
-    Track(position = "3", title = "Nemo", duration = null),
+    Track(
+        position = "1",
+        title = "Dark Chest Of Wonders",
+        duration = "4:28"
+    ),
+    Track(
+        position = "2",
+        title = "Wish I Had An Angel",
+        duration = "4:03"
+    ),
+    Track(
+        position = "3",
+        title = "Nemo",
+        duration = null
+    ),
 )

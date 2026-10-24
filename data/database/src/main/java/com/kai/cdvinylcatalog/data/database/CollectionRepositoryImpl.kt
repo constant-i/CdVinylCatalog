@@ -117,7 +117,7 @@ class CollectionRepositoryImpl @Inject constructor(
 
     override suspend fun addToCollection(release: Release, format: Format, notes: String?): Outcome<Long> {
         return try {
-            val entity = release.toEntity(format = format, notes = notes)
+            val entity = release.toEntity(format = format, userNote = notes)
             val id = dao.insert(entity)
             Outcome.Success(id)
         } catch (e: CancellationException) {
@@ -134,13 +134,21 @@ class CollectionRepositoryImpl @Inject constructor(
     ): Outcome<Long> {
         return try {
             val entity = CollectionItemEntity(
-                releaseId = null, title = title, artist = artist, year = year,
+                releaseId = null,
+                title = title,
+                artist = artist,
+                year = year,
                 barcode = barcode?.let(::normalizeBarcode),
                 coverImageUrl = photoPaths.firstOrNull(),
                 imageUrls = photoPaths.joinToString(",").ifBlank { null },
-                label = label, rawFormat = format.name, country = country,
-                releaseDate = null, catalogNumber = null, releaseNotes = null,
-                format = format.name, addedAt = System.currentTimeMillis(),
+                label = label,
+                rawFormat = format.name,
+                country = country,
+                releaseDate = null,
+                catalogNumber = null,
+                releaseNotes = null,
+                format = format.name,
+                addedAt = System.currentTimeMillis(),
                 userNotes = notes
             )
             val id = dao.insert(entity)
@@ -163,13 +171,25 @@ class CollectionRepositoryImpl @Inject constructor(
 
             dao.update(
                 existing.copy(
-                    title = title, artist = artist, year = year,
-                    format = format.name, rawFormat = format.name,
-                    label = label, country = country,
+                    title = title,
+                    artist = artist,
+                    year = year,
+                    // format меняется пользователем, а rawFormat — исходная строка
+                    // Discogs ("CD, Album"): её нельзя затирать именем enum-а
+                    format = format.name,
+                    rawFormat = existing.rawFormat,
+                    label = label,
+                    country = country,
                     barcode = barcode?.let(::normalizeBarcode),
                     userNotes = notes,
-                    coverImageUrl = photoPaths.firstOrNull() ?: preserveDiscogsImages.firstOrNull() ?: existing.coverImageUrl,
-                    imageUrls = if (allImages.isNotEmpty()) allImages.joinToString(",") else existing.imageUrls
+                    coverImageUrl = photoPaths.firstOrNull()
+                        ?: preserveDiscogsImages.firstOrNull()
+                        ?: existing.coverImageUrl,
+                    imageUrls = if (allImages.isNotEmpty()) {
+                        allImages.joinToString(",")
+                    } else {
+                        existing.imageUrls
+                    }
                 )
             )
             Outcome.Success(Unit)
@@ -200,16 +220,24 @@ private fun CollectionItemEntity.toDomain(): CollectionItem {
     return CollectionItem(
         id = id,
         release = Release(
-            id = releaseId ?: 0L, title = title, artist = artist, year = year,
-            barcode = barcode, coverImageUrl = coverImageUrl,
+            id = releaseId ?: 0L,
+            title = title,
+            artist = artist,
+            year = year,
+            barcode = barcode,
+            coverImageUrl = coverImageUrl,
             imageUrls = imageUrls?.split(",")?.filter { it.isNotBlank() } ?: emptyList(),
-            label = label, rawFormat = rawFormat, country = country,
-            releaseDate = releaseDate, catalogNumber = catalogNumber,
-            notes = releaseNotes, tracklist = emptyList()
+            label = label,
+            rawFormat = rawFormat,
+            country = country,
+            releaseDate = releaseDate,
+            catalogNumber = catalogNumber,
+            notes = releaseNotes,
+            tracklist = emptyList()
         ),
         format = try {
             Format.valueOf(format)
-        } catch (e: IllegalArgumentException) {
+        } catch (_: IllegalArgumentException) {
             Format.UNKNOWN
         },
         addedAt = addedAt,
@@ -217,15 +245,24 @@ private fun CollectionItemEntity.toDomain(): CollectionItem {
     )
 }
 
-private fun Release.toEntity(format: Format, notes: String?): CollectionItemEntity {
+private fun Release.toEntity(format: Format, userNote: String?): CollectionItemEntity {
     return CollectionItemEntity(
-        releaseId = id, title = title, artist = artist, year = year,
+        releaseId = id,
+        title = title,
+        artist = artist,
+        year = year,
         barcode = barcode?.let(::normalizeBarcode),
         coverImageUrl = coverImageUrl,
         imageUrls = imageUrls.joinToString(",").ifBlank { null },
-        label = label, rawFormat = rawFormat, country = country,
-        releaseDate = releaseDate, catalogNumber = catalogNumber,
-        releaseNotes = notes, format = format.name, addedAt = System.currentTimeMillis(),
-        userNotes = notes
+        label = label,
+        rawFormat = rawFormat,
+        country = country,
+        releaseDate = releaseDate,
+        catalogNumber = catalogNumber,
+        // Заметка из Discogs и заметка пользователя — разные поля
+        releaseNotes = notes,
+        format = format.name,
+        addedAt = System.currentTimeMillis(),
+        userNotes = userNote
     )
 }

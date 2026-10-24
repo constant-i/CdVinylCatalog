@@ -230,20 +230,38 @@ private fun EmptyCollection(modifier: Modifier = Modifier) {
 }
 
 private val mockRelease1 = Release(
-    id = 1L, title = "Nevermind", artist = "Nirvana", year = 1991,
-    barcode = null, coverImageUrl = null, imageUrls = emptyList(),
-    label = "DGC", rawFormat = "CD", country = "US", releaseDate = null,
-    catalogNumber = null, notes = null, tracklist = emptyList()
+    id = 1L,
+    title = "Nevermind",
+    artist = "Nirvana",
+    year = 1991,
+    barcode = null,
+    coverImageUrl = null,
+    imageUrls = emptyList(),
+    label = "DGC",
+    rawFormat = "CD",
+    country = "US",
+    releaseDate = null,
+    catalogNumber = null,
+    notes = null,
+    tracklist = emptyList()
 )
 
 private val mockItem1 = CollectionItem(
-    id = 1L, release = mockRelease1, format = Format.CD,
-    addedAt = System.currentTimeMillis(), notes = "Фирменный диск", copyCount = 2
+    id = 1L,
+    release = mockRelease1,
+    format = Format.CD,
+    addedAt = System.currentTimeMillis(),
+    notes = "Фирменный диск",
+    copyCount = 2
 )
 
 private val mockItem2 = CollectionItem(
-    id = 2L, release = mockRelease1.copy(id = 2, title = "In Utero"),
-    format = Format.CD, addedAt = System.currentTimeMillis(), notes = null, copyCount = 1
+    id = 2L,
+    release = mockRelease1.copy(id = 2, title = "In Utero"),
+    format = Format.CD,
+    addedAt = System.currentTimeMillis(),
+    notes = null,
+    copyCount = 1
 )
 
 @Preview(name = "Light - С данными", showBackground = true, locale = "ru")
