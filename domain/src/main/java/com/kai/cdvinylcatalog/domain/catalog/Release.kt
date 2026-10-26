@@ -62,3 +62,34 @@ fun Release.mergeWith(discogs: Release?): Release {
  */
 fun normalizeBarcode(raw: String): String? =
     raw.filter { it.isDigit() }.takeIf { it.isNotEmpty() }
+
+/**
+ * Картинки для галереи: все от издания, иначе хотя бы главная обложка.
+ */
+fun Release.galleryImages(): List<String> =
+    imageUrls.ifEmpty { listOfNotNull(coverImageUrl) }
+
+/**
+ * Только картинки из сети (Discogs) — их нельзя удалить с устройства.
+ */
+fun Release.remoteImages(): List<String> =
+    galleryImages().filter(::isRemoteImage)
+
+/**
+ * Только картинки в хранилище приложения.
+ *
+ * Внутри — пути к файлам, а не URL: именно их нужно удалять
+ * вместе с записью коллекции.
+ */
+fun Release.localImages(): List<String> =
+    galleryImages().filterNot(::isRemoteImage).distinct()
+
+/**
+ * Откуда пришла картинка.
+ *
+ * Соглашение: картинки из Discogs — `http`-строки, всё остальное —
+ * абсолютные пути в `filesDir/photos`. Единственное место, где
+ * это зафиксировано.
+ */
+private fun isRemoteImage(reference: String): Boolean =
+    reference.startsWith("http")

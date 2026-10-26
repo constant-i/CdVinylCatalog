@@ -6,9 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.mergeWith
 import com.kai.cdvinylcatalog.domain.repository.CollectionReader
-import com.kai.cdvinylcatalog.domain.repository.CollectionWriter
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.domain.usecase.catalog.GetReleaseDetailsUseCase
+import com.kai.cdvinylcatalog.domain.usecase.collection.DeleteCollectionItemUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class CollectionItemDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val reader: CollectionReader,
-    private val writer: CollectionWriter,
+    private val deleteItem: DeleteCollectionItemUseCase,
     private val getReleaseDetails: GetReleaseDetailsUseCase
 ) : ViewModel() {
 
@@ -134,7 +134,7 @@ class CollectionItemDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isDeleting = true) }
 
-            when (val outcome = writer.removeFromCollection(item.id)) {
+            when (val outcome = deleteItem(item.id)) {
                 is Outcome.Success -> {
                     _effect.send(CollectionItemDetailContract.Effect.NavigateBack)
                 }

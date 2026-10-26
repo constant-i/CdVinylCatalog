@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.common.ui.CdVinylCatalogTheme
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.Track
+import com.kai.cdvinylcatalog.domain.catalog.galleryImages
 
 /**
  * Блок «информация о релизе»: обложки, заголовок, метаданные, треклист.
@@ -83,12 +84,6 @@ fun ReleaseInfo(
     }
 }
 
-/**
- * Обложки для галереи: все изображения издания, иначе хотя бы главная.
- */
-fun Release.galleryImages(): List<String> =
-    imageUrls.ifEmpty { listOfNotNull(coverImageUrl) }
-
 @Preview(name = "Информация о релизе", showBackground = true, widthDp = 360, heightDp = 900)
 @Composable
 private fun ReleaseInfoPreview() {
@@ -136,7 +131,8 @@ private val previewReleaseInfo = Release(
             title = "Wish I Had An Angel",
             duration = "4:03"
         ),
-        Track(position = "3",
+        Track(
+            position = "3",
             title = "Nemo",
             duration = "4:36"
         ),
