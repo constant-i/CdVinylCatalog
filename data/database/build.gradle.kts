@@ -25,6 +25,14 @@ android {
     }
 }
 
+// Room экспортирует JSON-описание схемы в schemas/.
+// Без него не с чем сравнивать при написании миграции,
+// а без миграции изменение схемы стирает коллекцию.
+// Файлы schemas/**/*.json коммитятся в репозиторий.
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
 dependencies {
     // Зависимость от домена
     implementation(project(":domain"))

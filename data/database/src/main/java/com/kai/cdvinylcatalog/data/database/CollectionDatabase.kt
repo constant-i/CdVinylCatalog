@@ -10,7 +10,7 @@ import com.kai.cdvinylcatalog.data.database.entity.CollectionItemEntity
 @Database(
     entities = [CollectionItemEntity::class],
     version = 3,
-    exportSchema = false
+    exportSchema = true
 )
 @TypeConverters(FormatConverter::class)
 abstract class CollectionDatabase : RoomDatabase() {
