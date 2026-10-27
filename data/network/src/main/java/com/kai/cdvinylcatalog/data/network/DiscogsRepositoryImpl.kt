@@ -27,10 +27,7 @@ class DiscogsRepositoryImpl @Inject constructor(
 
     override suspend fun getReleaseDetails(releaseId: Long): Outcome<Release> =
         safeApiCall {
-            api.getReleaseDetails(
-                releaseId = releaseId,
-                token = NetworkConstants.DISCOGS_TOKEN
-            ).toDomain()
+            api.getReleaseDetails(releaseId = releaseId).toDomain()
         }
 
     /**

@@ -17,14 +17,12 @@ interface DiscogsApi {
         @Query("barcode") barcode: String,
         @Query("type") type: String = "release",
         @Query("page") page: Int,
-        @Query("per_page") perPage: Int = 50,
-        @Query("token") token: String
+        @Query("per_page") perPage: Int = 50
     ): SearchResponseDto
 
     @GET("releases/{releaseId}")
     suspend fun getReleaseDetails(
-        @Path("releaseId") releaseId: Long,
-        @Query("token") token: String
+        @Path("releaseId") releaseId: Long
     ): ReleaseDetailsDto
 
     @GET("database/search")
@@ -32,7 +30,6 @@ interface DiscogsApi {
         @Query("q") query: String,
         @Query("type") type: String = "release",
         @Query("page") page: Int,
-        @Query("per_page") perPage: Int = 50,
-        @Query("token") token: String
+        @Query("per_page") perPage: Int = 50
     ): SearchResponseDto
 }

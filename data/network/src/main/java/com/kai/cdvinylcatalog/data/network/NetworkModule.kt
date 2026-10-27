@@ -31,15 +31,24 @@ object NetworkModule {
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor =
         HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
+            // BODY пишет тела запросов и ответов вместе с URL, а токен Discogs
+            // передаётся query-параметром — на релизе это утечка в logcat.
+            // Поэтому логирование включается только в debug-сборке.
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
         }
 
     @Provides
     @Singleton
     fun provideOkHttpClient(
-        loggingInterceptor: HttpLoggingInterceptor
+        loggingInterceptor: HttpLoggingInterceptor,
+        authInterceptor: DiscogsAuthInterceptor
     ): OkHttpClient = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
+        .addInterceptor(authInterceptor)
         .addInterceptor { chain ->
             // Discogs требует User-Agent, иначе 403
             val request = chain.request().newBuilder()

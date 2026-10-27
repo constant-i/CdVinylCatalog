@@ -78,15 +78,13 @@ class DiscogsSearchPagingSource(
             api.searchByBarcode(
                 barcode = barcode,
                 page = page,
-                perPage = loadSize,
-                token = NetworkConstants.DISCOGS_TOKEN
+                perPage = loadSize
             )
         } else {
             api.searchByText(
                 query = query.orEmpty(),
                 page = page,
-                perPage = loadSize,
-                token = NetworkConstants.DISCOGS_TOKEN
+                perPage = loadSize
             )
         }
 

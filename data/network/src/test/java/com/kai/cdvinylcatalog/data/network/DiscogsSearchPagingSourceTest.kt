@@ -147,21 +147,18 @@ class DiscogsSearchPagingSourceTest {
             barcode: String,
             type: String,
             page: Int,
-            perPage: Int,
-            token: String
+            perPage: Int
         ): SearchResponseDto = response(page)
 
         override suspend fun searchByText(
             query: String,
             type: String,
             page: Int,
-            perPage: Int,
-            token: String
+            perPage: Int
         ): SearchResponseDto = response(page)
 
         override suspend fun getReleaseDetails(
-            releaseId: Long,
-            token: String
+            releaseId: Long
         ): ReleaseDetailsDto = error("not used")
 
         private fun response(page: Int): SearchResponseDto {
@@ -186,21 +183,18 @@ class DiscogsSearchPagingSourceTest {
             barcode: String,
             type: String,
             page: Int,
-            perPage: Int,
-            token: String
+            perPage: Int
         ): SearchResponseDto = throw CancellationException("screen closed")
 
         override suspend fun searchByText(
             query: String,
             type: String,
             page: Int,
-            perPage: Int,
-            token: String
+            perPage: Int
         ): SearchResponseDto = throw CancellationException("screen closed")
 
         override suspend fun getReleaseDetails(
-            releaseId: Long,
-            token: String
+            releaseId: Long
         ): ReleaseDetailsDto = error("not used")
     }
 
@@ -210,21 +204,18 @@ class DiscogsSearchPagingSourceTest {
             barcode: String,
             type: String,
             page: Int,
-            perPage: Int,
-            token: String
+            perPage: Int
         ): SearchResponseDto = throw IOException()
 
         override suspend fun searchByText(
             query: String,
             type: String,
             page: Int,
-            perPage: Int,
-            token: String
+            perPage: Int
         ): SearchResponseDto = throw IOException()
 
         override suspend fun getReleaseDetails(
-            releaseId: Long,
-            token: String
+            releaseId: Long
         ): ReleaseDetailsDto = error("not used")
     }
 }
