@@ -23,7 +23,9 @@ object DatabaseModule {
         CollectionDatabase::class.java,
         CollectionDatabase.DATABASE_NAME
     )
-        .fallbackToDestructiveMigration()  // <-- для MVP: при изменении схемы — удаляем базу
+        // Без fallbackToDestructiveMigration: при изменении схемы без миграции
+        // приложение упадёт с явной ошибкой вместо тихого удаления коллекции.
+        // Миграции обязательны, сравнивать с чем — schemas/ версии N.
         .build()
 
     @Provides
