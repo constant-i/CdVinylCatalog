@@ -27,12 +27,18 @@ import com.yalantis.ucrop.model.AspectRatio
  * и запускает их по эффектам ViewModel.
  *
  * Это единственное место фичи, где Compose встречается с `Intent`.
+ *
+ * @param onNavigateBack вернуться на предыдущий экран
+ * @param onNavigateToDetails переход к карточке после сохранения. Нужен только
+ *   при создании записи: при редактировании экран деталей уже лежит в стеке
+ *   и обновляется сам через `observeItemById`, поэтому остаётся только вернуться
+ *   назад — отсюда значение по умолчанию.
  */
 @Composable
 fun ManualAddRoute(
     onNavigateBack: () -> Unit,
-    onNavigateToDetails: (Long) -> Unit,
     modifier: Modifier = Modifier,
+    onNavigateToDetails: (Long) -> Unit = {},
     viewModel: ManualAddViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

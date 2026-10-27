@@ -2,6 +2,7 @@ package com.kai.cdvinylcatalog.navigation
 
 import android.net.Uri
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -37,10 +38,16 @@ object Routes {
      * Экран результатов поиска в Discogs.
      *
      * @param source откуда пришли (сканирование штрихкода или ручной поиск)
-     * @param query  штрихкод или поисковая строка
+     * @param query  штрихкод или поисковая строка, непустая
      */
-    fun selection(source: ReleaseSelectionContract.Source, query: String) =
-        "selection/${source.name}/${Uri.encode(query)}"
+    fun selection(source: ReleaseSelectionContract.Source, query: String): String {
+        // Пустой запрос дал бы маршрут с пустым сегментом («selection/SCAN/»),
+        // который не совпадёт с шаблоном и упадёт уже внутри NavController.
+        // Лучше упасть здесь, где видно виновный вызов.
+        require(query.isNotBlank()) { "Пустой query не образует маршрут $SELECTION" }
+
+        return "selection/${source.name}/${Uri.encode(query)}"
+    }
 }
 
 @Composable
@@ -147,8 +154,11 @@ fun CdVinylNavHost(
             val query = backStackEntry.arguments?.getString("query").orEmpty()
 
             if (query.isBlank()) {
-                // Пустой запрос — показывать нечего, возвращаемся назад
-                navController.popBackStack()
+                // Пустой запрос — показывать нечего, возвращаемся назад.
+                // Именно эффект, а не вызов в теле композиции: композиция
+                // может выполниться несколько раз на одно состояние,
+                // и popBackStack() увёл бы на несколько экранов назад.
+                LaunchedEffect(query) { navController.popBackStack() }
             } else {
                 ReleaseSelectionRoute(
                     query = query,
@@ -177,9 +187,10 @@ fun CdVinylNavHost(
             route = Routes.MANUAL_EDIT,
             arguments = listOf(navArgument("itemId") { type = NavType.LongType })
         ) {
+            // Переход к деталям не передаётся: после сохранения ViewModel шлёт
+            // NavigateBack, а карточка под нами обновляется через observeItemById
             ManualAddRoute(
-                onNavigateBack = { navController.popBackStack() },
-                onNavigateToDetails = { }
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }
