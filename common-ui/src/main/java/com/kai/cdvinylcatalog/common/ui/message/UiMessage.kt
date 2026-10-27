@@ -18,14 +18,10 @@ sealed interface UiMessage {
     data class Error(val appError: AppError) : UiMessage
 
     // ─── Бизнес-сообщения ───
-    data object ReleaseNotFound : UiMessage
-    data object SearchEmpty : UiMessage
-    data object InvalidBarcode : UiMessage
     data object ItemNotFound : UiMessage
     data object PhotoImportFailed : UiMessage
 
     // ─── UI-нотификации ───
     data object RequiredFieldsEmpty : UiMessage
     data class AddedSuccessfully(val title: String) : UiMessage
-    data object SaveFailed : UiMessage
 }

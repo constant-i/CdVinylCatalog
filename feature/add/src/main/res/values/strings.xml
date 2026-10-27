@@ -26,7 +26,6 @@
     <!-- Release Selection -->
     <string name="selection_title_scan">Найдено изданий</string>
     <string name="selection_title_search">Результаты поиска</string>
-    <string name="selection_empty">Ничего не найдено</string>
     <string name="selection_already_in_collection">Уже в коллекции</string>
 
     <!-- Content descriptions -->

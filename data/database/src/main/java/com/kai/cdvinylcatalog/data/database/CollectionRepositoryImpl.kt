@@ -10,6 +10,7 @@ import com.kai.cdvinylcatalog.data.database.entity.CollectionItemWithCount
 import com.kai.cdvinylcatalog.domain.catalog.Format
 import com.kai.cdvinylcatalog.domain.catalog.Release
 import com.kai.cdvinylcatalog.domain.catalog.normalizeBarcode
+import com.kai.cdvinylcatalog.domain.catalog.parseStoredFormat
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
 import com.kai.cdvinylcatalog.domain.collection.SortOrder
 import com.kai.cdvinylcatalog.domain.repository.CollectionMembership
@@ -235,11 +236,7 @@ private fun CollectionItemEntity.toDomain(): CollectionItem {
             notes = releaseNotes,
             tracklist = emptyList()
         ),
-        format = try {
-            Format.valueOf(format)
-        } catch (_: IllegalArgumentException) {
-            Format.UNKNOWN
-        },
+        format = parseStoredFormat(format),
         addedAt = addedAt,
         notes = userNotes
     )

@@ -27,3 +27,17 @@ fun parseFormat(rawFormat: String?): Format {
         else -> Format.UNKNOWN
     }
 }
+
+/**
+ * Восстанавливает формат из имени, сохранённого в базе или в Bundle.
+ *
+ * Обратная операция к `Format.name`. Неизвестное значение — не ошибка:
+ * данные могли быть записаны другой версией приложения, и падать
+ * из-за этого незачем.
+ *
+ * @return распознанный формат или [Format.UNKNOWN]
+ */
+fun parseStoredFormat(value: String?): Format =
+    value
+        ?.let { stored -> Format.entries.firstOrNull { it.name == stored } }
+        ?: Format.UNKNOWN

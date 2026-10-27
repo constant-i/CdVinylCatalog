@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kai.cdvinylcatalog.common.ui.message.UiMessage
 import com.kai.cdvinylcatalog.domain.catalog.Format
+import com.kai.cdvinylcatalog.domain.catalog.parseStoredFormat
 import com.kai.cdvinylcatalog.domain.media.PhotoStorage
 import com.kai.cdvinylcatalog.domain.result.Outcome
 import com.kai.cdvinylcatalog.domain.usecase.collection.AddManualItemUseCase
@@ -64,8 +65,8 @@ class ManualAddViewModel @Inject constructor(
             title = savedStateHandle.get<String>(KEY_TITLE) ?: "",
             artist = savedStateHandle.get<String>(KEY_ARTIST) ?: "",
             year = savedStateHandle.get<String>(KEY_YEAR) ?: "",
-            format = savedStateHandle.get<String>(KEY_FORMAT)
-                ?.let { runCatching { Format.valueOf(it) }.getOrNull() }
+            format = parseStoredFormat(savedStateHandle.get<String>(KEY_FORMAT))
+                .takeIf { it != Format.UNKNOWN }
                 ?: Format.CD,
             label = savedStateHandle.get<String>(KEY_LABEL) ?: "",
             country = savedStateHandle.get<String>(KEY_COUNTRY) ?: "",
