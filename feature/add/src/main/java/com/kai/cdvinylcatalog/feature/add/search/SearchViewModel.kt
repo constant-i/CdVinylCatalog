@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.feature.add.search
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,9 +13,15 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SearchViewModel @Inject constructor() : ViewModel() {
+class SearchViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+) : ViewModel() {
 
-    private val _state = MutableStateFlow(SearchContract.State())
+    // Введённый запрос переживает смерть процесса: экран поиска — это форма,
+    // и терять введённое без причины незачем
+    private val _state = MutableStateFlow(
+        SearchContract.State(query = savedStateHandle[KEY_QUERY] ?: "")
+    )
     val state = _state.asStateFlow()
 
     private val _effect = Channel<SearchContract.Effect>()
@@ -23,6 +30,7 @@ class SearchViewModel @Inject constructor() : ViewModel() {
     fun onIntent(intent: SearchContract.Intent) {
         when (intent) {
             is SearchContract.Intent.OnQueryChanged -> {
+                savedStateHandle[KEY_QUERY] = intent.query
                 _state.update { it.copy(query = intent.query) }
             }
             SearchContract.Intent.OnSearchClicked -> {
@@ -37,5 +45,9 @@ class SearchViewModel @Inject constructor() : ViewModel() {
                 viewModelScope.launch { _effect.send(SearchContract.Effect.NavigateBack) }
             }
         }
+    }
+
+    private companion object {
+        const val KEY_QUERY = "query"
     }
 }

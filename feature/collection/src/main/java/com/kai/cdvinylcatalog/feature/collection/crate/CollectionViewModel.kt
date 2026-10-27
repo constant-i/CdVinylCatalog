@@ -1,11 +1,13 @@
 package com.kai.cdvinylcatalog.feature.collection.crate
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.kai.cdvinylcatalog.domain.collection.CollectionItem
 import com.kai.cdvinylcatalog.domain.collection.SortOrder
+import com.kai.cdvinylcatalog.domain.collection.parseStoredSortOrder
 import com.kai.cdvinylcatalog.domain.repository.CollectionReader
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,10 +26,17 @@ import javax.inject.Inject
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
 class CollectionViewModel @Inject constructor(
-    private val repository: CollectionReader
+    private val repository: CollectionReader,
+    private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(CollectionContract.State())
+    // Сортировка переживает смерть процесса: без этого коллекция после
+    // возврата показывалась бы в порядке по умолчанию
+    private val _state = MutableStateFlow(
+        CollectionContract.State(
+            sortOrder = parseStoredSortOrder(savedStateHandle[KEY_SORT_ORDER])
+        )
+    )
     val state: StateFlow<CollectionContract.State> = _state.asStateFlow()
 
     private val _effect = Channel<CollectionContract.Effect>()
@@ -56,6 +65,7 @@ class CollectionViewModel @Inject constructor(
 
     private fun onSortChanged(sortOrder: SortOrder) {
         if (_state.value.sortOrder == sortOrder) return
+        savedStateHandle[KEY_SORT_ORDER] = sortOrder.name
         _state.update { it.copy(sortOrder = sortOrder) }
     }
 
@@ -69,5 +79,9 @@ class CollectionViewModel @Inject constructor(
 
     private fun onBack() {
         viewModelScope.launch { _effect.send(CollectionContract.Effect.NavigateBack) }
+    }
+
+    private companion object {
+        const val KEY_SORT_ORDER = "sort_order"
     }
 }
