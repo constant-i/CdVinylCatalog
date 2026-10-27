@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.feature.add.manual
 
-import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -333,8 +332,7 @@ private fun PhotoThumbnail(
     }
 }
 
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Ручное добавление", showBackground = true)
 @Composable
 private fun ManualAddScreenPreview() {
     CdVinylCatalogTheme {

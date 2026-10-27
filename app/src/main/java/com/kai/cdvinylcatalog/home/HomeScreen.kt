@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.home
 
-import android.content.res.Configuration
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -179,8 +178,7 @@ private fun HomeActionCard(
     }
 }
 
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Главный экран", showBackground = true)
 @Composable
 private fun HomeScreenPreview() {
     CdVinylCatalogTheme {

@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.feature.collection.detail
 
-import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -185,8 +184,7 @@ private fun OtherCopyCard(
     }
 }
 
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Запись коллекции", showBackground = true)
 @Composable
 private fun CollectionItemDetailScreenPreview() {
     val sampleRelease = Release(

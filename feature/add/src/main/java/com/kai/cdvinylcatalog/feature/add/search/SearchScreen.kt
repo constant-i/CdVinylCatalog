@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.feature.add.search
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -98,8 +97,7 @@ fun SearchScreen(
     }
 }
 
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Поиск", showBackground = true)
 @Composable
 private fun SearchScreenPreview() {
     CdVinylCatalogTheme {

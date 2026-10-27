@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.feature.collection.crate
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -264,8 +263,7 @@ private val mockItem2 = CollectionItem(
     copyCount = 1
 )
 
-@Preview(name = "Light - С данными", showBackground = true, locale = "ru")
-@Preview(name = "Dark - С данными", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, locale = "ru")
+@Preview(name = "С данными", showBackground = true, locale = "ru")
 @Composable
 private fun CollectionScreenPreview() {
     val mockItems = listOf(mockItem1, mockItem2)
@@ -286,7 +284,7 @@ private fun CollectionScreenPreview() {
     }
 }
 
-@Preview(name = "Light - Пустая коллекция", showBackground = true, locale = "ru")
+@Preview(name = "Пустая коллекция", showBackground = true, locale = "ru")
 @Composable
 private fun CollectionScreenEmptyPreview() {
     val mockPagingItems = remember {

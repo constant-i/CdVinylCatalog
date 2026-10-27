@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.feature.add.details
 
-import android.content.res.Configuration
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -126,8 +125,7 @@ private fun ErrorState(message: String, modifier: Modifier = Modifier) {
     }
 }
 
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Детали релиза", showBackground = true)
 @Composable
 private fun ReleaseDetailsScreenPreview() {
     CdVinylCatalogTheme {

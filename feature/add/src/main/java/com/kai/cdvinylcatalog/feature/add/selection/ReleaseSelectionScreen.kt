@@ -1,6 +1,5 @@
 package com.kai.cdvinylcatalog.feature.add.selection
 
-import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -379,8 +378,7 @@ private val previewReleases = listOf(
     )
 )
 
-@Preview(name = "Light", showBackground = true)
-@Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+@Preview(name = "Результаты поиска", showBackground = true)
 @Composable
 private fun ReleaseSelectionScreenPreview() {
     val pagingItems = remember {
