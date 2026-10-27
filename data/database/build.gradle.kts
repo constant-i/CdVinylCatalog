@@ -45,5 +45,9 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
+    // Тесты маппинга и репозитория: DAO подменяется mockk,
+    // поэтому нужны только JUnit, mockk и корутин-тест
     testImplementation(libs.junit)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
