@@ -72,8 +72,10 @@
 
 ```text
 :domain
-├── catalog/       Entities: Release, Track, Format
-├── collection/    Entities: CollectionItem, SortOrder
+├── catalog/       Release, Track, Format и правила над ними:
+│                  mergeWith, parseFormat/parseStoredFormat,
+│                  normalizeBarcode, galleryImages/remoteImages/localImages
+├── collection/    CollectionItem, SortOrder + parseStoredSortOrder
 ├── media/         PhotoDestination + порт PhotoStorage
 ├── result/        Outcome, AppError, AppErrorException
 ├── repository/    Порты: CollectionReader/Writer/Membership, ReleaseRepository
@@ -81,6 +83,33 @@
     ├── catalog/
     └── collection/
 ```
+
+Функции над моделями живут рядом с моделями, а не в UI-модулях:
+`mergeWith` задаёт приоритет правок пользователя над Discogs, `parseFormat`
+разбирает строку Discogs (`"CD, Album"`), `parseStoredFormat` и
+`parseStoredSortOrder` восстанавливают значение из имени, сохранённого
+в базе или Bundle. Восстановление сделано через `entries.firstOrNull`,
+а не через `valueOf` в `try/catch`: неизвестное значение — не ошибка,
+а штатная ситуация после смены набора значений.
+
+### Изображения: три взгляда на одно поле
+
+`Release.imageUrls` и `coverImageUrl` смешивают два разных вида ссылок:
+URL из Discogs и абсолютные пути к файлам в хранилище приложения
+(`filesDir/photos`). Три функции разводят их по источнику:
+
+| Функция | Что возвращает |
+|---|---|
+| `galleryImages()` | всё для галереи: `imageUrls`, иначе хотя бы `coverImageUrl` |
+| `remoteImages()` | только `http`-ссылки — их нельзя удалить с устройства |
+| `localImages()` | только файлы — именно их удаляет `DeleteCollectionItemUseCase` |
+
+Тождество: `galleryImages() == remoteImages() + localImages()`.
+
+Соглашение «`http` = из сети, иначе файл» записано в одном месте —
+в приватной `isRemoteImage`. Это компромисс: надёжнее было бы хранить
+удалённые и локальные картинки в двух разных полях модели, но это
+изменение схемы и миграция.
 
 ### Что лежит в `:common-ui`
 
@@ -223,6 +252,33 @@ Presentation-слой оперирует только `AppError` и строко
 схема — то, с чем миграция сравнивается, и без неё auto-migrations
 невозможны в принципе.
 
+### Резервное копирование
+
+Политика разная для облака и для переноса по кабелю:
+
+| Файл | API | Облако | Перенос |
+|---|---|:---:|:---:|
+| `xml/backup_rules.xml` | 26–27 | база | база |
+| `xml-v28/backup_rules.xml` | 28–30 | база | база + фото |
+| `xml/data_extraction_rules.xml` | 31+ | база | база + фото |
+
+Причина разделения — квота облачной копии: **25 МБ на приложение**.
+При превышении копия не создаётся **целиком**, вместе с базой, и
+системного уведомления об этом нет. Одно фото проходит через uCrop
+с `maxResultSize = 1080×1080`, это 150–400 КБ; до пяти фото на диск
+дают до 2 МБ на запись, так что коллекция из десятка дисков с фото
+в квоту не влезает. Перенос по кабелю лимита не имеет.
+
+На API 28–30 разделение работает через `requireFlags="deviceToDeviceTransfer"`
+(атрибут появился в Android 9). На API 26–27 его нет, поэтому там фото
+не копируются вовсе — выбор в пользу базы.
+
+Проверить на устройстве:
+
+```bash
+adb shell bmgr backupnow com.kai.cdvinylcatalog
+```
+
 ### Навигация
 
 Результаты поиска передаются между экранами **аргументами маршрута**
@@ -282,6 +338,23 @@ Presentation-слой оперирует только `AppError` и строко
 ./gradlew testDebugUnitTest       # юнит-тесты всех модулей
 ```
 
+### Покрытие тестами
+
+| Модуль | Что покрыто |
+|---|---|
+| `:domain` | `mergeWith`, форматирование, `DraftCollectionItem`, `DeleteCollectionItemUseCase` — 30 тестов |
+| `:data:network` | `DiscogsSearchPagingSource` (дедупликация, отмена, ошибки) и мапперы DTO — 15 |
+| `:data:database` | `CollectionRepositoryImpl`: маппинг в обе стороны, нормализация, ошибки БД — 15 |
+| `:feature:add` | ViewModel-и ручного добавления, сканера и выбора результата — 26 |
+| `:feature:collection` | `CollectionViewModel` (восстановление сортировки), `CollectionItemDetailViewModel` (удаление) — 10 |
+
+Регрессионные тесты на два бага в маппинге проверены «введением обратно»:
+при возврате дефекта падают ровно они, а не весь набор.
+
+`:data:files` юнит-тестов не имеет: `AppPhotoStorageImpl` завязан на `Context`
+и `FileProvider`, а провайдер объявлен в манифесте `:app`, так что
+без Robolectric или инструментальных тестов его не проверить.
+
 ## Что дальше
 
 - [x] Интеграция CameraX + ML Kit для сканирования
@@ -292,12 +365,14 @@ Presentation-слой оперирует только `AppError` и строко
 - [x] Paging 3 для Discogs API
 - [x] Единый конвейер доменных ошибок
 - [x] Тесты `PagingSource` для сети (включая дедупликацию)
-- [x] Чистка зависимостей: фичи больше не тянут `:data:*`,
-      `:domain` и `:common-ui` отдают свои публичные API через `api(...)`
 - [x] Общие блоки экранов деталей (`ReleaseInfo`) и общий топ-бар (`CdTopBar`) в `:common-ui`
 - [x] Экспорт схемы Room и отказ от разрушительного отката при миграциях
 - [x] Ориентация по размеру экрана: портрет на телефоне, свободная на планшете
+- [x] Удаление фотографий вместе с записью коллекции
+- [x] Сохранение фото в облаке и при переносе по кабелю
+- [x] Сортировка и поисковый запрос переживают смерть процесса
 - [ ] Адаптивность: многопанельные раскладки для планшетов
+- [ ] Подготовка к публикации: включить R8, настроить подпись
 - [ ] Экспорт коллекции
 
 ## Лицензия
