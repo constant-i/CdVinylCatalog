@@ -6,13 +6,16 @@ import androidx.compose.animation.core.spring
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LibraryMusic
@@ -32,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kai.cdvinylcatalog.R
@@ -41,6 +45,10 @@ import com.kai.cdvinylcatalog.common.ui.component.CdTopBar
 /**
  * Главный экран приложения.
  * Показывает четыре действия: сканирование, поиск, ручное добавление, коллекция.
+ *
+ * Карточки делят высоту экрана поровну (`weight`), поэтому на экране
+ * с малой высотой они сжимаются сами и все четыре остаются видны,
+ * без прокрутки и без обрезки.
  */
 @Composable
 fun HomeScreen(
@@ -60,8 +68,10 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.Center,
+                .padding(horizontal = 24.dp, vertical = 12.dp),
+            // Отступ фиксированный, а не spacedBy: иначе на низком экране
+            // он съедал бы место, которое нужно самим карточкам
+            verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             HomeActionCard(
@@ -69,31 +79,29 @@ fun HomeScreen(
                 title = stringResource(R.string.home_scan_title),
                 subtitle = stringResource(R.string.home_scan_subtitle),
                 onClick = onNavigateToScan,
-                isPrimary = true
+                isPrimary = true,
+                modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-
             HomeActionCard(
                 icon = Icons.Default.Search,
                 title = stringResource(R.string.home_search_title),
                 subtitle = stringResource(R.string.home_search_subtitle),
-                onClick = onNavigateToSearch
+                onClick = onNavigateToSearch,
+                modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-
             HomeActionCard(
                 icon = Icons.Default.Edit,
                 title = stringResource(R.string.home_manual_title),
                 subtitle = stringResource(R.string.home_manual_subtitle),
-                onClick = onNavigateToManualAdd
+                onClick = onNavigateToManualAdd,
+                modifier = Modifier.weight(1f)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-
             HomeActionCard(
                 icon = Icons.Default.LibraryMusic,
                 title = stringResource(R.string.home_collection_title),
                 subtitle = stringResource(R.string.home_collection_subtitle),
-                onClick = onNavigateToCollection
+                onClick = onNavigateToCollection,
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -154,33 +162,98 @@ private fun HomeActionCard(
                 else colorScheme.onSurfaceVariant
         )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp)
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall
-            )
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val isCompact = maxHeight < COMPACT_CARD_HEIGHT
+            if (isCompact) {
+                CompactContent(icon, title)
+            } else {
+                FullContent(icon, title, subtitle)
+            }
         }
     }
 }
 
-@Preview(name = "Главный экран", showBackground = true)
+/** Обычная раскладка: иконка сверху, заголовок и подпись под ней. */
+@Composable
+private fun FullContent(icon: ImageVector, title: String, subtitle: String) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(32.dp)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = subtitle,
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+/**
+ * Малая высота: иконка и заголовок в одну строку, подпись скрыта.
+ */
+@Composable
+private fun CompactContent(icon: ImageVector, title: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+/**
+ * С какой высоты карточка переключается с полной раскладки на компактную.
+ *
+ * Полная требует около 123dp: отступы 20+20, иконка 32, отступы 12+4,
+ * заголовок ~19, подпись ~16. Если места меньше, полная раскладка
+ * не помещается вообще.
+ */
+private val COMPACT_CARD_HEIGHT = 130.dp
+
+@Preview(name = "Высокий экран", showBackground = true, heightDp = 800)
 @Composable
 private fun HomeScreenPreview() {
+    CdVinylCatalogTheme {
+        HomeScreen(
+            onNavigateToScan = {},
+            onNavigateToSearch = {},
+            onNavigateToManualAdd = {},
+            onNavigateToCollection = {}
+        )
+    }
+}
+
+/**
+ * Малая высота — альбомная ориентация или разделённый экран.
+ * Проверяет, что карточки сжимаются и все четыре остаются видны.
+ */
+@Preview(name = "Низкий экран", showBackground = true, heightDp = 420)
+@Composable
+private fun HomeScreenShortPreview() {
     CdVinylCatalogTheme {
         HomeScreen(
             onNavigateToScan = {},
