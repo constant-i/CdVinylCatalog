@@ -29,6 +29,10 @@ class CollectionRepositoryImpl @Inject constructor(
     private val dao: CollectionDao
 ) : CollectionReader, CollectionMembership, CollectionWriter {
 
+    // Все методы ниже ловят любое исключение, кроме CancellationException,
+    // и отдают AppError.LocalStorage: единственный источник сбоя здесь —
+    // SQLite на устройстве, а не сеть и не логика.
+
     override fun getItems(sortOrder: SortOrder): Flow<PagingData<CollectionItem>> {
         val pagingSourceFactory = {
             when (sortOrder) {
@@ -65,7 +69,7 @@ class CollectionRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(AppError.LocalStorage)
         }
     }
 
@@ -82,7 +86,7 @@ class CollectionRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(AppError.LocalStorage)
         }
     }
 
@@ -98,7 +102,7 @@ class CollectionRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(AppError.LocalStorage)
         }
     }
 
@@ -109,7 +113,7 @@ class CollectionRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(AppError.LocalStorage)
         }
     }
 
@@ -124,7 +128,7 @@ class CollectionRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(AppError.LocalStorage)
         }
     }
 
@@ -157,7 +161,7 @@ class CollectionRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(AppError.LocalStorage)
         }
     }
 
@@ -197,7 +201,7 @@ class CollectionRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(AppError.LocalStorage)
         }
     }
 
@@ -208,7 +212,7 @@ class CollectionRepositoryImpl @Inject constructor(
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            Outcome.Failure(AppError.Unknown)
+            Outcome.Failure(AppError.LocalStorage)
         }
     }
 }

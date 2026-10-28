@@ -26,6 +26,12 @@ sealed interface AppError {
     /** Ресурс не найден: 404 */
     data object ResourceNotFound : AppError
 
+    /**
+     * Не удалось прочитать или записать данные на устройстве:
+     * ошибка SQLite, нет места, повреждён файл базы.
+     */
+    data object LocalStorage : AppError
+
     /** Неизвестная ошибка — без деталей, чтобы не тащить технические сообщения в Domain */
     data object Unknown : AppError
 }

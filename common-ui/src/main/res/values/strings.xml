@@ -6,6 +6,7 @@
     <string name="error_auth_required">Требуется авторизация</string>
     <string name="error_rate_limit">Слишком много запросов, подождите минуту</string>
     <string name="error_not_found">Релиз не найден в Discogs</string>
+    <string name="error_local_storage">Не удалось обратиться к сохранённым данным</string>
     <string name="error_unknown">Что-то пошло не так</string>
 
     <!-- UI messages -->

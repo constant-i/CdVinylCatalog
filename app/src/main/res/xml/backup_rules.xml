@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample backup rules file; uncomment and customize as necessary.
-   See https://developer.android.com/guide/topics/data/autobackup
-   for details.
-   Note: This file is ignored for devices older than API 31
-   See https://developer.android.com/about/versions/12/backup-restore
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Правила для API 26-27. Для API 28+ действует xml-v28/backup_rules.xml,
+   для API 31+ — data_extraction_rules.xml.
+
+   Здесь фото не попадают даже при переносе по кабелю: атрибут requireFlags
+   появился только в Android 9 (API 28), а без него старый механизм не умеет
+   отличать облако от переноса. Выбор в пользу базы — записи о дисках
+   восстановить руками невозможно, а фотографии можно переснять.
+   На API 28+ это ограничение снято, см. xml-v28/backup_rules.xml.
 -->
 <full-backup-content>
-    <!--
-   <include domain="sharedpref" path="."/>
-   <exclude domain="sharedpref" path="device.xml"/>
--->
+    <include domain="database" path="." />
 </full-backup-content>

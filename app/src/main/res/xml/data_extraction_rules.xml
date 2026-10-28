@@ -1,19 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?><!--
-   Sample data extraction rules file; uncomment and customize as necessary.
-   See https://developer.android.com/about/versions/12/backup-restore#xml-changes
-   for details.
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Правила для Android 12+ (API 31), где облачная копия и перенос на новое
+   устройство описаны отдельно.
+
+   Состав разный намеренно. Облачная копия ограничена 25 МБ на приложение,
+   и при превышении не создаётся ЦЕЛИКОМ — вместе с базой. Пять фото по
+   ~300 КБ на диск дают до 2 МБ на запись, так что коллекция из десятка
+   дисков уже не влезет. Поэтому в облако идёт только база: записи о дисках
+   восстановить руками невозможно, а фотографии можно переснять.
+
+   Перенос по кабелю лимита не имеет, поэтому туда попадают и снимки —
+   это самый частый сценарий смены телефона.
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <!-- TODO: Use <include> and <exclude> to control what is backed up.
-        <include .../>
-        <exclude .../>
-        -->
+        <include domain="database" path="." />
     </cloud-backup>
-    <!--
     <device-transfer>
-        <include .../>
-        <exclude .../>
+        <include domain="database" path="." />
+        <include domain="file" path="photos/" />
     </device-transfer>
-    -->
 </data-extraction-rules>

@@ -204,7 +204,7 @@ class CollectionRepositoryImplTest {
 
         val outcome = repository.getItemById(ID)
 
-        assertEquals(Outcome.Failure(AppError.Unknown), outcome)
+        assertEquals(Outcome.Failure(AppError.LocalStorage), outcome)
     }
 
     // --- Вспомогательное ---

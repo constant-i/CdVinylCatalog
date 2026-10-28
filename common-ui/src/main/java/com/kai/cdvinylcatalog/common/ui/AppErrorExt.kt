@@ -15,5 +15,6 @@ fun AppError.asText(context: Context): String = when (this) {
     AppError.AuthenticationRequired -> context.getString(R.string.error_auth_required)
     AppError.RateLimitExceeded -> context.getString(R.string.error_rate_limit)
     AppError.ResourceNotFound -> context.getString(R.string.error_not_found)
+    AppError.LocalStorage -> context.getString(R.string.error_local_storage)
     AppError.Unknown -> context.getString(R.string.error_unknown)
 }
