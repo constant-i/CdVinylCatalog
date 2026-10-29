@@ -21,11 +21,28 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // R8 + подпись debug-ключом, чтобы APK ставился на устройство.
+            // Для публикации понадобится свой keystore.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        // Debug с включённым R8: те же правила, что на релизе, но с отладчиком
+        // и логами. Собирается только по требованию: :app:assembleMinifiedDebug
+        create("minifiedDebug") {
+            initWith(getByName("debug"))
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+            matchingFallbacks += listOf("debug")
         }
     }
     compileOptions {
