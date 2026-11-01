@@ -1,0 +1,15 @@
+# Концы строк нормализуются в LF в репозитории независимо от настроек Git
+# на машине разработчика. Без этого поведение зависит от core.autocrlf:
+# на Windows файлы в рабочей копии получают CRLF, на Linux/macOS — LF,
+# и в диффах появляется шум из-за смены концов строк во всех файлах.
+* text=auto eol=lf
+
+# Windows-скрипты должны остаться с CRLF, иначе cmd может их не выполнить.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Бинарные файлы не трогаем.
+*.jar binary
+*.png binary
+*.jpg binary
+*.keystore binary
