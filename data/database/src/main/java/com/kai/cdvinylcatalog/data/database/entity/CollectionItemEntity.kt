@@ -1,9 +1,25 @@
 package com.kai.cdvinylcatalog.data.database.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "collection_items")
+/**
+ * Строка коллекции.
+ *
+ * Индексы:
+ * - `releaseId` — по нему фильтруют подзапросы подсчёта копий в списках
+ *   коллекции (коррелированный подзапрос выполняется для каждой строки)
+ *   и выборка «что уже в коллекции» для бейджей на экране поиска;
+ * - `barcode` — офлайн-поиск по штрихкоду, когда сети нет.
+ */
+@Entity(
+    tableName = "collection_items",
+    indices = [
+        Index(value = ["releaseId"]),
+        Index(value = ["barcode"]),
+    ]
+)
 data class CollectionItemEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,

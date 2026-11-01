@@ -1,5 +1,6 @@
 package com.kai.cdvinylcatalog.data.database
 
+import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
@@ -9,8 +10,11 @@ import com.kai.cdvinylcatalog.data.database.entity.CollectionItemEntity
 
 @Database(
     entities = [CollectionItemEntity::class],
-    version = 3,
-    exportSchema = true
+    version = 4,
+    exportSchema = true,
+    // 3 -> 4: индексы по releaseId и barcode. Room выведет CREATE INDEX
+    // из разницы схем, для этого schemas/3.json лежит в репозитории.
+    autoMigrations = [AutoMigration(from = 3, to = 4)]
 )
 @TypeConverters(FormatConverter::class)
 abstract class CollectionDatabase : RoomDatabase() {
